@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Nursing Data</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root { --primary: #455a64; --accent: #00897b; --bg: #f0f2f5; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
+        .form-box { background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; position: sticky; top: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
+        input, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; }
+        textarea { height: 80px; resize: vertical; }
+        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; transition: 0.2s; }
+        .btn-save { background: var(--accent); color: white; } .btn-save:hover { background: #00695c; }
+        .btn-clear { background: #ddd; color: #333; }
+        /* ปุ่ม Export */
+        .btn-export { background: #3f51b5; color: white; margin-top: 20px; } .btn-export:hover { background: #303f9f; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
+        th { background: var(--primary); color: white; } tr:hover { background: #f9f9f9; }
+        .action-btns { display: flex; gap: 5px; }
+        .btn-sm { padding: 5px 10px; border-radius: 4px; cursor: pointer; border: none; color: white; font-size: 0.8rem; }
+        .btn-edit { background: #ffb74d; color: #333; } .btn-del { background: #e57373; }
+        .preview-tag { background: #e0f2f1; color: #00695c; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin: 2px; }
+
+        /* Modal Box */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 60%; border-radius: 8px; }
+        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: black; }
+        .code-block { background: #263238; color: #80cbc4; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; height: 300px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2><i class="fas fa-cogs"></i> จัดการฐานข้อมูลโรค (Admin)</h2>
+        <a href="index.html" style="text-decoration:none; color:var(--accent); font-weight:bold;"><i class="fas fa-arrow-left"></i> กลับหน้าใช้งาน</a>
+    </div>
+
+    <div class="admin-grid">
+        <div class="form-box">
+            <h3 style="margin-top:0;">Add / Edit Diagnosis</h3>
+            <form id="adminForm">
+                <input type="hidden" id="inp_id">
+                <label>ชื่อโรค (NANDA):</label><input type="text" id="inp_nanda" required>
+                <label>Keywords (คั่นด้วย ,):</label><input type="text" id="inp_keywords">
+                <label>Data (S, O):</label><textarea id="inp_d"></textarea>
+                <label>Action:</label><textarea id="inp_a"></textarea>
+                <label>Response:</label><textarea id="inp_r"></textarea>
+                <label>Guideline:</label><textarea id="inp_guide"></textarea>
+                
+                <button type="button" class="btn btn-save" onclick="saveData()">บันทึก (Save)</button>
+                <button type="button" class="btn btn-clear" onclick="clearForm()">ล้างค่า (Clear)</button>
+
+                <hr>
+                <button type="button" class="btn btn-export" onclick="exportData()">
+                    <i class="fas fa-code"></i> สร้างโค้ดสำหรับนำไปใช้ (Export)
+                </button>
+            </form>
+        </div>
+        <div>
+            <table id="dataTable">
+                <thead><tr><th width="30%">Focus Name</th><th>Keywords</th><th width="15%">Action</th></tr></thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="exportModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h3><i class="fas fa-file-code"></i> โค้ดสำหรับไฟล์ index.html</h3>
+        <p>ให้ Copy โค้ดในกล่องนี้ ไปทับตัวแปร <code>masterDiagnosis</code> ในไฟล์ index.html เพื่อให้ทุกคนเห็นข้อมูลเหมือนกัน</p>
+        <div class="code-block" id="jsonOutput"></div>
+        <button class="btn btn-save" style="margin-top:10px; width:auto;" onclick="copyToClipboard()">Copy All Code</button>
+    </div>
+</div>
+
+<script>
+    let masterData = JSON.parse(localStorage.getItem('masterDiagnosis')) || [];
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+        masterData.forEach((item, index) => {
+            const keysHTML = item.keywords.map(k => `<span class="preview-tag">${k}</span>`).join('');
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${item.nanda}</strong></td><td>${keysHTML}</td>
+                    <td class="action-btns">
+                        <button class="btn-sm btn-edit" onclick="editItem(${index})"><i class="fas fa-pen"></i></button>
+                        <button class="btn-sm btn-del" onclick="deleteItem(${index})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        });
+    }
+
+    function saveData() {
+        const id = document.getElementById('inp_id').value;
+        const nanda = document.getElementById('inp_nanda').value;
+        const keywords = document.getElementById('inp_keywords').value.split(',').map(k => k.trim()).filter(k => k);
+        if(!nanda) return alert("ระบุชื่อโรค");
+
+        const newData = { id: Date.now().toString(), nanda: nanda, keywords: keywords, template: { d: document.getElementById('inp_d').value, a: document.getElementById('inp_a').value, r: document.getElementById('inp_r').value }, guide: document.getElementById('inp_guide').value };
+
+        if(id !== "") { masterData[parseInt(id)] = newData; alert("แก้ไขแล้ว"); } 
+        else { masterData.push(newData); alert("เพิ่มแล้ว"); }
+
+        localStorage.setItem('masterDiagnosis', JSON.stringify(masterData));
+        clearForm(); renderTable();
+    }
+
+    function editItem(index) {
+        const item = masterData[index];
+        document.getElementById('inp_id').value = index;
+        document.getElementById('inp_nanda').value = item.nanda;
+        document.getElementById('inp_keywords').value = item.keywords.join(', ');
+        document.getElementById('inp_d').value = item.template.d;
+        document.getElementById('inp_a').value = item.template.a;
+        document.getElementById('inp_r').value = item.template.r;
+        document.getElementById('inp_guide').value = item.guide || "";
+        document.querySelector('.btn-save').innerText = "Update"; document.querySelector('.btn-save').style.background = "#ffb74d"; document.querySelector('.btn-save').style.color = "black";
+    }
+
+    function deleteItem(index) {
+        if(confirm("ลบใช่หรือไม่?")) { masterData.splice(index, 1); localStorage.setItem('masterDiagnosis', JSON.stringify(masterData)); renderTable(); }
+    }
+
+    function clearForm() {
+        document.getElementById('adminForm').reset(); document.getElementById('inp_id').value = "";
+        document.querySelector('.btn-save').innerText = "Save"; document.querySelector('.btn-save').style.background = ""; document.querySelector('.btn-save').style.color = "";
+    }
+
+    // --- ส่วน Export JSON ---
+    function exportData() {
+        const modal = document.getElementById('exportModal');
+        const output = document.getElementById('jsonOutput');
+        
+        // แปลงข้อมูลเป็น Text เพื่อให้คน Copy ไปวางในโค้ดได้
+        const jsonString = JSON.stringify(masterData, null, 4); // จัด Format สวยๆ
+        output.textContent = jsonString; // แสดงในกล่อง
+        
+        modal.style.display = "block";
+    }
+
+    function closeModal() { document.getElementById('exportModal').style.display = "none"; }
+    
+    function copyToClipboard() {
+        const text = document.getElementById('jsonOutput').textContent;
+        navigator.clipboard.writeText(text).then(() => { alert("Copy แล้ว! นำไปวางในไฟล์ index.html ได้เลย"); });
+    }
+
+    renderTable();
+</script>
+</body>
+</html>
