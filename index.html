@@ -29,7 +29,6 @@
 
         .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; }
 
-        /* Type Badge Styles */
         .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 0.85rem; display: inline-block;}
         .type-1 { background-color: #4caf50; } 
         .type-2 { background-color: #8bc34a; } 
@@ -138,7 +137,7 @@
                 <div><label>Admit Date/Time:</label><input type="text" id="prof_admit"></div>
                 <div><label>D/C Date/Time (วันจำหน่าย):</label><input type="datetime-local" id="prof_dc"></div>
                 <div class="form-full"><label>Principal Diagnosis (DX):</label><input type="text" id="prof_dx"></div>
-                </div>
+            </div>
             <div style="margin-top:20px; text-align:right;">
                 <button class="btn btn-primary" onclick="saveProfile()" style="width:auto; padding:10px 25px;">บันทึก (Save)</button>
             </div>
@@ -150,10 +149,10 @@
             <div class="card" style="border-left: 5px solid var(--primary);">
                 <div class="card-header"><h3><i class="fas fa-search"></i> 1. ค้นหา Focus (Smart Search)</h3></div>
                 <div class="search-wrapper">
-                    <input type="text" id="focusSearch" placeholder="พิมพ์อาการ เช่น ไข้, ปวด, เหนื่อย..." autocomplete="off" style="margin-bottom:0;">
+                    <input type="text" id="focusSearch" placeholder="พิมพ์อาการ เช่น ไข้, ปวด หรือพิมพ์ Focus ใหม่แล้วกด Enter..." autocomplete="off" style="margin-bottom:0;">
                     <div id="suggestions" class="suggestions-list"></div>
                 </div>
-                <small style="color:#888; margin-top:5px; display:block;">* ลองพิมพ์: ไข้, ปวด, ท้องเสีย, ตกเตียง</small>
+                <small style="color:#888; margin-top:5px; display:block;">* พิมพ์คำค้นหา หรือ พิมพ์ชื่อ Focus ใหม่ที่ต้องการแล้วกด Enter ได้เลย</small>
             </div>
 
             <div class="card">
@@ -165,7 +164,11 @@
                     <input type="hidden" id="noteId">
                     <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:10px;">
                         <div><label style="font-weight:bold; font-size:0.9rem;">วัน-เวลา</label><input type="datetime-local" id="noteDate" required></div>
-                        <div><label style="font-weight:bold; font-size:0.9rem;">Focus</label><input type="text" id="focusInput" readonly style="background:#e0f2f1; font-weight:600; color:var(--primary-dark);"></div>
+                        
+                        <div>
+                            <label style="font-weight:bold; font-size:0.9rem;">Focus</label>
+                            <input type="text" id="focusInput" placeholder="หรือระบุชื่อปัญหาที่นี่..." style="background:#fff; color:var(--text-dark); border:1px solid #ccc;">
+                        </div>
                     </div>
 
                     <div style="margin-bottom:15px; background:#e8eaf6; padding:10px; border-radius:8px; border:1px dashed #9fa8da;">
@@ -243,13 +246,10 @@
             if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
             document.getElementById('display_dc').innerText = dcText;
 
-            // Type Badge
             const typeEl = document.getElementById('display_type_badge');
             typeEl.className = `type-badge type-${patientProfile.type || '1'}`;
             typeEl.innerText = `Type ${patientProfile.type || '1'}`;
 
-            // Sync Dropdown in Form to current Type
-            // ให้ Dropdown เริ่มต้นด้วยค่าล่าสุดของคนไข้
             const noteTypeSelect = document.getElementById('noteType');
             if(noteTypeSelect && !document.getElementById('noteId').value) {
                 noteTypeSelect.value = patientProfile.type || "1";
@@ -279,7 +279,6 @@
             patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value;
             patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value;
             patientProfile.dc = document.getElementById('prof_dc').value;
-            // ไม่เซฟ Type จากหน้า Profile Modal แล้ว เพราะจะใช้จาก Note แทน
             localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); 
         }
 
@@ -293,6 +292,23 @@
         if (!masterDiagnosis || !Array.isArray(masterDiagnosis)) { masterDiagnosis = defaultData; localStorage.setItem('masterDiagnosis', JSON.stringify(masterDiagnosis)); }
 
         const searchInput = document.getElementById('focusSearch'); const suggestionsBox = document.getElementById('suggestions');
+        
+        // ★★★ Logic กด Enter แล้วเอาข้อความลงช่อง Focus ทันที ★★★
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const val = e.target.value.trim();
+                if(val) {
+                    document.getElementById('focusInput').value = val;
+                    // เคลียร์ค่า search เพื่อความสะอาด
+                    e.target.value = '';
+                    suggestionsBox.style.display = 'none';
+                    // โฟกัสไปที่ช่อง Data ต่อเลย
+                    document.getElementById('dataInput').focus();
+                }
+            }
+        });
+
         searchInput.addEventListener('input', (e) => {
             const val = e.target.value.toLowerCase().trim(); suggestionsBox.innerHTML = '';
             if (val.length < 1) { suggestionsBox.style.display = 'none'; return; }
@@ -307,7 +323,7 @@
                         suggestionsBox.style.display = 'none'; searchInput.value = '';
                     }; suggestionsBox.appendChild(div);
                 });
-            } else { suggestionsBox.style.display = 'block'; suggestionsBox.innerHTML = '<div class="no-result">ไม่พบข้อมูล</div>'; }
+            } else { suggestionsBox.style.display = 'block'; suggestionsBox.innerHTML = '<div class="no-result">ไม่พบ Template (กด Enter เพื่อใช้ข้อความนี้ได้เลย)</div>'; }
         });
         document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrapper')) suggestionsBox.style.display = 'none'; });
 
@@ -325,7 +341,6 @@
             if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึก</div>'; return; }
             patientNotes.forEach(n => {
                 const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r);
-                // แสดง Type ใน Timeline
                 const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
                 
                 timeline.innerHTML += `<div class="timeline-item"><div class="note-card"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><div><span class="focus-badge">${n.focus}</span> ${typeBadge} <small style="color:#666;">${n.displayTime}</small></div><div><button class="btn" style="padding:2px 6px; font-size:10px; background:#e0f2f1; color:#00695c;" onclick="editNote(${n.id})"><i class="fas fa-pen"></i></button> <button class="btn" style="padding:2px 6px; font-size:10px; background:#ffebee; color:#c62828;" onclick="deleteNote(${n.id})"><i class="fas fa-trash"></i></button></div></div><div class="dar-grid"><div class="dar-label">D:</div><div>${d_html}</div><div class="dar-label">A:</div><div>${a_html}</div><div class="dar-label">R:</div><div>${r_html}</div></div></div></div>`;
@@ -335,7 +350,7 @@
 
         function saveNote() {
             const id = document.getElementById('noteId').value;
-            const selectedType = document.getElementById('noteType').value; // เอาค่า Type จากฟอร์ม
+            const selectedType = document.getElementById('noteType').value;
             
             const noteData = { 
                 id: id ? parseInt(id) : Date.now(), 
@@ -345,7 +360,7 @@
                 d: document.getElementById('dataInput').value, 
                 a: document.getElementById('actionInput').value, 
                 r: document.getElementById('responseInput').value, 
-                patientType: selectedType, // บันทึก Type ลงไปใน Note ด้วย
+                patientType: selectedType, 
                 nurse: currentUser 
             };
             
@@ -359,14 +374,11 @@
                 patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); 
             }
             
-            // ★★★ อัปเดต Type ที่หัวกระดาษให้เป็นค่าล่าสุดทันที ★★★
             patientProfile.type = selectedType;
             localStorage.setItem('patientProfile', JSON.stringify(patientProfile));
             localStorage.setItem('patientNotes', JSON.stringify(patientNotes)); 
             
-            renderProfile(); // รีเฟรชหัวกระดาษ
-            renderUI(); 
-            if(!id) setDefaultDateTime();
+            renderProfile(); renderUI(); if(!id) setDefaultDateTime();
         }
 
         function editNote(id) { 
@@ -374,18 +386,13 @@
             document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; 
             document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; 
             document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; 
-            
-            // ดึงค่า Type เก่ามาแสดง
             if(n.patientType) document.getElementById('noteType').value = n.patientType;
-
             document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; 
         }
         
         function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem('patientNotes', JSON.stringify(patientNotes)); renderUI(); } }
         function clearForm() { 
-            document.getElementById('noteForm').reset(); 
-            document.getElementById('noteId').value=''; 
-            // รีเซ็ต Dropdown กลับเป็นค่าปัจจุบันของคนไข้
+            document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; 
             document.getElementById('noteType').value = patientProfile.type || "1";
             setDefaultDateTime(); 
             document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; 
