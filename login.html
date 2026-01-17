@@ -41,12 +41,12 @@
         .input-wrapper i { position: absolute; left: 15px; top: 12px; color: #999; }
         input {
             width: 100%;
-            padding: 12px 12px 12px 40px; /* เว้นที่ให้ไอคอน */
+            padding: 12px 12px 12px 40px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-family: 'Sarabun';
             font-size: 1rem;
-            box-sizing: border-box; /* สำคัญ */
+            box-sizing: border-box;
         }
         input:focus { outline: none; border-color: var(--primary); }
 
@@ -72,7 +72,7 @@
             border-radius: 6px;
             margin-bottom: 20px;
             font-size: 0.9rem;
-            display: none; /* ซ่อนไว้ก่อน */
+            display: none;
         }
         .footer { margin-top: 20px; font-size: 0.8rem; color: #aaa; }
     </style>
@@ -108,35 +108,32 @@
     </div>
 
     <script>
-        // เคลียร์ค่าเก่าทิ้งทุกครั้งที่เปิดหน้า Login
+        // ล้างค่าเก่าก่อนทุกครั้ง
         sessionStorage.removeItem('isLoggedIn');
         sessionStorage.removeItem('currentUser');
 
         function handleLogin(e) {
-            e.preventDefault(); // กันไม่ให้หน้าเว็บรีโหลด
+            e.preventDefault();
             
             const user = document.getElementById('username').value;
             const pass = document.getElementById('password').value;
             const errorBox = document.getElementById('errorBox');
 
-            // --- ตรวจสอบรหัสผ่าน (Simulation) ---
-            // ในระบบจริง ส่วนนี้จะส่งไปเช็คที่ Server
-            if (user === 'admin' && pass === '1234') {
-                // Login สำเร็จ -> บันทึกสถานะ
-                sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('currentUser', 'พยบ.วิษณุรักษ์ (Admin)'); // จำชื่อคนล็อกอิน
+            // ตรวจสอบ Username/Password
+            if ((user === 'admin' && pass === '1234') || (user === 'nurse' && pass === '1111')) {
                 
-                // ย้ายไปหน้าหลัก
-                window.location.href = 'index.html';
-            } else if (user === 'nurse' && pass === '1111') {
-                // ตัวอย่าง User อีกคน
+                // 1. บันทึกสถานะล็อกอิน
                 sessionStorage.setItem('isLoggedIn', 'true');
-                sessionStorage.setItem('currentUser', 'พยบ.ใจดี มีสุข (Staff)');
-                window.location.href = 'index.html';
+                
+                // 2. บันทึกชื่อผู้ใช้
+                let displayName = user === 'admin' ? 'พยบ.วิษณุรักษ์ (Admin)' : 'พยบ.ใจดี มีสุข (Staff)';
+                sessionStorage.setItem('currentUser', displayName);
+                
+                // 3. ★★★ จุดสำคัญ: เปลี่ยนหน้าไปที่ ward.html ★★★
+                window.location.href = 'ward.html';
+
             } else {
-                // Login ผิดพลาด
                 errorBox.style.display = 'block';
-                // สั่นกล่องเบาๆ
                 const card = document.querySelector('.login-card');
                 card.style.transform = 'translateX(5px)';
                 setTimeout(() => card.style.transform = 'translateX(0)', 100);

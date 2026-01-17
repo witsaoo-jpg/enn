@@ -4,116 +4,44 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Focus Charting (Record)</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root {
-            --primary: #00897b; --primary-dark: #00695c; --primary-light: #e0f2f1;
-            --accent: #fbc02d; --danger: #e53935; --text-dark: #263238; --text-gray: #546e7a;
-            --bg-body: #f0f2f5; --bg-card: #ffffff; --radius: 12px;
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        /* CSS เพิ่มเติมสำหรับปุ่มหมวดหมู่ */
+        .category-filter { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        .cat-btn { 
+            background: white; border: 1px solid #ddd; padding: 5px 10px; border-radius: 20px; 
+            font-size: 0.8rem; cursor: pointer; transition: 0.2s; color: #555;
         }
-
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg-body); color: var(--text-dark); margin: 0; padding-bottom: 50px; }
-        * { box-sizing: border-box; }
-
-        .navbar { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-        .patient-banner { background: white; padding: 12px 2rem; position: sticky; top: 0; z-index: 90; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-bottom: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: flex-start; }
-        .patient-info h2 { margin: 0; font-size: 1.2rem; color: var(--primary-dark); display: flex; align-items: center; gap: 10px; }
-        .patient-meta { margin-top: 8px; color: var(--text-gray); font-size: 0.9rem; display: grid; grid-template-columns: auto auto auto auto; gap: 8px 25px; }
-        .patient-meta div { display: flex; align-items: center; gap: 5px; }
-        .patient-meta i { color: var(--primary); width: 16px; }
-
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 1.4fr 1fr; gap: 25px; }
-
-        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 0.85rem; display: inline-block;}
-        .type-1 { background-color: #4caf50; } 
-        .type-2 { background-color: #8bc34a; } 
-        .type-3 { background-color: #ff9800; } 
-        .type-4 { background-color: #f44336; } 
-        .type-5 { background-color: #9c27b0; } 
-
-        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 25px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.02); }
-        .card-header h3 { margin: 0; color: var(--primary-dark); font-size: 1.1rem; display: flex; align-items: center; gap: 8px;}
-        
-        input, textarea, select { width: 100%; padding: 10px 12px; border: 1px solid #cfd8dc; border-radius: 8px; font-family: 'Sarabun'; font-size: 0.95rem; margin-bottom: 15px; background: #fafafa; }
-        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--primary); background: white; }
-        textarea { resize: vertical; min-height: 80px; }
-
-        .btn { border: none; padding: 8px 15px; border-radius: 6px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; font-family: 'Sarabun'; transition: 0.2s; font-size: 0.9rem; }
-        .btn-primary { background: var(--primary); color: white; width: 100%; justify-content: center; padding: 10px; }
-        .btn-primary:hover { background: var(--primary-dark); }
-        .btn-nav { background: #e0f7fa; color: #006064; border: 1px solid #b2ebf2; }
-        .btn-edit-profile { background: #f3e5f5; color: #7b1fa2; padding: 4px 8px; font-size: 0.8rem; border-radius: 4px; cursor: pointer; border: 1px solid #e1bee7; margin-left: 10px; }
-        
-        .btn-reset { background: #c62828; color: white; font-size: 0.8rem; padding: 5px 10px; border-radius: 4px; margin-left: 10px; border: 1px solid #b71c1c; }
-        .btn-reset:hover { background: #b71c1c; }
-
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 600px; max-width: 90%; position: relative; }
-        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 24px; cursor: pointer; color: #aaa; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; } .form-full { grid-column: span 2; }
-        .modal label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #555; } .modal input, .modal select { margin-bottom: 0; }
-
-        .right-panel-scroll { max-height: 800px; overflow-y: auto; padding-right: 5px; }
-        .timeline-container { position: relative; padding-left: 15px; } .timeline-container::before { content: ''; position: absolute; top: 0; bottom: 0; left: 5px; width: 2px; background: #e0e0e0; }
-        .timeline-item { position: relative; margin-bottom: 15px; padding-left: 20px; } .timeline-item::after { content: ''; position: absolute; left: 0px; top: 15px; width: 12px; height: 12px; border-radius: 50%; background: white; border: 2px solid var(--primary); z-index: 2; }
-        .note-card { background: white; border-radius: 8px; padding: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; font-size: 0.85rem; }
-        .focus-badge { background: var(--primary-light); color: var(--primary-dark); padding: 2px 8px; border-radius: 12px; font-weight: 600; font-size: 0.8rem; }
-        .dar-grid { display: grid; grid-template-columns: 20px 1fr; gap: 2px 8px; margin-top: 8px; line-height: 1.4; }
-        .dar-label { font-weight: bold; color: var(--primary); text-align: right; font-size: 0.8rem; }
-        .dar-content ul, .dar-content ol { margin: 0; padding-left: 15px; }
-
-        .search-wrapper { position: relative; }
-        .suggestions-list { position: absolute; top: 100%; left: 0; right: 0; background: white; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); z-index: 50; max-height: 250px; overflow-y: auto; display: none; border: 1px solid #eee; }
-        .suggestion-item { padding: 10px 15px; cursor: pointer; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-        .suggestion-item:hover { background: var(--primary-light); }
-        .no-result { padding: 10px 15px; color: #999; font-style: italic; font-size: 0.9rem; }
-
-        #printable-area { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            .no-print { display: none !important; }
-            #printable-area, #printable-area * { visibility: visible; }
-            #printable-area { display: block; position: absolute; top: 0; left: 0; width: 100%; }
-            @page { size: A4; margin: 1.5cm; }
-            .print-table { width: 100%; border-collapse: collapse; font-family: 'Sarabun'; font-size: 11pt; }
-            .print-table th, .print-table td { border: 1px solid black; padding: 10px; vertical-align: top; }
-            .print-header-info { margin-bottom: 20px; border-bottom: 2px solid black; padding-bottom: 10px; }
-            .print-header-info p { margin: 5px 0; font-size: 14pt; }
-        }
-        @media (max-width: 900px) { .container { grid-template-columns: 1fr; } .patient-banner { flex-direction: column; gap: 10px; align-items: flex-start; } .right-panel-scroll { max-height: none; overflow: visible; } }
+        .cat-btn:hover { background: #e0f2f1; color: var(--primary); border-color: var(--primary); }
+        .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
 </head>
 <body>
 
-    <nav class="navbar no-print">
-        <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-heartbeat"></i> Nursing Note System</div>
-        <div style="font-size:0.9rem; display:flex; align-items:center; gap:15px;">
-            <span id="userDisplay">User: ...</span> 
-            <button class="btn-reset" onclick="forceResetData()" title="Reset"><i class="fas fa-sync"></i></button>
-            <button onclick="logout()" style="background:none; border:1px solid rgba(255,255,255,0.5); color:white; padding:4px 10px; border-radius:4px; cursor:pointer;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </div>
-    </nav>
+<nav class="navbar no-print">
+    <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-heartbeat"></i> Nursing Note System</div>
+    <div style="font-size:0.9rem; display:flex; align-items:center; gap:10px;">
+        <button onclick="window.location.href='ward.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 10px; border-radius:4px; cursor:pointer;">
+            <i class="fas fa-arrow-left"></i> Back to Ward
+        </button>
+        <button onclick="goToAdmin()" style="background:#fbc02d; border:none; color:#333; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
+            <i class="fas fa-cog"></i> Admin
+        </button>
+        <span id="userDisplay" style="margin-left:5px; border-left:1px solid rgba(255,255,255,0.3); padding-left:10px;">User: ...</span> 
+    </div>
+</nav>
 
     <div class="patient-banner no-print">
         <div class="patient-info">
-            <h2>
-                <span id="display_name">...</span> 
-                <button class="btn-edit-profile" onclick="openProfileModal()"><i class="fas fa-edit"></i> แก้ไขข้อมูล</button>
-            </h2>
+            <h2><span id="display_name">...</span> <button class="btn-edit-profile" onclick="openProfileModal()"><i class="fas fa-edit"></i> แก้ไขข้อมูล</button></h2>
             <div class="patient-meta">
                 <div><i class="fas fa-id-card"></i> HN: <span id="display_hn">-</span></div>
                 <div><i class="fas fa-procedures"></i> AN: <span id="display_an">-</span></div>
                 <div><i class="fas fa-clinic-medical"></i> Ward: <span id="display_ward">-</span></div>
-                
-                <div><i class="fas fa-layer-group"></i> Current Type: <span id="display_type_badge"></span></div>
-                
+                <div><i class="fas fa-layer-group"></i> Type: <span id="display_type_badge"></span></div>
                 <div><i class="far fa-calendar-check"></i> Admit: <span id="display_admit">-</span></div>
                 <div><i class="fas fa-diagnoses"></i> DX: <span id="display_dx">-</span></div>
                 <div><i class="fas fa-sign-out-alt"></i> D/C: <span id="display_dc" style="color:#e53935; font-weight:bold;">-</span></div>
@@ -147,12 +75,14 @@
     <div class="container no-print">
         <div class="left-panel">
             <div class="card" style="border-left: 5px solid var(--primary);">
-                <div class="card-header"><h3><i class="fas fa-search"></i> 1. ค้นหา Focus (Smart Search)</h3></div>
+                <div class="card-header"><h3><i class="fas fa-search"></i> 1. ค้นหา Focus / เลือกกลุ่มโรค</h3></div>
                 <div class="search-wrapper">
-                    <input type="text" id="focusSearch" placeholder="พิมพ์อาการ เช่น ไข้, ปวด หรือพิมพ์ Focus ใหม่แล้วกด Enter..." autocomplete="off" style="margin-bottom:0;">
+                    <input type="text" id="focusSearch" placeholder="พิมพ์อาการ เช่น ไข้, ปวด หรือเลือกกลุ่มโรคด้านล่าง..." autocomplete="off">
                     <div id="suggestions" class="suggestions-list"></div>
                 </div>
-                <small style="color:#888; margin-top:5px; display:block;">* พิมพ์คำค้นหา หรือ พิมพ์ชื่อ Focus ใหม่ที่ต้องการแล้วกด Enter ได้เลย</small>
+                
+                <div id="categoryContainer" class="category-filter">
+                    </div>
             </div>
 
             <div class="card">
@@ -164,7 +94,6 @@
                     <input type="hidden" id="noteId">
                     <div style="display:grid; grid-template-columns: 1fr 1.5fr; gap:10px;">
                         <div><label style="font-weight:bold; font-size:0.9rem;">วัน-เวลา</label><input type="datetime-local" id="noteDate" required></div>
-                        
                         <div>
                             <label style="font-weight:bold; font-size:0.9rem;">Focus</label>
                             <input type="text" id="focusInput" placeholder="หรือระบุชื่อปัญหาที่นี่..." style="background:#fff; color:var(--text-dark); border:1px solid #ccc;">
@@ -204,17 +133,8 @@
     <div id="printable-area">
         <div class="print-header-info" style="text-align:center;">
             <h2>ใบบันทึกทางการพยาบาล (Focus Charting)</h2>
-            <p>
-                <b>ชื่อ-สกุล:</b> <span class="p-name"></span> | 
-                <b>HN:</b> <span class="p-hn"></span> | 
-                <b>AN:</b> <span class="p-an"></span>
-            </p>
-            <p style="font-size:12pt;">
-                <b>Ward:</b> <span class="p-ward"></span> | 
-                <b>Type ล่าสุด:</b> <span class="p-type"></span> | 
-                <b>Admit:</b> <span class="p-admit"></span> | 
-                <b>D/C:</b> <span class="p-dc"></span>
-            </p>
+            <p><b>ชื่อ-สกุล:</b> <span class="p-name"></span> | <b>HN:</b> <span class="p-hn"></span> | <b>AN:</b> <span class="p-an"></span></p>
+            <p style="font-size:12pt;"><b>Ward:</b> <span class="p-ward"></span> | <b>Type ล่าสุด:</b> <span class="p-type"></span> | <b>Admit:</b> <span class="p-admit"></span> | <b>D/C:</b> <span class="p-dc"></span></p>
             <p style="font-size:12pt;"><b>DX:</b> <span class="p-dx"></span></p>
         </div>
         <table class="print-table">
@@ -224,182 +144,145 @@
     </div>
 
     <script>
+        // 1. Config
         if (!sessionStorage.getItem('isLoggedIn')) { window.location.href = 'login.html'; }
-        function logout() { if(confirm("ต้องการออกจากระบบใช่หรือไม่?")) { sessionStorage.clear(); window.location.href = 'login.html'; } }
         const currentUser = sessionStorage.getItem('currentUser') || "Unknown User";
         document.getElementById('userDisplay').innerHTML = `<i class="fas fa-user-nurse"></i> ${currentUser}`;
 
-        let patientProfile = JSON.parse(localStorage.getItem('patientProfile')) || { 
-            name: "นายทดสอบ ระบบดี (56 ปี)", hn: "5012345", an: "66000123", ward: "อายุรกรรมชาย 1", 
-            admit: "15/01/2569", dx: "Pneumonia", dc: "", type: "2" 
-        };
+        function goToAdmin() {
+            const pass = prompt("รหัสผ่าน Admin:");
+            if(pass === '1234') { sessionStorage.setItem('currentUser', 'พยบ.วิษณุรักษ์ (Admin Mode)'); window.location.href = 'admin.html'; }
+        }
+
+        // 2. Profile
+        const profileString = localStorage.getItem('patientProfile');
+        if (!profileString) { alert("กรุณาเลือกผู้ป่วยจากหน้า Ward"); window.location.href = 'ward.html'; }
+        let patientProfile = JSON.parse(profileString);
 
         function renderProfile() {
-            document.getElementById('display_name').innerText = patientProfile.name; 
-            document.getElementById('display_hn').innerText = patientProfile.hn;
-            document.getElementById('display_an').innerText = patientProfile.an; 
-            document.getElementById('display_ward').innerText = patientProfile.ward;
-            document.getElementById('display_admit').innerText = patientProfile.admit; 
-            document.getElementById('display_dx').innerText = patientProfile.dx;
-            
-            let dcText = "-";
-            if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
+            document.getElementById('display_name').innerText = patientProfile.name; document.getElementById('display_hn').innerText = patientProfile.hn;
+            document.getElementById('display_an').innerText = patientProfile.an; document.getElementById('display_ward').innerText = patientProfile.ward;
+            document.getElementById('display_admit').innerText = patientProfile.admit; document.getElementById('display_dx').innerText = patientProfile.dx;
+            let dcText = "-"; if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
             document.getElementById('display_dc').innerText = dcText;
-
-            const typeEl = document.getElementById('display_type_badge');
-            typeEl.className = `type-badge type-${patientProfile.type || '1'}`;
-            typeEl.innerText = `Type ${patientProfile.type || '1'}`;
-
-            const noteTypeSelect = document.getElementById('noteType');
-            if(noteTypeSelect && !document.getElementById('noteId').value) {
-                noteTypeSelect.value = patientProfile.type || "1";
-            }
-
-            document.querySelector('.p-name').innerText = patientProfile.name; 
-            document.querySelector('.p-hn').innerText = patientProfile.hn;
-            document.querySelector('.p-an').innerText = patientProfile.an; 
-            document.querySelector('.p-ward').innerText = patientProfile.ward;
-            document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`;
-            document.querySelector('.p-admit').innerText = patientProfile.admit; 
-            document.querySelector('.p-dx').innerText = patientProfile.dx;
-            document.querySelector('.p-dc').innerText = dcText;
+            const typeEl = document.getElementById('display_type_badge'); typeEl.className = `type-badge type-${patientProfile.type || '1'}`; typeEl.innerText = `Type ${patientProfile.type || '1'}`;
+            const noteTypeSelect = document.getElementById('noteType'); if(noteTypeSelect && !document.getElementById('noteId').value) noteTypeSelect.value = patientProfile.type || "1";
+            document.querySelector('.p-name').innerText = patientProfile.name; document.querySelector('.p-hn').innerText = patientProfile.hn;
+            document.querySelector('.p-an').innerText = patientProfile.an; document.querySelector('.p-ward').innerText = patientProfile.ward;
+            document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`; document.querySelector('.p-admit').innerText = patientProfile.admit; 
+            document.querySelector('.p-dx').innerText = patientProfile.dx; document.querySelector('.p-dc').innerText = dcText;
         }
 
-        function openProfileModal() { 
-            document.getElementById('prof_name').value = patientProfile.name; document.getElementById('prof_hn').value = patientProfile.hn; 
-            document.getElementById('prof_an').value = patientProfile.an; document.getElementById('prof_ward').value = patientProfile.ward; 
-            document.getElementById('prof_admit').value = patientProfile.admit; document.getElementById('prof_dx').value = patientProfile.dx; 
-            document.getElementById('prof_dc').value = patientProfile.dc; 
-            document.getElementById('profileModal').style.display = 'flex'; 
-        }
+        function openProfileModal() { document.getElementById('prof_name').value = patientProfile.name; document.getElementById('prof_hn').value = patientProfile.hn; document.getElementById('prof_an').value = patientProfile.an; document.getElementById('prof_ward').value = patientProfile.ward; document.getElementById('prof_admit').value = patientProfile.admit; document.getElementById('prof_dx').value = patientProfile.dx; document.getElementById('prof_dc').value = patientProfile.dc; document.getElementById('profileModal').style.display = 'flex'; }
         function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
-        
-        function saveProfile() { 
-            patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value;
-            patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value;
-            patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value;
-            patientProfile.dc = document.getElementById('prof_dc').value;
-            localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); 
-        }
+        function saveProfile() { patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value; patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value; patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value; patientProfile.dc = document.getElementById('prof_dc').value; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); }
 
-        // Search System
-        const defaultData = [
-            { id: "001", nanda: "Hyperthermia", keywords: ["ไข้", "ตัวร้อน", "fever"], template: { d: "S: หนาวสั่น\nO: T > 37.5 C", a: "1. เช็ดตัว\n2. ให้ยา Para", r: "ไข้ลด" }, guide: "" },
-            { id: "002", nanda: "Acute Pain", keywords: ["ปวด", "เจ็บ", "pain"], template: { d: "S: ปวด...\nO: Pain Score ...", a: "1. ประเมิน Pain\n2. ให้ยา", r: "Pain ลด" }, guide: "" }
-        ];
-        function forceResetData() { if(confirm("รีเซ็ตฐานข้อมูล?")) { localStorage.removeItem('masterDiagnosis'); localStorage.setItem('masterDiagnosis', JSON.stringify(defaultData)); location.reload(); } }
-        let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis'));
-        if (!masterDiagnosis || !Array.isArray(masterDiagnosis)) { masterDiagnosis = defaultData; localStorage.setItem('masterDiagnosis', JSON.stringify(masterDiagnosis)); }
-
+        // 3. Search & Category System
+        let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis')) || [];
         const searchInput = document.getElementById('focusSearch'); const suggestionsBox = document.getElementById('suggestions');
         
-        // ★★★ Logic กด Enter แล้วเอาข้อความลงช่อง Focus ทันที ★★★
+        // ★★★ Logic สร้างปุ่มหมวดหมู่ ★★★
+        function renderCategoryButtons() {
+            const container = document.getElementById('categoryContainer');
+            // หา category ที่ไม่ซ้ำกัน
+            const categories = [...new Set(masterDiagnosis.map(item => item.category || "Uncategorized"))].sort();
+            
+            let html = `<button class="cat-btn active" onclick="filterCategory('ALL', this)">ทั้งหมด</button>`;
+            categories.forEach(cat => {
+                html += `<button class="cat-btn" onclick="filterCategory('${cat}', this)">${cat}</button>`;
+            });
+            container.innerHTML = html;
+        }
+
+        // ฟังก์ชันกรองเมื่อกดปุ่มหมวดหมู่
+        window.filterCategory = function(category, btnElement) {
+            // Highlight Button
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            if(category === 'ALL') {
+                suggestionsBox.style.display = 'none'; // ซ่อนก่อน
+                return;
+            }
+
+            // Filter Data
+            const filtered = masterDiagnosis.filter(item => (item.category || "Uncategorized") === category);
+            showSuggestions(filtered);
+        };
+
+        function showSuggestions(data) {
+            suggestionsBox.innerHTML = '';
+            if (data.length > 0) {
+                suggestionsBox.style.display = 'block';
+                data.forEach(item => {
+                    const div = document.createElement('div'); div.className = 'suggestion-item'; 
+                    div.innerHTML = `<strong>${item.nanda}</strong> <span style="font-size:0.7rem; color:#999; float:right;">${item.category||''}</span>`;
+                    div.onclick = () => selectFocus(item);
+                    suggestionsBox.appendChild(div);
+                });
+            } else {
+                suggestionsBox.style.display = 'block'; suggestionsBox.innerHTML = '<div class="no-result">ไม่พบข้อมูลในหมวดหมู่นี้</div>';
+            }
+        }
+
+        function selectFocus(item) {
+            document.getElementById('focusInput').value = item.nanda;
+            document.getElementById('dataInput').value = item.template?.d || ""; 
+            document.getElementById('actionInput').value = item.template?.a || ""; 
+            document.getElementById('responseInput').value = item.template?.r || "";
+            suggestionsBox.style.display = 'none'; searchInput.value = '';
+        }
+
+        // Search Input Logic
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase().trim();
+            
+            // ถ้าเริ่มพิมพ์ ให้ยกเลิกการเลือกหมวดหมู่ (กลับไปค้นหาทั้งหมด)
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.cat-btn').classList.add('active'); // ปุ่ม 'ทั้งหมด' active
+
+            if (val.length < 1) { suggestionsBox.style.display = 'none'; return; }
+            
+            const found = masterDiagnosis.filter(item => (item.nanda || "").toLowerCase().includes(val) || (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val))));
+            showSuggestions(found);
+        });
+
         searchInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
-                e.preventDefault();
-                const val = e.target.value.trim();
+                e.preventDefault(); const val = e.target.value.trim();
                 if(val) {
-                    document.getElementById('focusInput').value = val;
-                    // เคลียร์ค่า search เพื่อความสะอาด
-                    e.target.value = '';
-                    suggestionsBox.style.display = 'none';
-                    // โฟกัสไปที่ช่อง Data ต่อเลย
-                    document.getElementById('dataInput').focus();
+                    document.getElementById('focusInput').value = val; e.target.value = ''; suggestionsBox.style.display = 'none'; document.getElementById('dataInput').focus();
                 }
             }
         });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrapper') && !e.target.closest('#categoryContainer')) suggestionsBox.style.display = 'none'; });
 
-        searchInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase().trim(); suggestionsBox.innerHTML = '';
-            if (val.length < 1) { suggestionsBox.style.display = 'none'; return; }
-            const found = masterDiagnosis.filter(item => (item.nanda || "").toLowerCase().includes(val) || (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val))));
-            if (found.length > 0) {
-                suggestionsBox.style.display = 'block';
-                found.forEach(item => {
-                    const div = document.createElement('div'); div.className = 'suggestion-item'; div.innerHTML = `<strong>${item.nanda}</strong>`;
-                    div.onclick = () => {
-                        document.getElementById('focusInput').value = item.nanda;
-                        document.getElementById('dataInput').value = item.template?.d || ""; document.getElementById('actionInput').value = item.template?.a || ""; document.getElementById('responseInput').value = item.template?.r || "";
-                        suggestionsBox.style.display = 'none'; searchInput.value = '';
-                    }; suggestionsBox.appendChild(div);
-                });
-            } else { suggestionsBox.style.display = 'block'; suggestionsBox.innerHTML = '<div class="no-result">ไม่พบ Template (กด Enter เพื่อใช้ข้อความนี้ได้เลย)</div>'; }
-        });
-        document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrapper')) suggestionsBox.style.display = 'none'; });
+        // 4. Note Logic
+        function formatToList(text) { if (!text) return "-"; let formatted = text.replace(/(\s+)(\d+\.)/g, '\n$2'); const lines = formatted.split('\n').filter(line => line.trim() !== ''); if (lines.length === 0) return "-"; const isOrdered = /^\s*\d+\./.test(lines[0]); let html = isOrdered ? '<ol style="margin:0; padding-left:20px;">' : '<ul style="margin:0; padding-left:20px;">'; lines.forEach(line => { html += `<li style="margin-bottom:2px;">${line.trim().replace(/^(\d+\.|[-•*])\s*/, '')}</li>`; }); return `<div class="dar-content">${html + (isOrdered ? '</ol>' : '</ul>')}</div>`; }
+        const currentHN = localStorage.getItem('currentHN') || 'default'; const storageKey = `notes_${currentHN}`; let patientNotes = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-        // Note Functions
-        function formatToList(text) {
-            if (!text) return "-"; let formatted = text.replace(/(\s+)(\d+\.)/g, '\n$2'); const lines = formatted.split('\n').filter(line => line.trim() !== ''); if (lines.length === 0) return "-";
-            const isOrdered = /^\s*\d+\./.test(lines[0]); let html = isOrdered ? '<ol style="margin:0; padding-left:20px;">' : '<ul style="margin:0; padding-left:20px;">';
-            lines.forEach(line => { html += `<li style="margin-bottom:2px;">${line.trim().replace(/^(\d+\.|[-•*])\s*/, '')}</li>`; }); return `<div class="dar-content">${html + (isOrdered ? '</ol>' : '</ul>')}</div>`;
-        }
-
-        let patientNotes = JSON.parse(localStorage.getItem('patientNotes')) || [];
         function renderUI() {
-            const timeline = document.getElementById('timelineList'); const printBody = document.getElementById('printTableBody');
-            timeline.innerHTML = ''; printBody.innerHTML = '';
-            if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึก</div>'; return; }
+            const timeline = document.getElementById('timelineList'); const printBody = document.getElementById('printTableBody'); timeline.innerHTML = ''; printBody.innerHTML = '';
+            if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึกสำหรับผู้ป่วยคนนี้</div>'; return; }
             patientNotes.forEach(n => {
-                const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r);
-                const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
-                
+                const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r); const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
                 timeline.innerHTML += `<div class="timeline-item"><div class="note-card"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><div><span class="focus-badge">${n.focus}</span> ${typeBadge} <small style="color:#666;">${n.displayTime}</small></div><div><button class="btn" style="padding:2px 6px; font-size:10px; background:#e0f2f1; color:#00695c;" onclick="editNote(${n.id})"><i class="fas fa-pen"></i></button> <button class="btn" style="padding:2px 6px; font-size:10px; background:#ffebee; color:#c62828;" onclick="deleteNote(${n.id})"><i class="fas fa-trash"></i></button></div></div><div class="dar-grid"><div class="dar-label">D:</div><div>${d_html}</div><div class="dar-label">A:</div><div>${a_html}</div><div class="dar-label">R:</div><div>${r_html}</div></div></div></div>`;
                 printBody.innerHTML += `<tr><td>${n.displayTime}</td><td><strong>${n.focus}</strong> <br><small>(${n.patientType ? 'Type '+n.patientType : '-'})</small></td><td><div style="margin-bottom:5px;"><b>D:</b> ${d_html}</div><div style="margin-bottom:5px;"><b>A:</b> ${a_html}</div><div><b>R:</b> ${r_html}</div></td><td>${n.nurse}</td></tr>`;
             });
         }
-
         function saveNote() {
-            const id = document.getElementById('noteId').value;
-            const selectedType = document.getElementById('noteType').value;
-            
-            const noteData = { 
-                id: id ? parseInt(id) : Date.now(), 
-                datetime: document.getElementById('noteDate').value, 
-                displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), 
-                focus: document.getElementById('focusInput').value, 
-                d: document.getElementById('dataInput').value, 
-                a: document.getElementById('actionInput').value, 
-                r: document.getElementById('responseInput').value, 
-                patientType: selectedType, 
-                nurse: currentUser 
-            };
-            
+            const id = document.getElementById('noteId').value; const selectedType = document.getElementById('noteType').value;
+            const noteData = { id: id ? parseInt(id) : Date.now(), datetime: document.getElementById('noteDate').value, displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), focus: document.getElementById('focusInput').value, d: document.getElementById('dataInput').value, a: document.getElementById('actionInput').value, r: document.getElementById('responseInput').value, patientType: selectedType, nurse: currentUser };
             if(!noteData.focus || !noteData.datetime) return alert("ระบุข้อมูลให้ครบ");
-            
-            if(id) { 
-                patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; 
-                clearForm(); 
-            } else { 
-                patientNotes.unshift(noteData); 
-                patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); 
-            }
-            
-            patientProfile.type = selectedType;
-            localStorage.setItem('patientProfile', JSON.stringify(patientProfile));
-            localStorage.setItem('patientNotes', JSON.stringify(patientNotes)); 
-            
-            renderProfile(); renderUI(); if(!id) setDefaultDateTime();
+            if(id) { patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; clearForm(); } else { patientNotes.unshift(noteData); patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); }
+            localStorage.setItem(storageKey, JSON.stringify(patientNotes)); patientProfile.type = selectedType; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); renderUI(); if(!id) setDefaultDateTime();
         }
-
-        function editNote(id) { 
-            const n = patientNotes.find(n => n.id === id); if(!n) return; 
-            document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; 
-            document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; 
-            document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; 
-            if(n.patientType) document.getElementById('noteType').value = n.patientType;
-            document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; 
-        }
-        
-        function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem('patientNotes', JSON.stringify(patientNotes)); renderUI(); } }
-        function clearForm() { 
-            document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; 
-            document.getElementById('noteType').value = patientProfile.type || "1";
-            setDefaultDateTime(); 
-            document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; 
-        }
+        function editNote(id) { const n = patientNotes.find(n => n.id === id); if(!n) return; document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; if(n.patientType) document.getElementById('noteType').value = n.patientType; document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; }
+        function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem(storageKey, JSON.stringify(patientNotes)); renderUI(); } }
+        function clearForm() { document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; document.getElementById('noteType').value = patientProfile.type || "1"; setDefaultDateTime(); document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; }
         function setDefaultDateTime() { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById('noteDate').value = now.toISOString().slice(0,16); }
 
-        renderProfile(); setDefaultDateTime(); renderUI();
+        renderProfile(); renderCategoryButtons(); setDefaultDateTime(); renderUI();
     </script>
 </body>
 </html>

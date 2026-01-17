@@ -3,164 +3,203 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Nursing Data</title>
+    <title>Admin - Manage Diagnosis</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    <link rel="stylesheet" href="style.css">
     <style>
-        :root { --primary: #455a64; --accent: #00897b; --bg: #f0f2f5; }
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg); margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 10px; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 30px; }
-        .form-box { background: #fafafa; padding: 20px; border-radius: 8px; border: 1px solid #ddd; position: sticky; top: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
-        input, textarea { width: 100%; padding: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun'; }
-        textarea { height: 80px; resize: vertical; }
-        .btn { padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-bottom: 10px; transition: 0.2s; }
-        .btn-save { background: var(--accent); color: white; } .btn-save:hover { background: #00695c; }
-        .btn-clear { background: #ddd; color: #333; }
-        /* ปุ่ม Export */
-        .btn-export { background: #3f51b5; color: white; margin-top: 20px; } .btn-export:hover { background: #303f9f; }
-        
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; vertical-align: top; }
-        th { background: var(--primary); color: white; } tr:hover { background: #f9f9f9; }
-        .action-btns { display: flex; gap: 5px; }
-        .btn-sm { padding: 5px 10px; border-radius: 4px; cursor: pointer; border: none; color: white; font-size: 0.8rem; }
-        .btn-edit { background: #ffb74d; color: #333; } .btn-del { background: #e57373; }
-        .preview-tag { background: #e0f2f1; color: #00695c; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem; display: inline-block; margin: 2px; }
-
-        /* Modal Box */
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
-        .modal-content { background-color: #fefefe; margin: 10% auto; padding: 20px; border: 1px solid #888; width: 60%; border-radius: 8px; }
-        .close { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .close:hover { color: black; }
-        .code-block { background: #263238; color: #80cbc4; padding: 15px; border-radius: 5px; font-family: monospace; white-space: pre-wrap; height: 300px; overflow-y: auto; }
+        .admin-container { max-width: 1400px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 400px 1fr; gap: 25px; }
+        .list-group { height: 700px; overflow-y: auto; border: 1px solid #ddd; border-radius: 8px; background: white; }
+        .list-item { padding: 15px; border-bottom: 1px solid #eee; cursor: pointer; transition: 0.2s; }
+        .list-item:hover { background: #e0f2f1; }
+        .list-item.active { background: var(--primary); color: white; }
+        .list-item h4 { margin: 0 0 5px 0; font-size: 1rem; }
+        .list-item p { margin: 0; font-size: 0.8rem; opacity: 0.8; }
+        .cat-badge { font-size: 0.75rem; background: #ddd; color: #333; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 5px; }
+        .editor-card { background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow); }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-gray); }
+        .btn-add { background: var(--success); color: white; width: 100%; margin-bottom: 15px; }
+        .btn-delete { background: var(--danger); color: white; float: right; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2><i class="fas fa-cogs"></i> จัดการฐานข้อมูลโรค (Admin)</h2>
-        <a href="index.html" style="text-decoration:none; color:var(--accent); font-weight:bold;"><i class="fas fa-arrow-left"></i> กลับหน้าใช้งาน</a>
-    </div>
-
-    <div class="admin-grid">
-        <div class="form-box">
-            <h3 style="margin-top:0;">Add / Edit Diagnosis</h3>
-            <form id="adminForm">
-                <input type="hidden" id="inp_id">
-                <label>ชื่อโรค (NANDA):</label><input type="text" id="inp_nanda" required>
-                <label>Keywords (คั่นด้วย ,):</label><input type="text" id="inp_keywords">
-                <label>Data (S, O):</label><textarea id="inp_d"></textarea>
-                <label>Action:</label><textarea id="inp_a"></textarea>
-                <label>Response:</label><textarea id="inp_r"></textarea>
-                <label>Guideline:</label><textarea id="inp_guide"></textarea>
-                
-                <button type="button" class="btn btn-save" onclick="saveData()">บันทึก (Save)</button>
-                <button type="button" class="btn btn-clear" onclick="clearForm()">ล้างค่า (Clear)</button>
-
-                <hr>
-                <button type="button" class="btn btn-export" onclick="exportData()">
-                    <i class="fas fa-code"></i> สร้างโค้ดสำหรับนำไปใช้ (Export)
-                </button>
-            </form>
-        </div>
+    <nav class="navbar">
+        <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-cog"></i> Focus/NANDA-I Manager</div>
         <div>
-            <table id="dataTable">
-                <thead><tr><th width="30%">Focus Name</th><th>Keywords</th><th width="15%">Action</th></tr></thead>
-                <tbody id="tableBody"></tbody>
-            </table>
+            <button onclick="window.location.href='index.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; border-radius:4px; cursor:pointer;">
+                <i class="fas fa-home"></i> กลับหน้าบันทึก
+            </button>
+            <button onclick="window.location.href='login.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; border-radius:4px; cursor:pointer; margin-left:10px;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div>
+            <button class="btn btn-primary btn-add" onclick="addNewItem()"><i class="fas fa-plus"></i> เพิ่มรายการใหม่ (Add New)</button>
+            <div class="list-group" id="diagnosisList"></div>
+            <div style="margin-top:10px; font-size:0.8rem; color:#666;">* คลิกที่รายชื่อเพื่อแก้ไข</div>
+        </div>
+
+        <div class="editor-card">
+            <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">
+                <i class="fas fa-edit"></i> Edit Focus / NANDA-I
+            </h3>
+            
+            <input type="hidden" id="editId">
+            
+            <div class="form-group">
+                <label>Category (หมวดหมู่โรค):</label>
+                <input type="text" id="editCategory" list="catList" placeholder="เช่น ระบบหายใจ, ศัลยกรรม, ทั่วไป...">
+                <datalist id="catList">
+                    <option value="ทั่วไป/สุขสบาย (General)">
+                    <option value="ระบบหายใจ (Respiratory)">
+                    <option value="ระบบหัวใจ/หลอดเลือด (Cardiovascular)">
+                    <option value="ระบบทางเดินอาหาร (GI)">
+                    <option value="ศัลยกรรม/แผล (Surgical)">
+                    <option value="ระบบประสาท/จิตใจ (Neuro/Psych)">
+                    <option value="ความปลอดภัย (Safety)">
+                </datalist>
+            </div>
+
+            <div class="form-group">
+                <label>Focus Name / NANDA-I Diagnosis:</label>
+                <input type="text" id="editNanda" placeholder="เช่น Acute Pain, Risk for Infection...">
+            </div>
+
+            <div class="form-group">
+                <label>Keywords (คำค้นหา - คั่นด้วยลูกน้ำ):</label>
+                <input type="text" id="editKeywords" placeholder="เช่น ปวด, เจ็บ, pain, แผลผ่าตัด">
+            </div>
+
+            <div class="form-group" style="background:#f9f9f9; padding:15px; border-radius:8px; border:1px dashed #ccc;">
+                <label style="color:var(--primary-dark);">Template: Data (S, O)</label>
+                <textarea id="editD" style="height:80px;"></textarea>
+                <label style="color:var(--primary-dark);">Template: Action (A)</label>
+                <textarea id="editA" style="height:80px;"></textarea>
+                <label style="color:var(--primary-dark);">Template: Response (R)</label>
+                <textarea id="editR" style="height:60px;"></textarea>
+            </div>
+
+            <div style="margin-top:20px;">
+                <button class="btn btn-primary" onclick="saveItem()"><i class="fas fa-save"></i> บันทึก (Save Changes)</button>
+                <button class="btn btn-reset btn-delete" onclick="deleteItem()"><i class="fas fa-trash"></i> ลบรายการนี้</button>
+            </div>
+            
+            <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;">
+            <details>
+                <summary style="cursor:pointer; color:#666;">Advanced: Tools</summary>
+                
+                <h4 style="margin-bottom:5px;">1. Import JSON</h4>
+                <textarea id="jsonImport" placeholder="วางโค้ด JSON ที่นี่..." style="font-family:monospace; font-size:0.8rem; width:100%;"></textarea>
+                <button class="btn" onclick="importJSON()" style="background:#607d8b; color:white; font-size:0.8rem; margin-top:5px;">Import Data</button>
+
+                <h4 style="margin-bottom:5px; margin-top:20px;">2. Auto Grouping (จัดหมวดหมู่อัตโนมัติ)</h4>
+                <p style="font-size:0.8rem; color:#666;">กดปุ่มนี้เพื่อจัดกลุ่มโรคเดิมที่ยังไม่มีหมวดหมู่ ให้เข้ากลุ่มตาม Keywords อัตโนมัติ</p>
+                <button class="btn" onclick="autoCategorize()" style="background:#ff9800; color:white; font-size:0.8rem;">Auto Categorize Old Data</button>
+            </details>
         </div>
     </div>
-</div>
 
-<div id="exportModal" class="modal">
-    <div class="modal-content">
-        <span class="close" onclick="closeModal()">&times;</span>
-        <h3><i class="fas fa-file-code"></i> โค้ดสำหรับไฟล์ index.html</h3>
-        <p>ให้ Copy โค้ดในกล่องนี้ ไปทับตัวแปร <code>masterDiagnosis</code> ในไฟล์ index.html เพื่อให้ทุกคนเห็นข้อมูลเหมือนกัน</p>
-        <div class="code-block" id="jsonOutput"></div>
-        <button class="btn btn-save" style="margin-top:10px; width:auto;" onclick="copyToClipboard()">Copy All Code</button>
-    </div>
-</div>
+    <script>
+        if (!sessionStorage.getItem('isLoggedIn') || !sessionStorage.getItem('currentUser').includes('Admin')) {
+            alert("เฉพาะ Admin เท่านั้นที่เข้าถึงหน้านี้ได้"); window.location.href = 'index.html';
+        }
 
-<script>
-    let masterData = JSON.parse(localStorage.getItem('masterDiagnosis')) || [];
-
-    function renderTable() {
-        const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
-        masterData.forEach((item, index) => {
-            const keysHTML = item.keywords.map(k => `<span class="preview-tag">${k}</span>`).join('');
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>${item.nanda}</strong></td><td>${keysHTML}</td>
-                    <td class="action-btns">
-                        <button class="btn-sm btn-edit" onclick="editItem(${index})"><i class="fas fa-pen"></i></button>
-                        <button class="btn-sm btn-del" onclick="deleteItem(${index})"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-        });
-    }
-
-    function saveData() {
-        const id = document.getElementById('inp_id').value;
-        const nanda = document.getElementById('inp_nanda').value;
-        const keywords = document.getElementById('inp_keywords').value.split(',').map(k => k.trim()).filter(k => k);
-        if(!nanda) return alert("ระบุชื่อโรค");
-
-        const newData = { id: Date.now().toString(), nanda: nanda, keywords: keywords, template: { d: document.getElementById('inp_d').value, a: document.getElementById('inp_a').value, r: document.getElementById('inp_r').value }, guide: document.getElementById('inp_guide').value };
-
-        if(id !== "") { masterData[parseInt(id)] = newData; alert("แก้ไขแล้ว"); } 
-        else { masterData.push(newData); alert("เพิ่มแล้ว"); }
-
-        localStorage.setItem('masterDiagnosis', JSON.stringify(masterData));
-        clearForm(); renderTable();
-    }
-
-    function editItem(index) {
-        const item = masterData[index];
-        document.getElementById('inp_id').value = index;
-        document.getElementById('inp_nanda').value = item.nanda;
-        document.getElementById('inp_keywords').value = item.keywords.join(', ');
-        document.getElementById('inp_d').value = item.template.d;
-        document.getElementById('inp_a').value = item.template.a;
-        document.getElementById('inp_r').value = item.template.r;
-        document.getElementById('inp_guide').value = item.guide || "";
-        document.querySelector('.btn-save').innerText = "Update"; document.querySelector('.btn-save').style.background = "#ffb74d"; document.querySelector('.btn-save').style.color = "black";
-    }
-
-    function deleteItem(index) {
-        if(confirm("ลบใช่หรือไม่?")) { masterData.splice(index, 1); localStorage.setItem('masterDiagnosis', JSON.stringify(masterData)); renderTable(); }
-    }
-
-    function clearForm() {
-        document.getElementById('adminForm').reset(); document.getElementById('inp_id').value = "";
-        document.querySelector('.btn-save').innerText = "Save"; document.querySelector('.btn-save').style.background = ""; document.querySelector('.btn-save').style.color = "";
-    }
-
-    // --- ส่วน Export JSON ---
-    function exportData() {
-        const modal = document.getElementById('exportModal');
-        const output = document.getElementById('jsonOutput');
+        let masterData = JSON.parse(localStorage.getItem('masterDiagnosis')) || [];
         
-        // แปลงข้อมูลเป็น Text เพื่อให้คน Copy ไปวางในโค้ดได้
-        const jsonString = JSON.stringify(masterData, null, 4); // จัด Format สวยๆ
-        output.textContent = jsonString; // แสดงในกล่อง
-        
-        modal.style.display = "block";
-    }
+        function renderList() {
+            const list = document.getElementById('diagnosisList'); list.innerHTML = '';
+            masterData.forEach((item, index) => {
+                const div = document.createElement('div'); div.className = 'list-item';
+                // แสดง Category Badge
+                const catBadge = item.category ? `<span class="cat-badge">${item.category}</span>` : `<span class="cat-badge" style="background:#eee; color:#999;">Uncategorized</span>`;
+                div.innerHTML = `${catBadge}<h4>${item.nanda}</h4><p>${item.keywords.join(', ')}</p>`;
+                div.onclick = () => loadEditor(index); div.id = `item-${index}`;
+                list.appendChild(div);
+            });
+        }
 
-    function closeModal() { document.getElementById('exportModal').style.display = "none"; }
-    
-    function copyToClipboard() {
-        const text = document.getElementById('jsonOutput').textContent;
-        navigator.clipboard.writeText(text).then(() => { alert("Copy แล้ว! นำไปวางในไฟล์ index.html ได้เลย"); });
-    }
+        function loadEditor(index) {
+            document.querySelectorAll('.list-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`item-${index}`).classList.add('active');
+            const item = masterData[index];
+            document.getElementById('editId').value = index;
+            document.getElementById('editCategory').value = item.category || "ทั่วไป/สุขสบาย (General)";
+            document.getElementById('editNanda').value = item.nanda;
+            document.getElementById('editKeywords').value = item.keywords.join(', ');
+            document.getElementById('editD').value = item.template.d;
+            document.getElementById('editA').value = item.template.a;
+            document.getElementById('editR').value = item.template.r;
+        }
 
-    renderTable();
-</script>
+        function addNewItem() {
+            document.getElementById('editId').value = 'NEW';
+            document.getElementById('editCategory').value = 'ทั่วไป/สุขสบาย (General)';
+            document.getElementById('editNanda').value = '';
+            document.getElementById('editKeywords').value = '';
+            document.getElementById('editD').value = ''; document.getElementById('editA').value = ''; document.getElementById('editR').value = '';
+            document.getElementById('editNanda').focus();
+            document.querySelectorAll('.list-item').forEach(el => el.classList.remove('active'));
+        }
+
+        function saveItem() {
+            const id = document.getElementById('editId').value;
+            const newItem = {
+                id: id === 'NEW' ? Date.now().toString() : masterData[parseInt(id)].id,
+                category: document.getElementById('editCategory').value, // Save Category
+                nanda: document.getElementById('editNanda').value,
+                keywords: document.getElementById('editKeywords').value.split(',').map(k => k.trim()),
+                template: { d: document.getElementById('editD').value, a: document.getElementById('editA').value, r: document.getElementById('editR').value },
+                guide: ""
+            };
+            if(!newItem.nanda) return alert("ระบุชื่อ Focus");
+            if (id === 'NEW') masterData.push(newItem); else masterData[parseInt(id)] = newItem;
+            localStorage.setItem('masterDiagnosis', JSON.stringify(masterData)); renderList(); alert("บันทึกเรียบร้อย!");
+        }
+
+        function deleteItem() {
+            const id = document.getElementById('editId').value;
+            if(id === 'NEW') return;
+            if(confirm("ลบ?")) { masterData.splice(parseInt(id), 1); localStorage.setItem('masterDiagnosis', JSON.stringify(masterData)); renderList(); addNewItem(); }
+        }
+
+        function importJSON() {
+            try {
+                const json = JSON.parse(document.getElementById('jsonImport').value);
+                if(Array.isArray(json)) {
+                    if(confirm("เพิ่มต่อท้าย?")) { masterData = masterData.concat(json); localStorage.setItem('masterDiagnosis', JSON.stringify(masterData)); renderList(); alert("Success"); }
+                }
+            } catch(e) { alert("Error: " + e.message); }
+        }
+
+        // ฟังก์ชันช่วยจัดหมวดหมู่ข้อมูลเก่าให้อัตโนมัติ
+        function autoCategorize() {
+            if(!confirm("ระบบจะพยายามจัดหมวดหมู่โรคเดิมของคุณให้อัตโนมัติ ยืนยัน?")) return;
+            let count = 0;
+            masterData.forEach(item => {
+                const txt = (item.nanda + " " + item.keywords.join(" ")).toLowerCase();
+                if(!item.category) {
+                    if(txt.includes('pain') || txt.includes('ปวด') || txt.includes('ไข้') || txt.includes('fever')) item.category = "ทั่วไป/สุขสบาย (General)";
+                    else if(txt.includes('breath') || txt.includes('airway') || txt.includes('gas') || txt.includes('หายใจ') || txt.includes('เหนื่อย')) item.category = "ระบบหายใจ (Respiratory)";
+                    else if(txt.includes('fluid') || txt.includes('bleed') || txt.includes('cardiac') || txt.includes('shock') || txt.includes('น้ำ')) item.category = "ระบบหัวใจ/หลอดเลือด (Cardiovascular)";
+                    else if(txt.includes('nutri') || txt.includes('bowel') || txt.includes('diarrhea') || txt.includes('ท้อง') || txt.includes('nausea')) item.category = "ระบบทางเดินอาหาร (GI)";
+                    else if(txt.includes('surg') || txt.includes('wound') || txt.includes('infect') || txt.includes('skin') || txt.includes('แผล')) item.category = "ศัลยกรรม/แผล (Surgical)";
+                    else if(txt.includes('anxiet') || txt.includes('confus') || txt.includes('knowl') || txt.includes('sleep') || txt.includes('กังวล')) item.category = "ระบบประสาท/จิตใจ (Neuro/Psych)";
+                    else if(txt.includes('fall') || txt.includes('injur') || txt.includes('safe') || txt.includes('ล้ม')) item.category = "ความปลอดภัย (Safety)";
+                    else item.category = "ทั่วไป/สุขสบาย (General)";
+                    count++;
+                }
+            });
+            localStorage.setItem('masterDiagnosis', JSON.stringify(masterData));
+            renderList();
+            alert(`จัดหมวดหมู่สำเร็จ ${count} รายการ!`);
+        }
+
+        renderList();
+    </script>
 </body>
 </html>

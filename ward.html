@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Ward - Nursing Station</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root { --primary: #00897b; --bg-body: #f0f2f5; }
+        body { font-family: 'Sarabun', sans-serif; background: var(--bg-body); margin: 0; }
+        
+        .navbar { background: linear-gradient(135deg, #00897b, #00695c); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
+        
+        .ward-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .ward-stats { display: flex; gap: 15px; }
+        .stat-box { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
+        
+        /* Grid Layout */
+        .patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+        
+        /* Patient Card */
+        .patient-card { 
+            background: white; border-radius: 12px; overflow: hidden; 
+            box-shadow: 0 3px 6px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; 
+            cursor: pointer; border: 1px solid #eee; position: relative;
+        }
+        .patient-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary); }
+        
+        .card-header { padding: 15px; background: #f9f9f9; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .bed-badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
+        .type-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        
+        .card-body { padding: 15px; }
+        .p-name { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 5px; }
+        .p-info { font-size: 0.85rem; color: #666; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
+        .p-dx { color: #00695c; font-weight: 500; margin-top: 10px; background: #e0f2f1; padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; display: inline-block; }
+
+        /* Type Colors */
+        .t-1 { background: #4caf50; } .t-2 { background: #8bc34a; } .t-3 { background: #ff9800; } .t-4 { background: #f44336; } .t-5 { background: #9c27b0; }
+        
+        .btn-logout { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-hospital-user"></i> IPD Ward: อายุรกรรมชาย 1</div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <span id="userDisplay" style="font-size:0.9rem;"></span>
+            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="ward-header">
+            <h2 style="margin:0; color:#37474f;">รายชื่อผู้ป่วย (Patient List)</h2>
+            <div class="ward-stats">
+                <div class="stat-box"><i class="fas fa-bed"></i> Total: 10</div>
+                <div class="stat-box" style="color:#f44336;"><i class="fas fa-procedures"></i> Heavy (Type 4): 2</div>
+            </div>
+        </div>
+
+        <div class="patient-grid" id="gridContainer">
+            </div>
+    </div>
+
+    <script>
+        // Security Check
+        if (!sessionStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
+        document.getElementById('userDisplay').innerHTML = `<i class="fas fa-user-nurse"></i> ${sessionStorage.getItem('currentUser')}`;
+
+        function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
+
+        // Mock Data: 10 Patients
+        const patients = [
+            { bed: "01", name: "นายสมชาย ใจดี", age: 56, hn: "6600001", an: "6600101", dx: "Pneumonia", type: 3, ward: "อายุรกรรมชาย 1" },
+            { bed: "02", name: "นายวีระ รักชาติ", age: 45, hn: "6600002", an: "6600102", dx: "DHF (Dengue Hemorrhagic Fever)", type: 2, ward: "อายุรกรรมชาย 1" },
+            { bed: "03", name: "นายปิติ มีทรัพย์", age: 72, hn: "6600003", an: "6600103", dx: "COPD with Acute Exacerbation", type: 4, ward: "อายุรกรรมชาย 1" },
+            { bed: "04", name: "นายมานะ อดทน", age: 38, hn: "6600004", an: "6600104", dx: "Appendicitis Post-op", type: 1, ward: "อายุรกรรมชาย 1" },
+            { bed: "05", name: "นายชูใจ ใฝ่ดี", age: 60, hn: "6600005", an: "6600105", dx: "CA Lung", type: 5, ward: "อายุรกรรมชาย 1" },
+            { bed: "06", name: "นายสมศักดิ์ รักเรียน", age: 50, hn: "6600006", an: "6600106", dx: "UTI (Urinary Tract Infection)", type: 2, ward: "อายุรกรรมชาย 1" },
+            { bed: "07", name: "นายกิตติ เก่งกาจ", age: 80, hn: "6600007", an: "6600107", dx: "CVA (Stroke) Ischemic", type: 4, ward: "อายุรกรรมชาย 1" },
+            { bed: "08", name: "นายอำนวย ช่วยเหลือ", age: 42, hn: "6600008", an: "6600108", dx: "Acute Gastritis", type: 1, ward: "อายุรกรรมชาย 1" },
+            { bed: "09", name: "นายบุญมี ศรีสุข", age: 65, hn: "6600009", an: "6600109", dx: "DM Foot Ulcer", type: 3, ward: "อายุรกรรมชาย 1" },
+            { bed: "10", name: "นายเจริญ รุ่งเรือง", age: 55, hn: "6600010", an: "6600110", dx: "Hypertension Crisis", type: 2, ward: "อายุรกรรมชาย 1" }
+        ];
+
+        const grid = document.getElementById('gridContainer');
+
+        patients.forEach(p => {
+            // สร้าง Card HTML
+            grid.innerHTML += `
+                <div class="patient-card" onclick="selectPatient('${p.hn}')">
+                    <div class="card-header">
+                        <span class="bed-badge">เตียง ${p.bed}</span>
+                        <div style="display:flex; align-items:center; gap:5px;">
+                            <span class="type-dot t-${p.type}"></span> <small style="color:#888;">Type ${p.type}</small>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="p-name">${p.name} (${p.age} ปี)</div>
+                        <div class="p-info"><i class="fas fa-id-card"></i> HN: ${p.hn} | AN: ${p.an}</div>
+                        <div class="p-dx">${p.dx}</div>
+                    </div>
+                </div>
+            `;
+        });
+
+        // เมื่อเลือกคนไข้ -> บันทึกข้อมูลลง LocalStorage แล้วไปหน้า index
+        function selectPatient(hn) {
+            const selected = patients.find(p => p.hn === hn);
+            // เตรียมข้อมูลโปรไฟล์
+            const profile = {
+                name: `${selected.name} (${selected.age} ปี)`,
+                hn: selected.hn,
+                an: selected.an,
+                ward: selected.ward,
+                admit: "16/01/2569 08:00", // Mock date
+                dx: selected.dx,
+                dc: "",
+                type: selected.type
+            };
+            
+            // บันทึกโปรไฟล์คนไข้คนนี้ลง Storage เพื่อให้ index.html ดึงไปแสดง
+            localStorage.setItem('patientProfile', JSON.stringify(profile));
+            
+            // *** สำคัญ: บันทึกว่าเรากำลังทำงานกับ HN ไหน เพื่อแยก Note ***
+            localStorage.setItem('currentHN', selected.hn);
+
+            // ไปหน้าบันทึก
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

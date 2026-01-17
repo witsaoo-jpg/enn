@@ -7,49 +7,19 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            --primary: #00897b; --primary-dark: #00695c; --danger: #e53935; --success: #43a047;
-            --text-dark: #263238; --bg-body: #f0f2f5; --bg-card: #ffffff;
-            --edit-color: #fbc02d;
-        }
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg-body); color: var(--text-dark); margin: 0; }
-        * { box-sizing: border-box; }
-
-        .navbar { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        
-        .patient-banner { background: white; padding: 15px 2rem; position: sticky; top: 0; z-index: 10; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between; align-items: flex-start; }
-        .patient-info h2 { margin: 0; font-size: 1.2rem; color: var(--primary-dark); }
-        .patient-meta { margin-top: 5px; color: #555; font-size: 0.9rem; display: grid; grid-template-columns: auto auto auto auto; gap: 5px 20px; }
-        .patient-meta i { color: var(--primary); width: 16px; }
-
-        .container { max-width: 1400px; margin: 20px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    <link rel="stylesheet" href="style.css"> <style>
+        /* CSS เฉพาะหน้า Summary */
         .section-header { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-
-        /* Type Badge Styles */
-        .type-badge { padding: 2px 8px; border-radius: 4px; color: white; font-weight: bold; font-size: 0.85rem; }
-        .type-1 { background-color: #4caf50; } 
-        .type-2 { background-color: #8bc34a; } 
-        .type-3 { background-color: #ff9800; } 
-        .type-4 { background-color: #f44336; } 
-        .type-5 { background-color: #9c27b0; }
-
-        /* Card Styles */
         .problem-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
         .problem-card.active { border-left-color: var(--danger); }
         .problem-card.resolved { border-left-color: var(--success); opacity: 0.8; }
 
-        .btn { border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-family: 'Sarabun'; font-weight: 600; transition: 0.2s; }
-        .btn-print { background: #fff; border: 1px solid #ccc; }
         .btn-action { background: #e0f2f1; color: #00695c; font-size: 0.8rem; }
         .btn-save { background: var(--primary); color: white; width: 100%; margin-top: 15px; padding: 12px; font-size: 1rem; }
         .btn-save:hover { background: var(--primary-dark); }
         
         .discharge-box { grid-column: span 2; background: white; padding: 20px; border-radius: 12px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .dmethod-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 10px; }
-        textarea { width: 100%; border: 1px solid #ddd; padding: 10px; font-family: 'Sarabun'; height: 60px; border-radius: 6px; background:#fafafa; transition:0.2s; }
-        textarea:focus { outline: none; border-color: var(--primary); background: #fff; box-shadow: 0 0 0 2px var(--primary-light); }
         
         /* History Styles */
         .history-section { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
@@ -60,7 +30,6 @@
         .history-tag { font-weight: 600; color: var(--primary); width: 110px; }
         
         .btn-icon-sm { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid #cfd8dc; background: white; cursor: pointer; color: #546e7a; margin-left: 5px; }
-        .btn-edit-sm:hover { background: #fff8e1; color: #f57f17; } .btn-delete-sm:hover { background: #ffebee; color: #c62828; }
 
         #printable-area { display: none; }
         @media print {
@@ -79,9 +48,14 @@
 <body>
     <nav class="navbar no-print">
         <div style="font-weight:bold; font-size:1.2rem;"><i class="fas fa-file-medical-alt"></i> Nursing Care Summary</div>
-        <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="window.location.href='index.html'">
-            <i class="fas fa-arrow-left"></i> กลับหน้าบันทึก
-        </button>
+        <div style="display:flex; align-items:center;">
+             <button class="btn" style="background:rgba(255,255,255,0.2); color:white; margin-right:10px;" onclick="window.location.href='index.html'">
+                <i class="fas fa-pen"></i> กลับหน้าบันทึก
+            </button>
+            <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="window.location.href='ward.html'">
+                <i class="fas fa-bed"></i> กลับหน้า Ward
+            </button>
+        </div>
     </nav>
     <div class="patient-banner no-print">
         <div class="patient-info">
@@ -99,7 +73,7 @@
                 <div><i class="fas fa-sign-out-alt"></i> D/C: <span id="display_dc" style="color:#e53935; font-weight:bold;">-</span></div>
             </div>
         </div>
-        <button class="btn btn-print" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
+        <button class="btn btn-print" style="background:#fff; border:1px solid #ccc;" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
     </div>
 
     <div class="container no-print">
@@ -176,57 +150,50 @@
     </div>
 
     <script>
-        // 1. SECURITY CHECK (ตรวจสอบการล็อกอินก่อน)
-        if (!sessionStorage.getItem('isLoggedIn')) {
-            window.location.href = 'login.html';
-        }
-        
-        // ดึงชื่อผู้ใช้
+        // 1. SECURITY & CONFIG
+        if (!sessionStorage.getItem('isLoggedIn')) { window.location.href = 'login.html'; }
         const currentUser = sessionStorage.getItem('currentUser') || "Unknown User";
 
+        // ★★★ KEY CHANGE: ระบุตัวตนคนไข้ ★★★
+        const currentHN = localStorage.getItem('currentHN') || 'default';
+        const notesKey = `notes_${currentHN}`;
+        const dischargeKey = `discharge_${currentHN}`;
+        const problemStatusKey = `problems_${currentHN}`;
+
         // 2. Profile Loader
-        let patientProfile = JSON.parse(localStorage.getItem('patientProfile')) || {
-            name: "นายทดสอบ ระบบดี (56 ปี)", hn: "5012345", an: "66000123", ward: "อายุรกรรมชาย 1",
-            admit: "15/01/2569", dx: "Pneumonia", dc: "", type: "2"
-        };
+        let patientProfile = JSON.parse(localStorage.getItem('patientProfile')) || {};
 
         function renderProfile() {
-            // Display Fields
-            document.getElementById('display_name').innerText = patientProfile.name;
-            document.getElementById('display_hn').innerText = patientProfile.hn;
-            document.getElementById('display_an').innerText = patientProfile.an;
-            document.getElementById('display_ward').innerText = patientProfile.ward;
-            document.getElementById('display_admit').innerText = patientProfile.admit;
-            document.getElementById('display_dx').innerText = patientProfile.dx;
+            document.getElementById('display_name').innerText = patientProfile.name || '-';
+            document.getElementById('display_hn').innerText = patientProfile.hn || '-';
+            document.getElementById('display_an').innerText = patientProfile.an || '-';
+            document.getElementById('display_ward').innerText = patientProfile.ward || '-';
+            document.getElementById('display_admit').innerText = patientProfile.admit || '-';
+            document.getElementById('display_dx').innerText = patientProfile.dx || '-';
             
-            // Format D/C
             let dcText = "-";
-            if(patientProfile.dc) {
-                const dateObj = new Date(patientProfile.dc);
-                if(!isNaN(dateObj)) dcText = dateObj.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' });
-            }
+            if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
             document.getElementById('display_dc').innerText = dcText;
 
-            // Type Badge
             const typeEl = document.getElementById('display_type_badge');
             typeEl.className = `type-badge type-${patientProfile.type || '1'}`;
             typeEl.innerText = `Type ${patientProfile.type || '1'}`;
 
             // Print Area
-            document.querySelector('.p-name').innerText = patientProfile.name;
-            document.querySelector('.p-hn').innerText = patientProfile.hn;
-            document.querySelector('.p-an').innerText = patientProfile.an;
-            document.querySelector('.p-ward').innerText = patientProfile.ward;
+            document.querySelector('.p-name').innerText = patientProfile.name || '-';
+            document.querySelector('.p-hn').innerText = patientProfile.hn || '-';
+            document.querySelector('.p-an').innerText = patientProfile.an || '-';
+            document.querySelector('.p-ward').innerText = patientProfile.ward || '-';
             document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`;
-            document.querySelector('.p-admit').innerText = patientProfile.admit;
-            document.querySelector('.p-dx').innerText = patientProfile.dx;
+            document.querySelector('.p-admit').innerText = patientProfile.admit || '-';
+            document.querySelector('.p-dx').innerText = patientProfile.dx || '-';
             document.querySelector('.p-dc').innerText = dcText;
         }
 
-        // --- Logic Summary เดิม ---
-        const rawNotes = JSON.parse(localStorage.getItem('patientNotes')) || [];
-        let problemStatus = JSON.parse(localStorage.getItem('problemStatus')) || {};
-        let dischargeHistory = JSON.parse(localStorage.getItem('dischargeHistory')) || [];
+        // 3. Load Data Specific to HN
+        const rawNotes = JSON.parse(localStorage.getItem(notesKey)) || [];
+        let problemStatus = JSON.parse(localStorage.getItem(problemStatusKey)) || {};
+        let dischargeHistory = JSON.parse(localStorage.getItem(dischargeKey)) || [];
 
         function init() {
             renderProfile();
@@ -235,7 +202,7 @@
             if(dischargeHistory.length > 0) fillForm(dischargeHistory[0].data);
         }
 
-        // CRUD Discharge Plan
+        // 4. Discharge Plan Logic (Saved by HN)
         function saveDischargePlan() {
             const id = document.getElementById('planId').value;
             const ids = ['d','m','e','t','h','o','diet'];
@@ -256,7 +223,11 @@
             } else {
                 dischargeHistory.unshift(logData); alert('บันทึกประวัติใหม่เรียบร้อย');
             }
-            localStorage.setItem('dischargeHistory', JSON.stringify(dischargeHistory)); renderHistory(); updatePrintDM(); 
+            
+            // ★ Save to Specific Key ★
+            localStorage.setItem(dischargeKey, JSON.stringify(dischargeHistory)); 
+            
+            renderHistory(); updatePrintDM(); 
         }
 
         function renderHistory() {
@@ -277,23 +248,65 @@
         }
         
         function editPlan(id) { const log = dischargeHistory.find(l => l.id === id); if(!log) return; fillForm(log.data); document.getElementById('planId').value = log.id; const saveBtn = document.getElementById('saveBtn'); saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> บันทึกการแก้ไข (Update)'; saveBtn.style.background = 'var(--edit-color)'; saveBtn.style.color = 'black'; document.getElementById('cancelBtn').style.display = 'inline-block'; document.getElementById('editModeBadge').style.display = 'block'; document.querySelector('.discharge-box').scrollIntoView({ behavior: 'smooth' }); }
-        function deletePlan(id) { if(confirm("ต้องการลบประวัติรายการนี้หรือไม่?")) { dischargeHistory = dischargeHistory.filter(l => l.id !== id); localStorage.setItem('dischargeHistory', JSON.stringify(dischargeHistory)); renderHistory(); if(document.getElementById('planId').value == id) clearPlanForm(); } }
+        
+        function deletePlan(id) { 
+            if(confirm("ต้องการลบประวัติรายการนี้หรือไม่?")) { 
+                dischargeHistory = dischargeHistory.filter(l => l.id !== id); 
+                localStorage.setItem(dischargeKey, JSON.stringify(dischargeHistory)); // Save
+                renderHistory(); if(document.getElementById('planId').value == id) clearPlanForm(); 
+            } 
+        }
+        
         function clearPlanForm() { document.getElementById('planId').value = ''; const saveBtn = document.getElementById('saveBtn'); saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกแผนการจำหน่าย (Save)'; saveBtn.style.background = ''; saveBtn.style.color = ''; document.getElementById('cancelBtn').style.display = 'none'; document.getElementById('editModeBadge').style.display = 'none'; }
         function fillForm(data) { const ids = ['d','m','e','t','h','o','diet']; ids.forEach(id => { document.getElementById('inp_' + id).value = data[id] || ''; }); updatePrintDM(); }
 
-        // Problems Logic
+        // 5. Problems Logic (Using Specific HN Data)
         function renderProblems() {
             let problems = [];
-            if (rawNotes.length > 0) { const groups = rawNotes.reduce((acc, note) => { if (!acc[note.focus]) acc[note.focus] = []; acc[note.focus].push(note); return acc; }, {}); problems = Object.keys(groups).map((focus, index) => { const notes = groups[focus]; notes.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)); return { id: index, focus: focus, startDate: notes[0].displayTime.split(' ')[0], lastUpdate: notes[notes.length - 1].displayTime, lastEval: notes[notes.length - 1].r, status: problemStatus[focus] || 'Active' }; }); }
-            const activeList = document.getElementById('activeList'); const resolvedList = document.getElementById('resolvedList'); const printBody = document.getElementById('printTableBody');
-            if (problems.length === 0) { document.querySelector('.container').innerHTML = '<div style="text-align:center; padding:50px; color:#999;">ไม่พบข้อมูลบันทึก</div>'; return; } 
+            if (rawNotes.length > 0) { 
+                const groups = rawNotes.reduce((acc, note) => { 
+                    if (!acc[note.focus]) acc[note.focus] = []; 
+                    acc[note.focus].push(note); return acc; 
+                }, {}); 
+                
+                problems = Object.keys(groups).map((focus, index) => { 
+                    const notes = groups[focus]; 
+                    notes.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)); 
+                    return { 
+                        id: index, 
+                        focus: focus, 
+                        startDate: notes[0].displayTime.split(' ')[0], 
+                        lastUpdate: notes[notes.length - 1].displayTime, 
+                        lastEval: notes[notes.length - 1].r, 
+                        status: problemStatus[focus] || 'Active' 
+                    }; 
+                }); 
+            }
+            
+            const activeList = document.getElementById('activeList'); 
+            const resolvedList = document.getElementById('resolvedList'); 
+            const printBody = document.getElementById('printTableBody');
+            
+            activeList.innerHTML = ''; resolvedList.innerHTML = ''; printBody.innerHTML = '';
+
+            if (problems.length === 0) { 
+                activeList.innerHTML = '<div style="color:#999; font-style:italic;">ยังไม่มีบันทึกสำหรับผู้ป่วยรายนี้</div>';
+                return; 
+            } 
+            
             problems.forEach(p => {
                 const cardHTML = `<div class="problem-card ${p.status.toLowerCase()}"><div style="display:flex; justify-content:space-between;"><b>${p.focus}</b><span style="font-size:0.8rem; background:${p.status==='Active'?'#ffebee':'#e8f5e9'}; padding:2px 8px; border-radius:10px; color:${p.status==='Active'?'red':'green'};">${p.status}</span></div><div style="font-size:0.85rem; color:#666; margin:5px 0;">เริ่ม: ${p.startDate} | ล่าสุด: ${p.lastUpdate}</div><div style="background:#f9f9f9; padding:8px; border-radius:4px; font-size:0.9rem;">Eval: ${p.lastEval}</div><div style="text-align:right; margin-top:10px;"><button class="btn btn-action" onclick="toggleProblem('${p.focus}')">${p.status==='Active' ? 'จำหน่ายปัญหา' : 'ดึงกลับมา'}</button></div></div>`;
                 if(p.status === 'Active') activeList.innerHTML += cardHTML; else resolvedList.innerHTML += cardHTML;
                 printBody.innerHTML += `<tr><td>${p.startDate}</td><td>${p.focus}</td><td style="text-align:center;">${p.status}</td><td>${p.lastEval}</td></tr>`;
             });
         }
-        function toggleProblem(f) { problemStatus[f] = problemStatus[f] === 'Resolved' ? 'Active' : 'Resolved'; localStorage.setItem('problemStatus', JSON.stringify(problemStatus)); location.reload(); }
+
+        function toggleProblem(f) { 
+            problemStatus[f] = problemStatus[f] === 'Resolved' ? 'Active' : 'Resolved'; 
+            localStorage.setItem(problemStatusKey, JSON.stringify(problemStatus)); // Save by HN
+            location.reload(); 
+        }
+
         function updatePrintDM() { const ids = ['d','m','e','t','h','o','diet']; let html = ''; ids.forEach(id => { const val = document.getElementById('inp_' + id).value; const label = document.getElementById('inp_' + id).previousElementSibling.innerText; if(val) html += `<div><b>${label}:</b> ${val}</div>`; }); document.getElementById('printDmethod').innerHTML = html || '- ไม่ได้ระบุ -'; }
         document.querySelectorAll('textarea').forEach(el => el.addEventListener('input', updatePrintDM));
         
