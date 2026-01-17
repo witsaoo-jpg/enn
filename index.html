@@ -18,6 +18,9 @@
         .cat-btn:hover { background: #e0f2f1; color: var(--primary); border-color: var(--primary); }
         .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
+    <link rel="stylesheet" href="style.css">
+    
+    <script src="data.js"></script>
 </head>
 <body>
 
@@ -177,10 +180,21 @@
         function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
         function saveProfile() { patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value; patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value; patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value; patientProfile.dc = document.getElementById('prof_dc').value; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); }
 
-        // 3. Search & Category System
-        let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis')) || [];
-        const searchInput = document.getElementById('focusSearch'); const suggestionsBox = document.getElementById('suggestions');
+        // 3. Search & Category System (แก้ไขใหม่ให้ดึงจาก data.js)
         
+        // ลองดึงจากความจำเครื่องก่อน
+        let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis'));
+
+        // ถ้าในเครื่องไม่มีข้อมูล หรือ ข้อมูลน้อยผิดปกติ (เช่น มีแค่ 2 อัน)
+        // ให้โหลดข้อมูลชุดใหญ่จากไฟล์ data.js (ตัวแปร initialMasterData)
+        if (!masterDiagnosis || masterDiagnosis.length < 5) { 
+            // ดึงค่าจากตัวแปร initialMasterData ในไฟล์ data.js
+            masterDiagnosis = initialMasterData; 
+            localStorage.setItem('masterDiagnosis', JSON.stringify(masterDiagnosis));
+        }
+
+        const searchInput = document.getElementById('focusSearch'); 
+        // ... (โค้ดด้านล่างเหมือนเดิม) ...
         // ★★★ Logic สร้างปุ่มหมวดหมู่ ★★★
         function renderCategoryButtons() {
             const container = document.getElementById('categoryContainer');
