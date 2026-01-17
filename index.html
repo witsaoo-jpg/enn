@@ -146,157 +146,199 @@
         </table>
     </div>
 
-    <script>
-        // 1. Config
-        if (!sessionStorage.getItem('isLoggedIn')) { window.location.href = 'login.html'; }
-        const currentUser = sessionStorage.getItem('currentUser') || "Unknown User";
-        document.getElementById('userDisplay').innerHTML = `<i class="fas fa-user-nurse"></i> ${currentUser}`;
+<script>
+    // 1. Security & Config
+    if (!sessionStorage.getItem('isLoggedIn')) { window.location.href = 'login.html'; }
+    const currentUser = sessionStorage.getItem('currentUser') || "Unknown User";
+    document.getElementById('userDisplay').innerHTML = `<i class="fas fa-user-nurse"></i> ${currentUser}`;
 
-        function goToAdmin() {
-            const pass = prompt("รหัสผ่าน Admin:");
-            if(pass === '1234') { sessionStorage.setItem('currentUser', 'พยบ.วิษณุรักษ์ (Admin Mode)'); window.location.href = 'admin.html'; }
-        }
+    function goToAdmin() {
+        const pass = prompt("รหัสผ่าน Admin:");
+        if(pass === '1234') { sessionStorage.setItem('currentUser', 'พยบ.วิษณุรักษ์ (Admin Mode)'); window.location.href = 'admin.html'; }
+    }
 
-        // 2. Profile
-        const profileString = localStorage.getItem('patientProfile');
-        if (!profileString) { alert("กรุณาเลือกผู้ป่วยจากหน้า Ward"); window.location.href = 'ward.html'; }
-        let patientProfile = JSON.parse(profileString);
+    // 2. Profile Management
+    const profileString = localStorage.getItem('patientProfile');
+    if (!profileString) { alert("กรุณาเลือกผู้ป่วยจากหน้า Ward"); window.location.href = 'ward.html'; }
+    let patientProfile = JSON.parse(profileString);
 
-        function renderProfile() {
-            document.getElementById('display_name').innerText = patientProfile.name; document.getElementById('display_hn').innerText = patientProfile.hn;
-            document.getElementById('display_an').innerText = patientProfile.an; document.getElementById('display_ward').innerText = patientProfile.ward;
-            document.getElementById('display_admit').innerText = patientProfile.admit; document.getElementById('display_dx').innerText = patientProfile.dx;
-            let dcText = "-"; if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
-            document.getElementById('display_dc').innerText = dcText;
-            const typeEl = document.getElementById('display_type_badge'); typeEl.className = `type-badge type-${patientProfile.type || '1'}`; typeEl.innerText = `Type ${patientProfile.type || '1'}`;
-            const noteTypeSelect = document.getElementById('noteType'); if(noteTypeSelect && !document.getElementById('noteId').value) noteTypeSelect.value = patientProfile.type || "1";
-            document.querySelector('.p-name').innerText = patientProfile.name; document.querySelector('.p-hn').innerText = patientProfile.hn;
-            document.querySelector('.p-an').innerText = patientProfile.an; document.querySelector('.p-ward').innerText = patientProfile.ward;
-            document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`; document.querySelector('.p-admit').innerText = patientProfile.admit; 
-            document.querySelector('.p-dx').innerText = patientProfile.dx; document.querySelector('.p-dc').innerText = dcText;
-        }
-
-        function openProfileModal() { document.getElementById('prof_name').value = patientProfile.name; document.getElementById('prof_hn').value = patientProfile.hn; document.getElementById('prof_an').value = patientProfile.an; document.getElementById('prof_ward').value = patientProfile.ward; document.getElementById('prof_admit').value = patientProfile.admit; document.getElementById('prof_dx').value = patientProfile.dx; document.getElementById('prof_dc').value = patientProfile.dc; document.getElementById('profileModal').style.display = 'flex'; }
-        function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
-        function saveProfile() { patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value; patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value; patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value; patientProfile.dc = document.getElementById('prof_dc').value; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); }
-
-        // 3. Search & Category System (แก้ไขใหม่ให้ดึงจาก data.js)
+    function renderProfile() {
+        document.getElementById('display_name').innerText = patientProfile.name; document.getElementById('display_hn').innerText = patientProfile.hn;
+        document.getElementById('display_an').innerText = patientProfile.an; document.getElementById('display_ward').innerText = patientProfile.ward;
+        document.getElementById('display_admit').innerText = patientProfile.admit; document.getElementById('display_dx').innerText = patientProfile.dx;
+        let dcText = "-"; if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
+        document.getElementById('display_dc').innerText = dcText;
+        const typeEl = document.getElementById('display_type_badge'); typeEl.className = `type-badge type-${patientProfile.type || '1'}`; typeEl.innerText = `Type ${patientProfile.type || '1'}`;
+        const noteTypeSelect = document.getElementById('noteType'); if(noteTypeSelect && !document.getElementById('noteId').value) noteTypeSelect.value = patientProfile.type || "1";
         
-        // ลองดึงจากความจำเครื่องก่อน
-        let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis'));
+        // Update Print Area
+        document.querySelector('.p-name').innerText = patientProfile.name; document.querySelector('.p-hn').innerText = patientProfile.hn;
+        document.querySelector('.p-an').innerText = patientProfile.an; document.querySelector('.p-ward').innerText = patientProfile.ward;
+        document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`; document.querySelector('.p-admit').innerText = patientProfile.admit; 
+        document.querySelector('.p-dx').innerText = patientProfile.dx; document.querySelector('.p-dc').innerText = dcText;
+    }
 
-        // ถ้าในเครื่องไม่มีข้อมูล หรือ ข้อมูลน้อยผิดปกติ (เช่น มีแค่ 2 อัน)
-        // ให้โหลดข้อมูลชุดใหญ่จากไฟล์ data.js (ตัวแปร initialMasterData)
-        if (!masterDiagnosis || masterDiagnosis.length < 5) { 
-            // ดึงค่าจากตัวแปร initialMasterData ในไฟล์ data.js
+    function openProfileModal() { document.getElementById('prof_name').value = patientProfile.name; document.getElementById('prof_hn').value = patientProfile.hn; document.getElementById('prof_an').value = patientProfile.an; document.getElementById('prof_ward').value = patientProfile.ward; document.getElementById('prof_admit').value = patientProfile.admit; document.getElementById('prof_dx').value = patientProfile.dx; document.getElementById('prof_dc').value = patientProfile.dc; document.getElementById('profileModal').style.display = 'flex'; }
+    function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
+    function saveProfile() { patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value; patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value; patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value; patientProfile.dc = document.getElementById('prof_dc').value; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); }
+
+    // 3. Search & Category System (แก้ไขปรับปรุง)
+    let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis'));
+
+    // ★★★ ตรวจสอบและโหลดข้อมูลจาก data.js ถ้าในเครื่องไม่มี ★★★
+    if (!masterDiagnosis || masterDiagnosis.length < 5) { 
+        if(typeof initialMasterData !== 'undefined') {
             masterDiagnosis = initialMasterData; 
             localStorage.setItem('masterDiagnosis', JSON.stringify(masterDiagnosis));
+            console.log("Loaded data from data.js");
+        } else {
+            console.error("ไม่พบไฟล์ data.js หรือตัวแปร initialMasterData");
+            // ใช้ข้อมูลสำรองกัน Error
+            masterDiagnosis = [];
+        }
+    }
+
+    const searchInput = document.getElementById('focusSearch'); 
+    const suggestionsBox = document.getElementById('suggestions');
+    let currentCategory = 'ALL'; // ตัวแปรจำหมวดหมู่ปัจจุบัน
+
+    function renderCategoryButtons() {
+        const container = document.getElementById('categoryContainer');
+        const categories = [...new Set(masterDiagnosis.map(item => item.category || "Uncategorized"))].sort();
+        
+        let html = `<button class="cat-btn active" onclick="setCategory('ALL', this)">ทั้งหมด</button>`;
+        categories.forEach(cat => {
+            html += `<button class="cat-btn" onclick="setCategory('${cat}', this)">${cat}</button>`;
+        });
+        
+        // ปุ่ม Reset Data (เผื่อข้อมูลค้าง)
+        html += `<button class="cat-btn" style="background:#ffebee; color:red; border:1px solid red;" onclick="resetData()">↻ รีเซ็ตข้อมูล</button>`;
+        
+        container.innerHTML = html;
+    }
+
+    // ฟังก์ชันเลือกหมวดหมู่ (แก้ไขให้ทำงานร่วมกับช่องค้นหา)
+    window.setCategory = function(category, btnElement) {
+        currentCategory = category;
+        
+        // Highlight ปุ่ม
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+
+        // เรียกฟังก์ชันค้นหาใหม่ทันที เพื่อกรองตามหมวดที่เลือก
+        performSearch();
+    };
+
+    // ฟังก์ชันค้นหาหลัก (รวมทั้ง Text และ Category)
+    function performSearch() {
+        const val = searchInput.value.toLowerCase().trim();
+        
+        // 1. กรองตามหมวดหมู่ก่อน
+        let filtered = masterDiagnosis;
+        if (currentCategory !== 'ALL') {
+            filtered = masterDiagnosis.filter(item => (item.category || "Uncategorized") === currentCategory);
         }
 
-        const searchInput = document.getElementById('focusSearch'); 
-        // ... (โค้ดด้านล่างเหมือนเดิม) ...
-        // ★★★ Logic สร้างปุ่มหมวดหมู่ ★★★
-        function renderCategoryButtons() {
-            const container = document.getElementById('categoryContainer');
-            // หา category ที่ไม่ซ้ำกัน
-            const categories = [...new Set(masterDiagnosis.map(item => item.category || "Uncategorized"))].sort();
-            
-            let html = `<button class="cat-btn active" onclick="filterCategory('ALL', this)">ทั้งหมด</button>`;
-            categories.forEach(cat => {
-                html += `<button class="cat-btn" onclick="filterCategory('${cat}', this)">${cat}</button>`;
-            });
-            container.innerHTML = html;
+        // 2. กรองตามคำค้นหา (ถ้ามี)
+        if (val.length > 0) {
+            filtered = filtered.filter(item => 
+                (item.nanda || "").toLowerCase().includes(val) || 
+                (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val)))
+            );
         }
 
-        // ฟังก์ชันกรองเมื่อกดปุ่มหมวดหมู่
-        window.filterCategory = function(category, btnElement) {
-            // Highlight Button
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            btnElement.classList.add('active');
-
-            if(category === 'ALL') {
-                suggestionsBox.style.display = 'none'; // ซ่อนก่อน
-                return;
-            }
-
-            // Filter Data
-            const filtered = masterDiagnosis.filter(item => (item.category || "Uncategorized") === category);
+        // 3. แสดงผล (ถ้าไม่มีคำค้น แต่เลือกหมวดหมู่ ก็ให้แสดงรายการในหมวดนั้นเลย)
+        if (val.length > 0 || currentCategory !== 'ALL') {
             showSuggestions(filtered);
-        };
-
-        function showSuggestions(data) {
-            suggestionsBox.innerHTML = '';
-            if (data.length > 0) {
-                suggestionsBox.style.display = 'block';
-                data.forEach(item => {
-                    const div = document.createElement('div'); div.className = 'suggestion-item'; 
-                    div.innerHTML = `<strong>${item.nanda}</strong> <span style="font-size:0.7rem; color:#999; float:right;">${item.category||''}</span>`;
-                    div.onclick = () => selectFocus(item);
-                    suggestionsBox.appendChild(div);
-                });
-            } else {
-                suggestionsBox.style.display = 'block'; suggestionsBox.innerHTML = '<div class="no-result">ไม่พบข้อมูลในหมวดหมู่นี้</div>';
-            }
+        } else {
+            suggestionsBox.style.display = 'none';
         }
+    }
 
-        function selectFocus(item) {
-            document.getElementById('focusInput').value = item.nanda;
-            document.getElementById('dataInput').value = item.template?.d || ""; 
-            document.getElementById('actionInput').value = item.template?.a || ""; 
-            document.getElementById('responseInput').value = item.template?.r || "";
-            suggestionsBox.style.display = 'none'; searchInput.value = '';
-        }
-
-        // Search Input Logic
-        searchInput.addEventListener('input', (e) => {
-            const val = e.target.value.toLowerCase().trim();
-            
-            // ถ้าเริ่มพิมพ์ ให้ยกเลิกการเลือกหมวดหมู่ (กลับไปค้นหาทั้งหมด)
-            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
-            document.querySelector('.cat-btn').classList.add('active'); // ปุ่ม 'ทั้งหมด' active
-
-            if (val.length < 1) { suggestionsBox.style.display = 'none'; return; }
-            
-            const found = masterDiagnosis.filter(item => (item.nanda || "").toLowerCase().includes(val) || (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val))));
-            showSuggestions(found);
-        });
-
-        searchInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                e.preventDefault(); const val = e.target.value.trim();
-                if(val) {
-                    document.getElementById('focusInput').value = val; e.target.value = ''; suggestionsBox.style.display = 'none'; document.getElementById('dataInput').focus();
-                }
-            }
-        });
-        document.addEventListener('click', (e) => { if (!e.target.closest('.search-wrapper') && !e.target.closest('#categoryContainer')) suggestionsBox.style.display = 'none'; });
-
-        // 4. Note Logic
-        function formatToList(text) { if (!text) return "-"; let formatted = text.replace(/(\s+)(\d+\.)/g, '\n$2'); const lines = formatted.split('\n').filter(line => line.trim() !== ''); if (lines.length === 0) return "-"; const isOrdered = /^\s*\d+\./.test(lines[0]); let html = isOrdered ? '<ol style="margin:0; padding-left:20px;">' : '<ul style="margin:0; padding-left:20px;">'; lines.forEach(line => { html += `<li style="margin-bottom:2px;">${line.trim().replace(/^(\d+\.|[-•*])\s*/, '')}</li>`; }); return `<div class="dar-content">${html + (isOrdered ? '</ol>' : '</ul>')}</div>`; }
-        const currentHN = localStorage.getItem('currentHN') || 'default'; const storageKey = `notes_${currentHN}`; let patientNotes = JSON.parse(localStorage.getItem(storageKey)) || [];
-
-        function renderUI() {
-            const timeline = document.getElementById('timelineList'); const printBody = document.getElementById('printTableBody'); timeline.innerHTML = ''; printBody.innerHTML = '';
-            if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึกสำหรับผู้ป่วยคนนี้</div>'; return; }
-            patientNotes.forEach(n => {
-                const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r); const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
-                timeline.innerHTML += `<div class="timeline-item"><div class="note-card"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><div><span class="focus-badge">${n.focus}</span> ${typeBadge} <small style="color:#666;">${n.displayTime}</small></div><div><button class="btn" style="padding:2px 6px; font-size:10px; background:#e0f2f1; color:#00695c;" onclick="editNote(${n.id})"><i class="fas fa-pen"></i></button> <button class="btn" style="padding:2px 6px; font-size:10px; background:#ffebee; color:#c62828;" onclick="deleteNote(${n.id})"><i class="fas fa-trash"></i></button></div></div><div class="dar-grid"><div class="dar-label">D:</div><div>${d_html}</div><div class="dar-label">A:</div><div>${a_html}</div><div class="dar-label">R:</div><div>${r_html}</div></div></div></div>`;
-                printBody.innerHTML += `<tr><td>${n.displayTime}</td><td><strong>${n.focus}</strong> <br><small>(${n.patientType ? 'Type '+n.patientType : '-'})</small></td><td><div style="margin-bottom:5px;"><b>D:</b> ${d_html}</div><div style="margin-bottom:5px;"><b>A:</b> ${a_html}</div><div><b>R:</b> ${r_html}</div></td><td>${n.nurse}</td></tr>`;
+    function showSuggestions(data) {
+        suggestionsBox.innerHTML = '';
+        if (data.length > 0) {
+            suggestionsBox.style.display = 'block';
+            data.forEach(item => {
+                const div = document.createElement('div'); 
+                div.className = 'suggestion-item'; 
+                div.innerHTML = `<strong>${item.nanda}</strong> <span style="font-size:0.7rem; color:#999; float:right;">${item.category||''}</span>`;
+                div.onclick = () => selectFocus(item);
+                suggestionsBox.appendChild(div);
             });
+        } else {
+            suggestionsBox.style.display = 'block'; 
+            suggestionsBox.innerHTML = '<div class="no-result">ไม่พบข้อมูลในเงื่อนไขนี้</div>';
         }
-        function saveNote() {
-            const id = document.getElementById('noteId').value; const selectedType = document.getElementById('noteType').value;
-            const noteData = { id: id ? parseInt(id) : Date.now(), datetime: document.getElementById('noteDate').value, displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), focus: document.getElementById('focusInput').value, d: document.getElementById('dataInput').value, a: document.getElementById('actionInput').value, r: document.getElementById('responseInput').value, patientType: selectedType, nurse: currentUser };
-            if(!noteData.focus || !noteData.datetime) return alert("ระบุข้อมูลให้ครบ");
-            if(id) { patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; clearForm(); } else { patientNotes.unshift(noteData); patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); }
-            localStorage.setItem(storageKey, JSON.stringify(patientNotes)); patientProfile.type = selectedType; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); renderUI(); if(!id) setDefaultDateTime();
-        }
-        function editNote(id) { const n = patientNotes.find(n => n.id === id); if(!n) return; document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; if(n.patientType) document.getElementById('noteType').value = n.patientType; document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; }
-        function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem(storageKey, JSON.stringify(patientNotes)); renderUI(); } }
-        function clearForm() { document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; document.getElementById('noteType').value = patientProfile.type || "1"; setDefaultDateTime(); document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; }
-        function setDefaultDateTime() { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById('noteDate').value = now.toISOString().slice(0,16); }
+    }
 
-        renderProfile(); renderCategoryButtons(); setDefaultDateTime(); renderUI();
-    </script>
+    function selectFocus(item) {
+        document.getElementById('focusInput').value = item.nanda;
+        document.getElementById('dataInput').value = item.template?.d || ""; 
+        document.getElementById('actionInput').value = item.template?.a || ""; 
+        document.getElementById('responseInput').value = item.template?.r || "";
+        suggestionsBox.style.display = 'none'; 
+        searchInput.value = ''; // ล้างคำค้น
+        
+        // รีเซ็ตหมวดหมู่กลับเป็นทั้งหมด
+        currentCategory = 'ALL';
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        document.querySelector('.cat-btn').classList.add('active');
+    }
+    
+    // Event Listeners
+    searchInput.addEventListener('input', performSearch);
+    
+    // ปิดกล่องเมื่อคลิกข้างนอก (ยกเว้นคลิกที่กล่องค้นหา หรือ ปุ่มหมวดหมู่)
+    document.addEventListener('click', (e) => { 
+        if (!e.target.closest('.search-wrapper') && !e.target.closest('#categoryContainer')) {
+            suggestionsBox.style.display = 'none'; 
+        }
+    });
+
+    // ฟังก์ชันล้างข้อมูล (เผื่อข้อมูลเก่าค้าง)
+    window.resetData = function() {
+        if(confirm("ต้องการโหลดข้อมูลโรคใหม่ทั้งหมดจากไฟล์ data.js ใช่หรือไม่? (ข้อมูลคนไข้จะไม่หาย)")) {
+            if(typeof initialMasterData !== 'undefined') {
+                localStorage.setItem('masterDiagnosis', JSON.stringify(initialMasterData));
+                alert("รีเซ็ตข้อมูลเรียบร้อย!");
+                location.reload();
+            } else {
+                alert("ไม่พบข้อมูลใน data.js กรุณาตรวจสอบไฟล์");
+            }
+        }
+    }
+
+    // 4. Note Logic (เหมือนเดิม)
+    function formatToList(text) { if (!text) return "-"; let formatted = text.replace(/(\s+)(\d+\.)/g, '\n$2'); const lines = formatted.split('\n').filter(line => line.trim() !== ''); if (lines.length === 0) return "-"; const isOrdered = /^\s*\d+\./.test(lines[0]); let html = isOrdered ? '<ol style="margin:0; padding-left:20px;">' : '<ul style="margin:0; padding-left:20px;">'; lines.forEach(line => { html += `<li style="margin-bottom:2px;">${line.trim().replace(/^(\d+\.|[-•*])\s*/, '')}</li>`; }); return `<div class="dar-content">${html + (isOrdered ? '</ol>' : '</ul>')}</div>`; }
+    const currentHN = localStorage.getItem('currentHN') || 'default'; const storageKey = `notes_${currentHN}`; let patientNotes = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+    function renderUI() {
+        const timeline = document.getElementById('timelineList'); const printBody = document.getElementById('printTableBody'); timeline.innerHTML = ''; printBody.innerHTML = '';
+        if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึกสำหรับผู้ป่วยคนนี้</div>'; return; }
+        patientNotes.forEach(n => {
+            const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r); const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
+            timeline.innerHTML += `<div class="timeline-item"><div class="note-card"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><div><span class="focus-badge">${n.focus}</span> ${typeBadge} <small style="color:#666;">${n.displayTime}</small></div><div><button class="btn" style="padding:2px 6px; font-size:10px; background:#e0f2f1; color:#00695c;" onclick="editNote(${n.id})"><i class="fas fa-pen"></i></button> <button class="btn" style="padding:2px 6px; font-size:10px; background:#ffebee; color:#c62828;" onclick="deleteNote(${n.id})"><i class="fas fa-trash"></i></button></div></div><div class="dar-grid"><div class="dar-label">D:</div><div>${d_html}</div><div class="dar-label">A:</div><div>${a_html}</div><div class="dar-label">R:</div><div>${r_html}</div></div></div></div>`;
+            printBody.innerHTML += `<tr><td>${n.displayTime}</td><td><strong>${n.focus}</strong> <br><small>(${n.patientType ? 'Type '+n.patientType : '-'})</small></td><td><div style="margin-bottom:5px;"><b>D:</b> ${d_html}</div><div style="margin-bottom:5px;"><b>A:</b> ${a_html}</div><div><b>R:</b> ${r_html}</div></td><td>${n.nurse}</td></tr>`;
+        });
+    }
+    function saveNote() {
+        const id = document.getElementById('noteId').value; const selectedType = document.getElementById('noteType').value;
+        const noteData = { id: id ? parseInt(id) : Date.now(), datetime: document.getElementById('noteDate').value, displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), focus: document.getElementById('focusInput').value, d: document.getElementById('dataInput').value, a: document.getElementById('actionInput').value, r: document.getElementById('responseInput').value, patientType: selectedType, nurse: currentUser };
+        if(!noteData.focus || !noteData.datetime) return alert("ระบุข้อมูลให้ครบ");
+        if(id) { patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; clearForm(); } else { patientNotes.unshift(noteData); patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); }
+        localStorage.setItem(storageKey, JSON.stringify(patientNotes)); patientProfile.type = selectedType; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); renderUI(); if(!id) setDefaultDateTime();
+    }
+    function editNote(id) { const n = patientNotes.find(n => n.id === id); if(!n) return; document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; if(n.patientType) document.getElementById('noteType').value = n.patientType; document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; }
+    function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem(storageKey, JSON.stringify(patientNotes)); renderUI(); } }
+    function clearForm() { document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; document.getElementById('noteType').value = patientProfile.type || "1"; setDefaultDateTime(); document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; }
+    function setDefaultDateTime() { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById('noteDate').value = now.toISOString().slice(0,16); }
+
+    // Init
+    renderProfile(); 
+    renderCategoryButtons(); 
+    setDefaultDateTime(); 
+    renderUI();
+</script>
 </body>
 </html>
