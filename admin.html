@@ -21,6 +21,10 @@
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--text-gray); }
         .btn-add { background: var(--success); color: white; width: 100%; margin-bottom: 15px; }
         .btn-delete { background: var(--danger); color: white; float: right; }
+        
+        /* Backup Zone Style */
+        .backup-zone { background: #e3f2fd; border: 1px dashed #2196f3; padding: 15px; border-radius: 8px; margin-top: 20px; }
+        .backup-zone h4 { margin-top: 0; color: #1565c0; }
     </style>
 </head>
 <body>
@@ -89,17 +93,29 @@
                 <button class="btn btn-reset btn-delete" onclick="deleteItem()"><i class="fas fa-trash"></i> ลบรายการนี้</button>
             </div>
             
+            <div class="backup-zone">
+                <h4><i class="fas fa-cloud-download-alt"></i> ย้ายเครื่อง / สำรองข้อมูล (System Backup)</h4>
+                <p style="font-size:0.85rem; color:#555; margin-bottom:10px;">ใช้สำหรับย้ายข้อมูลทั้งหมด (รายชื่อโรค + ประวัติคนไข้) ไปเครื่องอื่น</p>
+                
+                <button class="btn" onclick="exportBackup()" style="background:#1976d2; color:white; font-size:0.9rem;">
+                    <i class="fas fa-download"></i> 1. ดาวน์โหลดไฟล์ข้อมูล (Backup)
+                </button>
+                
+                <div style="margin-top:15px; border-top:1px dashed #90caf9; padding-top:10px;">
+                    <p style="font-size:0.85rem; font-weight:bold;">2. นำข้อมูลเข้า (Restore) จากไฟล์:</p>
+                    <input type="file" id="restoreFile" accept=".json" style="background:white; padding:5px;">
+                    <button class="btn" onclick="importBackup()" style="background:#f57c00; color:white; font-size:0.9rem;">
+                        <i class="fas fa-upload"></i> ยืนยันนำเข้าข้อมูล
+                    </button>
+                </div>
+            </div>
+
             <hr style="margin: 30px 0; border:0; border-top:1px solid #eee;">
             <details>
-                <summary style="cursor:pointer; color:#666;">Advanced: Tools</summary>
-                
-                <h4 style="margin-bottom:5px;">1. Import JSON</h4>
-                <textarea id="jsonImport" placeholder="วางโค้ด JSON ที่นี่..." style="font-family:monospace; font-size:0.8rem; width:100%;"></textarea>
+                <summary style="cursor:pointer; color:#666;">Advanced: Import JSON (เพิ่มเฉพาะโรค)</summary>
+                <textarea id="jsonImport" placeholder="วางโค้ด JSON ที่นี่..." style="font-family:monospace; font-size:0.8rem; width:100%; margin-top:5px;"></textarea>
                 <button class="btn" onclick="importJSON()" style="background:#607d8b; color:white; font-size:0.8rem; margin-top:5px;">Import Data</button>
-
-                <h4 style="margin-bottom:5px; margin-top:20px;">2. Auto Grouping (จัดหมวดหมู่อัตโนมัติ)</h4>
-                <p style="font-size:0.8rem; color:#666;">กดปุ่มนี้เพื่อจัดกลุ่มโรคเดิมที่ยังไม่มีหมวดหมู่ ให้เข้ากลุ่มตาม Keywords อัตโนมัติ</p>
-                <button class="btn" onclick="autoCategorize()" style="background:#ff9800; color:white; font-size:0.8rem;">Auto Categorize Old Data</button>
+                <button class="btn" onclick="autoCategorize()" style="background:#ff9800; color:white; font-size:0.8rem; margin-top:5px; margin-left:5px;">Auto Grouping</button>
             </details>
         </div>
     </div>
@@ -115,7 +131,6 @@
             const list = document.getElementById('diagnosisList'); list.innerHTML = '';
             masterData.forEach((item, index) => {
                 const div = document.createElement('div'); div.className = 'list-item';
-                // แสดง Category Badge
                 const catBadge = item.category ? `<span class="cat-badge">${item.category}</span>` : `<span class="cat-badge" style="background:#eee; color:#999;">Uncategorized</span>`;
                 div.innerHTML = `${catBadge}<h4>${item.nanda}</h4><p>${item.keywords.join(', ')}</p>`;
                 div.onclick = () => loadEditor(index); div.id = `item-${index}`;
@@ -150,7 +165,7 @@
             const id = document.getElementById('editId').value;
             const newItem = {
                 id: id === 'NEW' ? Date.now().toString() : masterData[parseInt(id)].id,
-                category: document.getElementById('editCategory').value, // Save Category
+                category: document.getElementById('editCategory').value, 
                 nanda: document.getElementById('editNanda').value,
                 keywords: document.getElementById('editKeywords').value.split(',').map(k => k.trim()),
                 template: { d: document.getElementById('editD').value, a: document.getElementById('editA').value, r: document.getElementById('editR').value },
@@ -176,7 +191,6 @@
             } catch(e) { alert("Error: " + e.message); }
         }
 
-        // ฟังก์ชันช่วยจัดหมวดหมู่ข้อมูลเก่าให้อัตโนมัติ
         function autoCategorize() {
             if(!confirm("ระบบจะพยายามจัดหมวดหมู่โรคเดิมของคุณให้อัตโนมัติ ยืนยัน?")) return;
             let count = 0;
@@ -197,6 +211,54 @@
             localStorage.setItem('masterDiagnosis', JSON.stringify(masterData));
             renderList();
             alert(`จัดหมวดหมู่สำเร็จ ${count} รายการ!`);
+        }
+
+        // ★★★ ฟังก์ชัน Backup / Restore ★★★
+        function exportBackup() {
+            // ดึงข้อมูลทั้งหมดใน LocalStorage
+            const backupData = JSON.stringify(localStorage);
+            const blob = new Blob([backupData], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            // ตั้งชื่อไฟล์เป็น NursingBackup_วัน-เวลา.json
+            const date = new Date().toISOString().slice(0,10);
+            a.download = `NursingBackup_${date}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        function importBackup() {
+            const fileInput = document.getElementById('restoreFile');
+            const file = fileInput.files[0];
+
+            if (!file) return alert("กรุณาเลือกไฟล์ Backup (.json) ก่อนครับ");
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm("คำเตือน: ข้อมูลปัจจุบันในเครื่องนี้จะถูกลบและแทนที่ด้วยข้อมูลจากไฟล์ Backup\n\nยืนยันหรือไม่?")) {
+                        // ล้างข้อมูลเก่า
+                        localStorage.clear();
+                        
+                        // ใส่ข้อมูลใหม่ทีละ key
+                        Object.keys(data).forEach(function (k) {
+                            localStorage.setItem(k, data[k]);
+                        });
+
+                        alert("กู้คืนข้อมูลสำเร็จ! ระบบจะรีเฟรชหน้าจอ");
+                        location.reload();
+                    }
+                } catch (err) {
+                    alert("ไฟล์ไม่ถูกต้อง หรือไฟล์เสียหาย");
+                    console.error(err);
+                }
+            };
+            reader.readAsText(file);
         }
 
         renderList();
