@@ -551,9 +551,6 @@ const initialMasterData = [
         "r": "หายใจสะดวกขึ้น, รอบเอวลดลง, อาการบวมลดลง" 
       }
     },
-    
-
-[Image of ascites in liver cirrhosis]
 
     {
       "id": "GI010", 
@@ -599,9 +596,6 @@ const initialMasterData = [
         "r": "ผู้ป่วยเริ่มยอมรับ มองดู Stoma ได้, เริ่มฝึกดูแลตนเอง" 
       }
     },
-    
-
-[Image of colostomy stoma care]
 
     {
       "id": "GI014", 
@@ -680,9 +674,7 @@ const initialMasterData = [
         "r": "ผู้ป่วยรับรู้โทษของสุรา, ยินดีเข้ารับการบำบัด" 
       }
     },
-   // ส่วนของระบบหัวใจ/หลอดเลือด (Cardiovascular)
-// ก๊อปปี้ไปวางต่อท้ายในตัวแปร initialMasterData ในไฟล์ data.js ได้เลยครับ
-
+  
     // --- 3. ระบบหัวใจ/หลอดเลือด (Cardiovascular) ---
     {
       "id": "C001", 
