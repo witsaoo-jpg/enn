@@ -24,18 +24,25 @@
 </head>
 <body>
 
-<nav class="navbar no-print">
-    <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-heartbeat"></i> Nursing Note System</div>
-    <div style="font-size:0.9rem; display:flex; align-items:center; gap:10px;">
-        <button onclick="window.location.href='ward.html'" style="background:rgba(255,255,255,0.2); border:none; color:white; padding:4px 10px; border-radius:4px; cursor:pointer;">
-            <i class="fas fa-arrow-left"></i> Back to Ward
-        </button>
-        <button onclick="goToAdmin()" style="background:#fbc02d; border:none; color:#333; padding:4px 10px; border-radius:4px; cursor:pointer; font-weight:bold;">
-            <i class="fas fa-cog"></i> Admin
-        </button>
-        <span id="userDisplay" style="margin-left:5px; border-left:1px solid rgba(255,255,255,0.3); padding-left:10px;">User: ...</span> 
-    </div>
-</nav>
+<nav class="navbar">
+        <div style="font-weight:bold; font-size:1.1rem;">
+            <i class="fas fa-notes-medical"></i> Nursing Note
+        </div>
+        
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span id="userDisplay" style="font-size:0.9rem; margin-right:10px;"></span>
+
+            <button onclick="window.location.href='ward.html'" 
+                    style="background:#ff9800; border:none; color:white; padding:5px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem;">
+                <i class="fas fa-users"></i> เปลี่ยนผู้ป่วย (Ward)
+            </button>
+
+            <button onclick="goToAdmin()" 
+                    style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem;">
+                <i class="fas fa-cog"></i> Admin
+            </button>
+        </div>
+    </nav>
 
     <div class="patient-banner no-print">
         <div class="patient-info">
