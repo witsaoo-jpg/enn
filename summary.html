@@ -3,314 +3,196 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nursing Summary</title>
-    
+    <title>Nursing Summary Report</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css"> <style>
-        /* CSS เฉพาะหน้า Summary */
-        .section-header { border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .problem-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid #ccc; }
-        .problem-card.active { border-left-color: var(--danger); }
-        .problem-card.resolved { border-left-color: var(--success); opacity: 0.8; }
-
-        .btn-action { background: #e0f2f1; color: #00695c; font-size: 0.8rem; }
-        .btn-save { background: var(--primary); color: white; width: 100%; margin-top: 15px; padding: 12px; font-size: 1rem; }
-        .btn-save:hover { background: var(--primary-dark); }
-        
-        .discharge-box { grid-column: span 2; background: white; padding: 20px; border-radius: 12px; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .dmethod-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 10px; }
-        
-        /* History Styles */
-        .history-section { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-        .history-item { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 15px; }
-        .history-header { background: #f5f7f8; padding: 10px 15px; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; font-size: 0.85rem; color: #607d8b; }
-        .history-content { padding: 15px; font-size: 0.95rem; }
-        .history-row { display: flex; margin-bottom: 4px; border-bottom: 1px dashed #f0f0f0; padding-bottom: 4px; }
-        .history-tag { font-weight: 600; color: var(--primary); width: 110px; }
-        
-        .btn-icon-sm { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid #cfd8dc; background: white; cursor: pointer; color: #546e7a; margin-left: 5px; }
-
-        #printable-area { display: none; }
-        @media print {
-            body * { visibility: hidden; }
-            #printable-area, #printable-area * { visibility: visible; }
-            #printable-area { display: block; position: absolute; top: 0; left: 0; width: 100%; }
-            @page { size: A4; margin: 1.5cm; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            .print-table th, .print-table td { border: 1px solid black; padding: 8px; vertical-align: top; }
-            .print-header-info { text-align: center; border-bottom: 2px solid black; margin-bottom: 20px; padding-bottom: 10px; }
-            .print-header-info p { margin: 5px 0; font-size: 14pt; }
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
         }
-        @media (max-width: 800px) { .container { grid-template-columns: 1fr; } .discharge-box { grid-column: span 1; } }
+        .stat-card {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-bottom: 4px solid var(--primary);
+        }
+        .stat-number { font-size: 2.5rem; font-weight: bold; color: var(--primary); }
+        .stat-label { color: #666; font-size: 0.9rem; }
+
+        .problem-list {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .problem-header {
+            background: #f5f5f5;
+            padding: 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+        }
+        .problem-item {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .problem-item:last-child { border-bottom: none; }
+        .badge-count {
+            background: #e0f2f1; color: #00695c;
+            padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;
+        }
+
+        /* Print Style */
+        @media print {
+            .navbar, .no-print { display: none; }
+            .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+            .summary-grid { display: block; }
+            .stat-card { border: 1px solid #ccc; break-inside: avoid; margin-bottom: 10px; }
+            .problem-list { box-shadow: none; border: 1px solid #ccc; }
+        }
     </style>
 </head>
 <body>
-    <nav class="navbar no-print">
-        <div style="font-weight:bold; font-size:1.2rem;"><i class="fas fa-file-medical-alt"></i> Nursing Care Summary</div>
-        <div style="display:flex; align-items:center;">
-             <button class="btn" style="background:rgba(255,255,255,0.2); color:white; margin-right:10px;" onclick="window.location.href='index.html'">
-                <i class="fas fa-pen"></i> กลับหน้าบันทึก
-            </button>
-            <button class="btn" style="background:rgba(255,255,255,0.2); color:white;" onclick="window.location.href='ward.html'">
-                <i class="fas fa-bed"></i> กลับหน้า Ward
+
+    <nav class="navbar">
+        <div style="font-weight:bold; font-size:1.1rem;">
+            <i class="fas fa-chart-line"></i> สรุปข้อมูลผู้ป่วย (Summary)
+        </div>
+        <div>
+            <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;">
+                <i class="fas fa-arrow-left"></i> กลับหน้าบันทึก
             </button>
         </div>
     </nav>
-    <div class="patient-banner no-print">
-        <div class="patient-info">
-            <h2><span id="display_name">...</span></h2>
-            <div class="patient-meta">
-                <div><i class="fas fa-id-card"></i> HN: <span id="display_hn">-</span></div>
-                <div><i class="fas fa-procedures"></i> AN: <span id="display_an">-</span></div>
-                <div><i class="fas fa-clinic-medical"></i> Ward: <span id="display_ward">-</span></div>
-                
-                <div><i class="fas fa-layer-group"></i> Type: <span id="display_type_badge"></span></div>
-                
-                <div><i class="far fa-calendar-check"></i> Admit: <span id="display_admit">-</span></div>
-                <div><i class="fas fa-diagnoses"></i> DX: <span id="display_dx">-</span></div>
-                
-                <div><i class="fas fa-sign-out-alt"></i> D/C: <span id="display_dc" style="color:#e53935; font-weight:bold;">-</span></div>
-            </div>
-        </div>
-        <button class="btn btn-print" style="background:#fff; border:1px solid #ccc;" onclick="window.print()"><i class="fas fa-print"></i> Print</button>
-    </div>
 
-    <div class="container no-print">
-        <div id="col-active">
-            <div class="section-header"><h3 style="color:var(--danger); margin:0;">Active Problems</h3></div>
-            <div id="activeList"></div>
-        </div>
-        <div id="col-resolved">
-            <div class="section-header"><h3 style="color:var(--success); margin:0;">Resolved Problems</h3></div>
-            <div id="resolvedList"></div>
-        </div>
+    <div class="container">
         
-        <div class="discharge-box">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-                <h3 style="margin:0;"><i class="fas fa-home"></i> Discharge Planning (D-M-E-T-H-O-D)</h3>
-                <div id="editModeBadge" style="display:none; background:var(--edit-color); color:black; padding:2px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold;"><i class="fas fa-pen"></i> กำลังแก้ไข...</div>
+        <div class="patient-banner">
+            <div class="patient-info">
+                <h2><i class="fas fa-user-circle"></i> <span id="sName">...</span></h2>
+                <div class="patient-meta">
+                    <span>HN: <span id="sHN">-</span></span> | 
+                    <span>AN: <span id="sAN">-</span></span> | 
+                    <span>Ward: <span id="sWard">-</span></span> |
+                    <span>Admit: <span id="sAdmit">-</span></span>
+                </div>
             </div>
-            
-            <input type="hidden" id="planId">
+            <div class="no-print">
+                <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์ใบสรุป</button>
+            </div>
+        </div>
 
-            <div class="dmethod-grid">
-                <div><label>D - Diagnosis</label><textarea id="inp_d"></textarea></div>
-                <div><label>M - Medicine</label><textarea id="inp_m"></textarea></div>
-                <div><label>E - Environment</label><textarea id="inp_e"></textarea></div>
-                <div><label>T - Treatment</label><textarea id="inp_t"></textarea></div>
-                <div><label>H - Health</label><textarea id="inp_h"></textarea></div>
-                <div><label>O - Outpatient</label><textarea id="inp_o"></textarea></div>
-                <div style="grid-column: span 2;"><label>D - Diet</label><textarea id="inp_diet"></textarea></div>
-            </div>
+        <div class="summary-grid">
             
-            <div style="display:flex;">
-                <button class="btn btn-save" id="saveBtn" onclick="saveDischargePlan()">
-                    <i class="fas fa-save"></i> บันทึกแผนการจำหน่าย (Save)
-                </button>
-                <button class="btn btn-save btn-cancel" id="cancelBtn" onclick="clearPlanForm()" style="background:#cfd8dc; color:#333; display:none; margin-left:10px;">
-                    ยกเลิก (Cancel)
-                </button>
+            <div>
+                <h3 style="color:var(--primary);"><i class="fas fa-clipboard-list"></i> สรุปข้อวินิจฉัยทางการพยาบาล (Nursing Problem List)</h3>
+                <div class="problem-list" id="problemListContainer">
+                    </div>
+
+                <h3 style="color:var(--primary); margin-top:20px;"><i class="fas fa-history"></i> บันทึกล่าสุด 3 รายการ</h3>
+                <div id="recentNotes"></div>
             </div>
 
-            <div class="history-section">
-                <h4><i class="fas fa-history"></i> ประวัติการบันทึก (History Log)</h4>
-                <div id="historyList"></div>
+            <div class="no-print">
+                <div class="stat-card" style="margin-bottom:20px;">
+                    <div class="stat-number" id="totalNotes">0</div>
+                    <div class="stat-label">จำนวนบันทึกทั้งหมด (ครั้ง)</div>
+                </div>
+                <div class="stat-card" style="margin-bottom:20px;">
+                    <div class="stat-number" id="totalProblems">0</div>
+                    <div class="stat-label">หัวข้อปัญหาที่พบ (เรื่อง)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="lastUpdate">-</div>
+                    <div class="stat-label" style="font-size:0.8rem;">อัปเดตล่าสุด</div>
+                </div>
             </div>
+
         </div>
     </div>
 
-    <div id="printable-area">
-        <div class="print-header-info">
-            <h2>สรุปปัญหาการพยาบาล (Nursing Care Summary)</h2>
-            <p>
-                <b>ชื่อ-สกุล:</b> <span class="p-name"></span> | 
-                <b>HN:</b> <span class="p-hn"></span> | 
-                <b>AN:</b> <span class="p-an"></span>
-            </p>
-            <p style="font-size:12pt;">
-                <b>Ward:</b> <span class="p-ward"></span> |
-                <b>Type:</b> <span class="p-type"></span> |
-                <b>Admit:</b> <span class="p-admit"></span> |
-                <b>D/C:</b> <span class="p-dc"></span>
-            </p>
-            <p style="font-size:12pt;"><b>DX:</b> <span class="p-dx"></span></p>
-        </div>
-        <h4>1. สรุปปัญหาทางการพยาบาล (Problems List)</h4>
-        <table class="print-table">
-            <thead><tr style="background:#eee;"><th>วันเริ่ม</th><th>ข้อวินิจฉัย (Diagnosis)</th><th>สถานะ</th><th>บันทึกล่าสุด</th></tr></thead>
-            <tbody id="printTableBody"></tbody>
-        </table>
-        <h4 style="margin-top:20px;">2. การวางแผนจำหน่าย (Discharge Planning)</h4>
-        <div id="printDmethod" style="border:1px solid black; padding:10px;"></div>
-        <div style="margin-top:40px; display:flex; justify-content:space-between; padding:0 50px;">
-            <div style="text-align:center;"><br>( พยาบาลวิษณุรักษ์ )<br>ผู้สรุป</div>
-            <div style="text-align:center;"><br>( ........................... )<br>ผู้รับคำแนะนำ</div>
-        </div>
-    </div>
+<script>
+    // 1. ดึงข้อมูล Profile
+    const profile = JSON.parse(localStorage.getItem('patientProfile'));
+    if(!profile) { alert("กรุณาเลือกผู้ป่วยก่อน"); window.location.href='ward.html'; }
 
-    <script>
-        // 1. SECURITY & CONFIG
-        if (!sessionStorage.getItem('isLoggedIn')) { window.location.href = 'login.html'; }
-        const currentUser = sessionStorage.getItem('currentUser') || "Unknown User";
+    document.getElementById('sName').innerText = profile.name;
+    document.getElementById('sHN').innerText = profile.hn;
+    document.getElementById('sAN').innerText = profile.an;
+    document.getElementById('sWard').innerText = profile.ward;
+    document.getElementById('sAdmit').innerText = profile.admit;
 
-        // ★★★ KEY CHANGE: ระบุตัวตนคนไข้ ★★★
-        const currentHN = localStorage.getItem('currentHN') || 'default';
-        const notesKey = `notes_${currentHN}`;
-        const dischargeKey = `discharge_${currentHN}`;
-        const problemStatusKey = `problems_${currentHN}`;
+    // 2. ดึงข้อมูล Note
+    const storageKey = `notes_${profile.hn}`;
+    const notes = JSON.parse(localStorage.getItem(storageKey)) || [];
 
-        // 2. Profile Loader
-        let patientProfile = JSON.parse(localStorage.getItem('patientProfile')) || {};
+    document.getElementById('totalNotes').innerText = notes.length;
 
-        function renderProfile() {
-            document.getElementById('display_name').innerText = patientProfile.name || '-';
-            document.getElementById('display_hn').innerText = patientProfile.hn || '-';
-            document.getElementById('display_an').innerText = patientProfile.an || '-';
-            document.getElementById('display_ward').innerText = patientProfile.ward || '-';
-            document.getElementById('display_admit').innerText = patientProfile.admit || '-';
-            document.getElementById('display_dx').innerText = patientProfile.dx || '-';
-            
-            let dcText = "-";
-            if(patientProfile.dc) { const d = new Date(patientProfile.dc); if(!isNaN(d)) dcText = d.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short' }); }
-            document.getElementById('display_dc').innerText = dcText;
+    if(notes.length > 0) {
+        // หาบันทึกล่าสุด
+        const lastNote = notes[0]; // เพราะเรา sort วันที่ล่าสุดไว้ตัวแรกแล้วใน index.html
+        const d = new Date(lastNote.datetime);
+        document.getElementById('lastUpdate').innerText = `${d.getHours()}:${d.getMinutes().toString().padStart(2,'0')}`;
 
-            const typeEl = document.getElementById('display_type_badge');
-            typeEl.className = `type-badge type-${patientProfile.type || '1'}`;
-            typeEl.innerText = `Type ${patientProfile.type || '1'}`;
+        // แสดง Note ล่าสุด 3 อัน
+        const recentDiv = document.getElementById('recentNotes');
+        notes.slice(0, 3).forEach(n => {
+            recentDiv.innerHTML += `
+                <div style="background:white; padding:15px; margin-bottom:10px; border-radius:8px; border-left:4px solid #ddd; box-shadow:var(--shadow);">
+                    <div style="font-weight:bold; color:var(--primary);">${n.displayTime} - ${n.focus}</div>
+                    <div style="font-size:0.9rem; color:#555; margin-top:5px;">A: ${n.a || '-'}</div>
+                </div>
+            `;
+        });
+    }
 
-            // Print Area
-            document.querySelector('.p-name').innerText = patientProfile.name || '-';
-            document.querySelector('.p-hn').innerText = patientProfile.hn || '-';
-            document.querySelector('.p-an').innerText = patientProfile.an || '-';
-            document.querySelector('.p-ward').innerText = patientProfile.ward || '-';
-            document.querySelector('.p-type').innerText = `Type ${patientProfile.type || '1'}`;
-            document.querySelector('.p-admit').innerText = patientProfile.admit || '-';
-            document.querySelector('.p-dx').innerText = patientProfile.dx || '-';
-            document.querySelector('.p-dc').innerText = dcText;
-        }
+    // 3. วิเคราะห์ Problem List (Group by Focus)
+    const problemCounts = {};
+    const problemLastDate = {};
 
-        // 3. Load Data Specific to HN
-        const rawNotes = JSON.parse(localStorage.getItem(notesKey)) || [];
-        let problemStatus = JSON.parse(localStorage.getItem(problemStatusKey)) || {};
-        let dischargeHistory = JSON.parse(localStorage.getItem(dischargeKey)) || [];
-
-        function init() {
-            renderProfile();
-            renderProblems();
-            renderHistory();
-            if(dischargeHistory.length > 0) fillForm(dischargeHistory[0].data);
-        }
-
-        // 4. Discharge Plan Logic (Saved by HN)
-        function saveDischargePlan() {
-            const id = document.getElementById('planId').value;
-            const ids = ['d','m','e','t','h','o','diet'];
-            let currentData = {};
-            let isEmpty = true;
-            ids.forEach(key => {
-                const val = document.getElementById('inp_' + key).value;
-                currentData[key] = val;
-                if(val.trim() !== '') isEmpty = false;
-            });
-            if(isEmpty) return alert("กรุณากรอกข้อมูลอย่างน้อย 1 ช่องครับ");
-
-            const logData = { id: id ? parseInt(id) : Date.now(), timestamp: new Date().toLocaleString('th-TH'), nurse: currentUser, data: currentData };
-            if (id) {
-                const index = dischargeHistory.findIndex(log => log.id == id);
-                if (index !== -1) dischargeHistory[index] = logData;
-                alert('แก้ไขข้อมูลเรียบร้อย'); clearPlanForm();
-            } else {
-                dischargeHistory.unshift(logData); alert('บันทึกประวัติใหม่เรียบร้อย');
-            }
-            
-            // ★ Save to Specific Key ★
-            localStorage.setItem(dischargeKey, JSON.stringify(dischargeHistory)); 
-            
-            renderHistory(); updatePrintDM(); 
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList'); list.innerHTML = '';
-            if(dischargeHistory.length === 0) { list.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">- ไม่มีประวัติ -</div>'; return; }
-            dischargeHistory.forEach(log => {
-                let contentHTML = ''; const labels = { d:'Diagnosis', m:'Medicine', e:'Environment', t:'Treatment', h:'Health', o:'Outpatient', diet:'Diet' };
-                for(const [key, val] of Object.entries(log.data)) { if(val && val.trim() !== '') { contentHTML += `<div class="history-row"><span class="history-tag">${labels[key]}</span><span>${val}</span></div>`; } }
-                list.innerHTML += `
-                    <div class="history-item">
-                        <div class="history-header">
-                            <div style="display:flex; gap:15px;"><span><i class="far fa-clock"></i> ${log.timestamp}</span><span><i class="fas fa-user-edit"></i> ${log.nurse}</span></div>
-                            <div style="display:flex;"><button class="btn-icon-sm btn-edit-sm" onclick="editPlan(${log.id})"><i class="fas fa-pen"></i></button><button class="btn-icon-sm btn-delete-sm" onclick="deletePlan(${log.id})"><i class="fas fa-trash"></i></button></div>
-                        </div>
-                        <div class="history-content">${contentHTML}</div>
-                    </div>`;
-            });
-        }
+    notes.forEach(n => {
+        const focus = n.focus || "Unspecified";
+        if(!problemCounts[focus]) { problemCounts[focus] = 0; }
+        problemCounts[focus]++;
         
-        function editPlan(id) { const log = dischargeHistory.find(l => l.id === id); if(!log) return; fillForm(log.data); document.getElementById('planId').value = log.id; const saveBtn = document.getElementById('saveBtn'); saveBtn.innerHTML = '<i class="fas fa-sync-alt"></i> บันทึกการแก้ไข (Update)'; saveBtn.style.background = 'var(--edit-color)'; saveBtn.style.color = 'black'; document.getElementById('cancelBtn').style.display = 'inline-block'; document.getElementById('editModeBadge').style.display = 'block'; document.querySelector('.discharge-box').scrollIntoView({ behavior: 'smooth' }); }
-        
-        function deletePlan(id) { 
-            if(confirm("ต้องการลบประวัติรายการนี้หรือไม่?")) { 
-                dischargeHistory = dischargeHistory.filter(l => l.id !== id); 
-                localStorage.setItem(dischargeKey, JSON.stringify(dischargeHistory)); // Save
-                renderHistory(); if(document.getElementById('planId').value == id) clearPlanForm(); 
-            } 
+        // เก็บวันที่ล่าสุดของปัญหานั้น
+        if(!problemLastDate[focus] || new Date(n.datetime) > new Date(problemLastDate[focus])) {
+            problemLastDate[focus] = n.datetime;
         }
-        
-        function clearPlanForm() { document.getElementById('planId').value = ''; const saveBtn = document.getElementById('saveBtn'); saveBtn.innerHTML = '<i class="fas fa-save"></i> บันทึกแผนการจำหน่าย (Save)'; saveBtn.style.background = ''; saveBtn.style.color = ''; document.getElementById('cancelBtn').style.display = 'none'; document.getElementById('editModeBadge').style.display = 'none'; }
-        function fillForm(data) { const ids = ['d','m','e','t','h','o','diet']; ids.forEach(id => { document.getElementById('inp_' + id).value = data[id] || ''; }); updatePrintDM(); }
+    });
 
-        // 5. Problems Logic (Using Specific HN Data)
-        function renderProblems() {
-            let problems = [];
-            if (rawNotes.length > 0) { 
-                const groups = rawNotes.reduce((acc, note) => { 
-                    if (!acc[note.focus]) acc[note.focus] = []; 
-                    acc[note.focus].push(note); return acc; 
-                }, {}); 
-                
-                problems = Object.keys(groups).map((focus, index) => { 
-                    const notes = groups[focus]; 
-                    notes.sort((a, b) => new Date(a.datetime) - new Date(b.datetime)); 
-                    return { 
-                        id: index, 
-                        focus: focus, 
-                        startDate: notes[0].displayTime.split(' ')[0], 
-                        lastUpdate: notes[notes.length - 1].displayTime, 
-                        lastEval: notes[notes.length - 1].r, 
-                        status: problemStatus[focus] || 'Active' 
-                    }; 
-                }); 
-            }
+    const uniqueProblems = Object.keys(problemCounts);
+    document.getElementById('totalProblems').innerText = uniqueProblems.length;
+
+    const listContainer = document.getElementById('problemListContainer');
+    if(uniqueProblems.length === 0) {
+        listContainer.innerHTML = '<div style="padding:20px; text-align:center; color:#999;">ยังไม่มีการบันทึกปัญหา</div>';
+    } else {
+        uniqueProblems.forEach(p => {
+            const count = problemCounts[p];
+            const lastDate = new Date(problemLastDate[p]).toLocaleString('th-TH', { dateStyle:'short', timeStyle:'short' });
             
-            const activeList = document.getElementById('activeList'); 
-            const resolvedList = document.getElementById('resolvedList'); 
-            const printBody = document.getElementById('printTableBody');
-            
-            activeList.innerHTML = ''; resolvedList.innerHTML = ''; printBody.innerHTML = '';
+            listContainer.innerHTML += `
+                <div class="problem-item">
+                    <div>
+                        <div style="font-weight:bold; font-size:1rem;">${p}</div>
+                        <div style="font-size:0.8rem; color:#777;">บันทึกล่าสุด: ${lastDate}</div>
+                    </div>
+                    <div class="badge-count">${count} ครั้ง</div>
+                </div>
+            `;
+        });
+    }
 
-            if (problems.length === 0) { 
-                activeList.innerHTML = '<div style="color:#999; font-style:italic;">ยังไม่มีบันทึกสำหรับผู้ป่วยรายนี้</div>';
-                return; 
-            } 
-            
-            problems.forEach(p => {
-                const cardHTML = `<div class="problem-card ${p.status.toLowerCase()}"><div style="display:flex; justify-content:space-between;"><b>${p.focus}</b><span style="font-size:0.8rem; background:${p.status==='Active'?'#ffebee':'#e8f5e9'}; padding:2px 8px; border-radius:10px; color:${p.status==='Active'?'red':'green'};">${p.status}</span></div><div style="font-size:0.85rem; color:#666; margin:5px 0;">เริ่ม: ${p.startDate} | ล่าสุด: ${p.lastUpdate}</div><div style="background:#f9f9f9; padding:8px; border-radius:4px; font-size:0.9rem;">Eval: ${p.lastEval}</div><div style="text-align:right; margin-top:10px;"><button class="btn btn-action" onclick="toggleProblem('${p.focus}')">${p.status==='Active' ? 'จำหน่ายปัญหา' : 'ดึงกลับมา'}</button></div></div>`;
-                if(p.status === 'Active') activeList.innerHTML += cardHTML; else resolvedList.innerHTML += cardHTML;
-                printBody.innerHTML += `<tr><td>${p.startDate}</td><td>${p.focus}</td><td style="text-align:center;">${p.status}</td><td>${p.lastEval}</td></tr>`;
-            });
-        }
-
-        function toggleProblem(f) { 
-            problemStatus[f] = problemStatus[f] === 'Resolved' ? 'Active' : 'Resolved'; 
-            localStorage.setItem(problemStatusKey, JSON.stringify(problemStatus)); // Save by HN
-            location.reload(); 
-        }
-
-        function updatePrintDM() { const ids = ['d','m','e','t','h','o','diet']; let html = ''; ids.forEach(id => { const val = document.getElementById('inp_' + id).value; const label = document.getElementById('inp_' + id).previousElementSibling.innerText; if(val) html += `<div><b>${label}:</b> ${val}</div>`; }); document.getElementById('printDmethod').innerHTML = html || '- ไม่ได้ระบุ -'; }
-        document.querySelectorAll('textarea').forEach(el => el.addEventListener('input', updatePrintDM));
-        
-        init();
-    </script>
+</script>
 </body>
 </html>
