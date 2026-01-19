@@ -9,111 +9,181 @@
     <link rel="stylesheet" href="style.css"> 
     
     <style>
-        /* จัด Layout แบ่งซ้าย-ขวา */
+        /* --- Layout & Grid --- */
+        body { background-color: #f0f2f5; }
+        
         .layout-container {
             display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 20px;
+            grid-template-columns: 320px 1fr; /* ซ้าย 320px, ขวาเต็มจอ */
+            gap: 25px;
             margin-top: 20px;
             align-items: start;
         }
 
+        /* --- Header Card --- */
         .patient-header-card {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            border-left: 5px solid var(--primary);
+            background: linear-gradient(135deg, var(--primary) 0%, #004d40 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .ph-info h2 { margin: 0 0 5px 0; font-size: 1.4rem; color: #333; }
-        .ph-meta { font-size: 1rem; color: #555; font-weight: 500; }
-        .ph-meta span { margin-right: 15px; background: #f5f5f5; padding: 4px 10px; border-radius: 5px; }
+        .ph-info h2 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+        .ph-meta { margin-top: 5px; font-size: 1rem; opacity: 0.9; }
+        .ph-meta span { margin-right: 15px; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 15px; font-size: 0.9rem; }
 
-        /* Sidebar ด้านซ้าย */
+        /* --- Sidebar (Templates) --- */
         .sidebar-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: var(--shadow);
-            padding: 15px;
-            height: calc(100vh - 200px);
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
+            padding: 20px;
+            height: calc(100vh - 180px); /* เต็มจอพอดี */
             display: flex;
             flex-direction: column;
+            border: 1px solid #e0e0e0;
         }
-
-        /* รายการ Template */
-        .template-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            border-radius: 6px;
-            margin-bottom: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: #f9f9f9;
-        }
-        .template-item:hover { background-color: #e3f2fd; }
         
-        .template-info { cursor: pointer; flex-grow: 1; }
-        .template-info strong { display: block; font-size: 0.95rem; color: #333; }
-        .template-info small { color: #888; font-size: 0.8rem; }
-
-        .template-actions { display: flex; gap: 5px; }
-        .btn-icon {
-            border: none; background: none; cursor: pointer; color: #999;
-            padding: 5px; border-radius: 4px; transition: 0.2s;
+        .sidebar-title {
+            font-size: 1.1rem; font-weight: bold; color: var(--primary);
+            margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
         }
-        .btn-icon:hover { background: #ddd; color: #333; }
-        .btn-icon.del:hover { background: #ffebee; color: #c62828; }
 
-        /* Form ด้านขวา */
+        .search-box {
+            width: 100%; padding: 10px 15px; border: 1px solid #ddd;
+            border-radius: 25px; background: #f9f9f9; outline: none; transition: 0.3s;
+            margin-bottom: 15px;
+        }
+        .search-box:focus { border-color: var(--primary); background: white; box-shadow: 0 0 5px rgba(0,105,92,0.1); }
+
+        #templateList { flex-grow: 1; overflow-y: auto; padding-right: 5px; }
+
+        .template-item {
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            background: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .template-item:hover {
+            border-color: var(--primary);
+            background: #e0f2f1;
+            transform: translateX(3px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .template-item::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--primary); opacity: 0; transition: 0.2s;
+        }
+        .template-item:hover::before { opacity: 1; }
+        
+        .template-item strong { display: block; color: #333; font-size: 0.95rem; }
+        .template-item small { color: #888; font-size: 0.8rem; }
+
+        /* --- Main Form (Editor) --- */
         .form-card {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
             box-shadow: var(--shadow);
             padding: 30px;
-            min-height: calc(100vh - 200px);
+            min-height: calc(100vh - 180px);
+            position: relative;
         }
 
-        .dm-box { margin-bottom: 20px; }
-        .dm-box label { 
-            display: block; font-weight: bold; font-size: 1.1rem; 
-            margin-bottom: 8px; color: var(--primary-dark);
-            background: #e8eaf6; padding: 8px 12px;
-            border-radius: 6px; border-left: 5px solid var(--accent);
-        }
-        .dm-box textarea {
-            width: 100%; padding: 12px; border: 1px solid #ccc;
-            border-radius: 6px; font-family: 'Sarabun', sans-serif;
-            font-size: 1.05rem; line-height: 1.6; min-height: 80px; resize: vertical;
+        /* Action Buttons Toolbar */
+        .action-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
         }
 
-        /* Modal เพิ่ม/แก้ไข */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
-        .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; color: var(--primary); display: flex; justify-content: space-between; }
-        .close-modal { cursor: pointer; font-size: 1.5rem; color: #aaa; }
-        .form-row { margin-bottom: 10px; }
-        .form-row label { display: block; font-weight: bold; margin-bottom: 3px; font-size: 0.9rem; }
-        .form-row input, .form-row textarea { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 5px; font-family: 'Sarabun'; }
+        .btn-action {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .btn-save { background: #2e7d32; color: white; }
+        .btn-save:hover { background: #1b5e20; box-shadow: 0 4px 10px rgba(46, 125, 50, 0.3); }
+        
+        .btn-clear { background: #ffebee; color: #c62828; }
+        .btn-clear:hover { background: #ffcdd2; }
 
-        /* Print Settings */
+        .btn-print { background: #0277bd; color: white; }
+        .btn-print:hover { background: #01579b; box-shadow: 0 4px 10px rgba(2, 119, 189, 0.3); }
+
+        /* Input Groups */
+        .dm-group { margin-bottom: 20px; }
+        .dm-label {
+            display: flex; align-items: center; gap: 8px;
+            font-weight: bold; font-size: 1.05rem; color: #37474f;
+            margin-bottom: 8px;
+        }
+        .dm-label i { color: var(--accent); width: 20px; text-align: center; }
+        
+        .dm-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #cfd8dc;
+            border-radius: 8px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            min-height: 85px;
+            resize: vertical;
+            transition: 0.2s;
+            background: #fafafa;
+        }
+        .dm-textarea:focus {
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 105, 92, 0.1);
+            outline: none;
+        }
+
+        /* --- Print Styles --- */
         .print-only-header { display: none; }
         @media print {
-            .navbar, .sidebar-card, .btn-print-group, .modal { display: none !important; }
+            .navbar, .sidebar-card, .action-toolbar, .no-print { display: none !important; }
+            body { background: white; margin: 0; padding: 0; }
+            .container { max-width: 100%; width: 100%; margin: 0; padding: 0; }
             .layout-container { display: block; margin: 0; }
             .patient-header-card { display: none; }
+            
             .print-only-header { display: block; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
             .form-card { box-shadow: none; padding: 0; border: none; }
-            .dm-box textarea { border: none; resize: none; min-height: auto; padding: 0; margin-bottom: 5px; font-size: 12pt; height: auto; overflow: visible; }
-            .dm-box label { background: none; border: none; padding: 0; color: #000; font-weight: bold; text-decoration: underline; margin-bottom: 2px; font-size: 12pt; }
-            .dm-box { break-inside: avoid; margin-bottom: 10px; }
-            body { background: white; font-size: 12pt; }
-            #printContent { display: block; width: 100%; }
+            
+            .dm-textarea { 
+                border: none; resize: none; min-height: auto; padding: 0; 
+                margin-bottom: 5px; font-size: 12pt; height: auto; background: none; 
+            }
+            .dm-label { 
+                margin-bottom: 2px; font-size: 12pt; color: black; 
+                text-decoration: underline; 
+            }
+            .dm-label i { display: none; } /* ซ่อนไอคอนตอนปริ้น */
+            .dm-group { break-inside: avoid; margin-bottom: 10px; page-break-inside: avoid; }
+            
+            #printContent { width: 100%; }
         }
     </style>
 </head>
@@ -121,7 +191,7 @@
 
     <nav class="navbar">
         <div style="font-weight:bold; font-size:1.1rem;">
-            <i class="fas fa-home"></i> Discharge Planning (D-M-E-T-H-O-D)
+            <i class="fas fa-home"></i> Discharge Planning
         </div>
         <div style="display:flex; gap:10px;">
             <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;">
@@ -141,34 +211,19 @@
                     <span><i class="fas fa-clinic-medical"></i> Ward: <span id="ptWard">-</span></span>
                 </div>
             </div>
-            <div class="btn-print-group">
-                <button class="btn btn-primary" onclick="window.print()" style="font-size:1.1rem; padding: 10px 20px;">
-                    <i class="fas fa-print"></i> พิมพ์ใบกลับบ้าน
-                </button>
             </div>
-        </div>
 
         <div class="layout-container">
             
             <div class="sidebar-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding-bottom:10px; margin-bottom:10px;">
-                    <h3 style="margin:0; color:var(--primary); font-size:1.1rem;"><i class="fas fa-list"></i> เลือกกลุ่มโรค</h3>
-                    <button class="btn" onclick="openModal()" style="background:#4caf50; color:white; font-size:0.8rem; padding:5px 10px;">
-                        <i class="fas fa-plus"></i> เพิ่มใหม่
-                    </button>
-                </div>
-
-                <input type="text" id="searchTemplate" placeholder="🔍 ค้นหาชื่อโรค..." 
-                       style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:20px; outline:none;"
-                       onkeyup="renderTemplates()">
+                <div class="sidebar-title"><i class="fas fa-book-medical"></i> เลือกกลุ่มโรค (Templates)</div>
+                <input type="text" id="searchTemplate" class="search-box" placeholder="🔍 ค้นหาชื่อโรค..." onkeyup="renderTemplates()">
                 
-                <div id="templateList" style="flex-grow:1; overflow-y:auto;">
+                <div id="templateList">
                     </div>
                 
-                <div style="margin-top:10px; text-align:center;">
-                    <button class="btn" onclick="resetDefaults()" style="background:#ffebee; color:red; border:1px solid red; font-size:0.8rem; width:100%;">
-                        <i class="fas fa-sync"></i> รีเซ็ตค่าเริ่มต้น
-                    </button>
+                <div style="margin-top:auto; font-size:0.8rem; color:#999; text-align:center; padding-top:10px;">
+                    *แก้ไขรายการโรคได้ในไฟล์ Code
                 </div>
             </div>
 
@@ -179,13 +234,53 @@
                 </div>
 
                 <div class="form-card">
-                    <div class="dm-box"><label>D - Diagnosis (การวินิจฉัยโรค)</label><textarea id="inp_d"></textarea></div>
-                    <div class="dm-box"><label>M - Medicine (ยา)</label><textarea id="inp_m"></textarea></div>
-                    <div class="dm-box"><label>E - Environment (สิ่งแวดล้อม)</label><textarea id="inp_e"></textarea></div>
-                    <div class="dm-box"><label>T - Treatment (การรักษา/ดูแลตนเอง)</label><textarea id="inp_t"></textarea></div>
-                    <div class="dm-box"><label>H - Health (สุขภาพ/อาการที่ต้องสังเกต)</label><textarea id="inp_h"></textarea></div>
-                    <div class="dm-box"><label>O - Outpatient (การนัดตรวจ)</label><textarea id="inp_o"></textarea></div>
-                    <div class="dm-box"><label>D - Diet (อาหาร)</label><textarea id="inp_d2"></textarea></div>
+                    
+                    <div class="action-toolbar">
+                        <button class="btn-action btn-clear" onclick="clearForm()">
+                            <i class="fas fa-eraser"></i> ล้างข้อมูล
+                        </button>
+                        <button class="btn-action btn-save" onclick="saveDischargeNote()">
+                            <i class="fas fa-save"></i> บันทึกข้อมูลผู้ป่วย
+                        </button>
+                        <button class="btn-action btn-print" onclick="window.print()">
+                            <i class="fas fa-print"></i> พิมพ์ใบ D-M-E-T
+                        </button>
+                    </div>
+
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-stethoscope"></i> D - Diagnosis (การวินิจฉัยโรค)</div>
+                        <textarea id="inp_d" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-pills"></i> M - Medicine (ยา)</div>
+                        <textarea id="inp_m" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-home"></i> E - Environment (สิ่งแวดล้อม)</div>
+                        <textarea id="inp_e" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-crutch"></i> T - Treatment (การรักษา/ดูแลตนเอง)</div>
+                        <textarea id="inp_t" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-heartbeat"></i> H - Health (สุขภาพ/อาการที่ต้องสังเกต)</div>
+                        <textarea id="inp_h" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-calendar-alt"></i> O - Outpatient (การนัดตรวจ)</div>
+                        <textarea id="inp_o" class="dm-textarea"></textarea>
+                    </div>
+                    
+                    <div class="dm-group">
+                        <div class="dm-label"><i class="fas fa-utensils"></i> D - Diet (อาหาร)</div>
+                        <textarea id="inp_d2" class="dm-textarea"></textarea>
+                    </div>
                     
                     <div class="print-only-header" style="border:none; margin-top:50px; text-align:right;">
                         <p>ลงชื่อพยาบาลผู้จำหน่าย ...........................................................</p>
@@ -197,35 +292,70 @@
         </div>
     </div>
 
-    <div id="templateModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <span id="modalTitle">เพิ่ม Template โรคใหม่</span>
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-            </div>
-            <input type="hidden" id="editId">
-            <div class="form-row">
-                <label>ชื่อโรค / กลุ่มโรค (Title):</label>
-                <input type="text" id="t_title" placeholder="เช่น ผ่าตัดไส้ติ่ง, เบาหวาน">
-            </div>
-            <div class="form-row"><label>D - Diagnosis:</label><textarea id="t_d" rows="2"></textarea></div>
-            <div class="form-row"><label>M - Medicine:</label><textarea id="t_m" rows="2"></textarea></div>
-            <div class="form-row"><label>E - Environment:</label><textarea id="t_e" rows="2"></textarea></div>
-            <div class="form-row"><label>T - Treatment:</label><textarea id="t_t" rows="2"></textarea></div>
-            <div class="form-row"><label>H - Health:</label><textarea id="t_h" rows="2"></textarea></div>
-            <div class="form-row"><label>O - Outpatient:</label><textarea id="t_o" rows="2"></textarea></div>
-            <div class="form-row"><label>D - Diet:</label><textarea id="t_d2" rows="2"></textarea></div>
-            
-            <div style="text-align:right; margin-top:15px;">
-                <button class="btn" onclick="closeModal()" style="background:#ccc; color:#333;">ยกเลิก</button>
-                <button class="btn btn-primary" onclick="saveTemplate()">บันทึก</button>
-            </div>
-        </div>
-    </div>
-
 <script>
-    // 1. ดึงข้อมูลผู้ป่วย
+    // -------------------------------------------------------------------
+    // 1. ส่วนของข้อมูล Template โรค (แก้ไขที่นี่ถ้าต้องการเพิ่มโรค)
+    // -------------------------------------------------------------------
+    const dischargeTemplates = [
+        {
+            id: 'SURG01', title: 'ไส้ติ่งอักเสบ (Post-op Appendectomy)',
+            d: 'โรคไส้ติ่งอักเสบเฉียบพลัน (Acute Appendicitis) และได้รับการรักษาโดยการผ่าตัดเอาไส้ติ่งออกแล้ว',
+            m: '1. ยาแก้ปวด (Paracetamol) ทานเมื่อปวด ทุก 4-6 ชม.\n2. ยาฆ่าเชื้อ (Antibiotics) ทานติดต่อกันจนหมด\n3. ยาระบาย (ถ้ามี) ป้องกันท้องผูก',
+            e: 'จัดห้องนอนให้อากาศถ่ายเท สะอาด อยู่ชั้นล่างในช่วง 3 วันแรกเพื่อลดการเดินขึ้นลงบันได',
+            t: '1. ห้ามแผลโดนน้ำ 7 วัน (หรือจนกว่าจะตัดไหม)\n2. ห้ามยกของหนัก > 5 กก. นาน 1 เดือน\n3. ลุกเดินบ่อยๆ แต่ช้าๆ ป้องกันพังผืด',
+            h: 'สังเกตอาการ: ไข้สูง, แผลบวมแดงร้อน มีหนอง, ปวดท้องรุนแรง, อาเจียนมาก ให้รีบมา รพ. ทันที',
+            o: 'นัดดูแผล/ตัดไหม วันที่ ..................... เวลา ........... ที่ห้องตรวจศัลยกรรม (OPD Surg)',
+            d2: 'อาหารอ่อน ย่อยง่าย (ข้าวต้ม/โจ๊ก) ในช่วงแรก, เน้นผักผลไม้ป้องกันท้องผูก, ดื่มน้ำสะอาดมากๆ'
+        },
+        {
+            id: 'MED01', title: 'ปอดอักเสบ (Pneumonia)',
+            d: 'โรคปอดอักเสบ (Pneumonia) ได้รับการรักษาจนอาการดีขึ้น',
+            m: '1. ยาปฏิชีวนะ (Antibiotics) สำคัญมาก ต้องทานให้ครบตามแพทย์สั่ง ห้ามหยุดยาเอง\n2. ยาละลายเสมหะ/แก้ไอ จิบน้ำอุ่นบ่อยๆ',
+            e: 'หลีกเลี่ยงควันบุหรี่ ฝุ่นละออง และอากาศเย็นจัด จัดห้องให้อากาศถ่ายเท',
+            t: '1. ฝึกการหายใจลึกๆ (Deep breathing) บริหารปอด\n2. พักผ่อนให้เพียงพอ\n3. ใส่หน้ากากอนามัยเมื่อต้องเข้าชุมชน',
+            h: 'หากมีไข้สูงกลับมา หอบเหนื่อย ไอมีเสมหะเปลี่ยนสี (เขียว/เหลืองข้น) เจ็บหน้าอก ให้รีบมาพบแพทย์',
+            o: 'นัดฟังผล X-ray ปอดซ้ำ วันที่ ..................... ที่คลินิกอายุรกรรม',
+            d2: 'อาหารครบ 5 หมู่ ปรุงสุกสะอาด ดื่มน้ำอุ่นมากๆ เพื่อช่วยละลายเสมหะ'
+        },
+        {
+            id: 'MED02', title: 'เบาหวาน (Diabetes Mellitus)',
+            d: 'โรคเบาหวาน (DM) ระดับน้ำตาลในเลือดสูง',
+            m: '1. ยาลดน้ำตาล (Metformin/Glipizide) ทานก่อน/หลังอาหารตามสั่งเคร่งครัด\n2. ยาฉีดอินซูลิน (ถ้ามี) ฉีดตามเวลาและเทคนิคที่สอน',
+            e: 'ระวังของมีคมตามพื้น ป้องกันการเกิดแผลที่เท้า สวมรองเท้าในบ้านเสมอ',
+            t: '1. ออกกำลังกายสม่ำเสมอ อย่างน้อย 30 นาที/วัน\n2. ตรวจเท้าทุกวัน ห้ามแช่เท้าในน้ำร้อน\n3. ตัดเล็บอย่างระมัดระวัง',
+            h: 'อาการน้ำตาลต่ำ: ใจสั่น เหงื่อออก หน้ามืด (ให้ดื่มน้ำหวานทันที)\nอาการน้ำตาลสูง: หิวน้ำบ่อย ปัสสาวะบ่อย ผอมลง',
+            o: 'นัดเจาะเลือด (NPO งดน้ำงดอาหารหลังเที่ยงคืน) วันที่ .....................',
+            d2: 'จำกัดแป้งและน้ำตาล (ข้าว ขนมปัง ผลไม้หวาน) งดของหวาน เครื่องดื่มชูกำลัง น้ำอัดลม'
+        },
+        {
+            id: 'MED03', title: 'ความดันโลหิตสูง (Hypertension)',
+            d: 'โรคความดันโลหิตสูง (Essential Hypertension)',
+            m: 'ยาต้านความดันโลหิต ทานสม่ำเสมอทุกวัน ห้ามหยุดยาเองแม้ไม่มีอาการ',
+            e: 'บรรยากาศสงบ ลดความเครียด หลีกเลี่ยงเสียงดัง',
+            t: '1. ควบคุมน้ำหนักตัว\n2. ออกกำลังกายแบบแอโรบิคเบาๆ\n3. วัดความดันโลหิตสม่ำเสมอที่บ้าน',
+            h: 'หากปวดศีรษะรุนแรง ตาพร่ามัว หน้ามืด หรือวัดความดันได้ > 160/100 mmHg ให้รีบมาพบแพทย์',
+            o: 'นัดติดตามอาการ วันที่ ..................... ที่คลินิก NCD',
+            d2: 'ลดเค็ม (จำกัดโซเดียม) งดผงชูรส อาหารหมักดอง ปลาเค็ม ไข่เค็ม'
+        },
+        {
+            id: 'ORTHO01', title: 'กระดูกหัก/ใส่เฝือก (Fracture)',
+            d: 'กระดูกหัก (Fracture) ที่บริเวณ ..................... ใส่เฝือก/ดามเหล็ก',
+            m: 'ยาแก้ปวด และแคลเซียมบำรุงกระดูก ตามแพทย์สั่ง',
+            e: 'จัดบ้านให้โล่ง ป้องกันการสะดุดหกล้ม พื้นห้องน้ำไม่ลื่น',
+            t: '1. ห้ามลงน้ำหนักขาข้างที่หัก (ใช้ไม้ค้ำยันตามสอน)\n2. บริหารเกร็งกล้ามเนื้อในเฝือก (Isometric exercise)\n3. ห้ามให้เฝือกเปียกน้ำ/ห้ามเอาไม้เข้าไปเกา',
+            h: 'หากปลายมือ/เท้า บวม เขียวคล้ำ ชา หรือปวดมากผิดปกติ ให้รีบมา รพ. ทันที',
+            o: 'นัด X-ray ดูการติดของกระดูก วันที่ .....................',
+            d2: 'อาหารโปรตีนสูง (เนื้อ นม ไข่) และแคลเซียมสูง เพื่อเสริมสร้างกระดูก'
+        }
+    ];
+
+    // -------------------------------------------------------------------
+    // 2. Logic การทำงาน
+    // -------------------------------------------------------------------
+    
+    // ดึงข้อมูลผู้ป่วย
     const patientProfile = JSON.parse(localStorage.getItem('patientProfile'));
+    
     if(patientProfile) {
         document.getElementById('ptName').innerText = patientProfile.name;
         document.getElementById('ptHN').innerText = patientProfile.hn;
@@ -236,53 +366,42 @@
         document.getElementById('pNamePrint').innerText = patientProfile.name;
         document.getElementById('pHNPrint').innerText = patientProfile.hn;
         document.getElementById('pWardPrint').innerText = patientProfile.ward;
+
+        // โหลดข้อมูลเก่าถ้าเคยบันทึกไว้
+        loadDischargeNote();
     } else {
         alert("กรุณาเลือกผู้ป่วยก่อนครับ"); window.location.href = 'ward.html';
     }
 
-    // 2. ข้อมูล Default (กรณีรีเซ็ตหรือเริ่มใหม่)
-    const defaultTemplates = [
-        { id: 'SURG01', title: 'ไส้ติ่งอักเสบ (Post-op Appendectomy)', d: 'โรคไส้ติ่งอักเสบเฉียบพลัน ผ่าตัดเอาไส้ติ่งออกแล้ว', m: '1. Paracetamol 500 mg แก้ปวด\n2. Antibiotics ทานให้ครบ', e: 'จัดห้องนอนสะอาด อากาศถ่ายเท งดเดินขึ้นลงบันได', t: '1. ห้ามแผลโดนน้ำ 7 วัน\n2. ห้ามยกของหนัก > 5 กก.\n3. เดินยืดตัวบ่อยๆ', h: 'สังเกต: ไข้สูง, แผลบวมแดง, ปวดท้องรุนแรง ให้รีบมา รพ.', o: 'นัดตัดไหมวันที่ .................. เวลา .................. ห้องตรวจศัลยกรรม', d2: 'อาหารอ่อนย่อยง่าย เน้นผักผลไม้ ดื่มน้ำมากๆ' },
-        { id: 'MED01', title: 'ปอดอักเสบ (Pneumonia)', d: 'โรคปอดอักเสบ รักษาจนอาการดีขึ้น', m: '1. ทานยาปฏิชีวนะให้ครบ\n2. ยาละลายเสมหะ', e: 'หลีกเลี่ยงควันบุหรี่ ฝุ่นละออง', t: '1. ฝึกหายใจลึกๆ\n2. พักผ่อนให้เพียงพอ\n3. ใส่หน้ากากอนามัย', h: 'หากไข้กลับมา หอบเหนื่อย ไอเสมหะเปลี่ยนสี ให้มาพบแพทย์', o: 'นัด X-ray ปอดซ้ำวันที่ ..................', d2: 'อาหารครบ 5 หมู่ ปรุงสุกสะอาด ดื่มน้ำอุ่น' }
-    ];
-
-    // 3. จัดการข้อมูล (Local Storage CRUD)
-    let templates = JSON.parse(localStorage.getItem('dmethod_templates'));
-    if(!templates || templates.length === 0) {
-        templates = defaultTemplates;
-        localStorage.setItem('dmethod_templates', JSON.stringify(templates));
-    }
-
-    // Render List
+    // Render List Template
     function renderTemplates() {
         const searchText = document.getElementById('searchTemplate').value.toLowerCase();
         const listDiv = document.getElementById('templateList');
         listDiv.innerHTML = '';
 
-        const filtered = templates.filter(t => t.title.toLowerCase().includes(searchText));
+        const filtered = dischargeTemplates.filter(t => t.title.toLowerCase().includes(searchText));
 
-        if(filtered.length === 0) { listDiv.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">ไม่พบข้อมูล</div>'; return; }
+        if(filtered.length === 0) {
+            listDiv.innerHTML = '<div style="text-align:center; color:#999; padding:20px;">ไม่พบข้อมูล</div>';
+            return;
+        }
 
-        filtered.forEach((t, index) => {
+        filtered.forEach(t => {
             const div = document.createElement('div');
             div.className = 'template-item';
             div.innerHTML = `
-                <div class="template-info" onclick="fillForm('${t.id}')">
-                    <strong>${t.title}</strong>
-                </div>
-                <div class="template-actions">
-                    <button class="btn-icon" onclick="openModal('${t.id}')" title="แก้ไข"><i class="fas fa-pen"></i></button>
-                    <button class="btn-icon del" onclick="deleteTemplate('${t.id}')" title="ลบ"><i class="fas fa-trash"></i></button>
-                </div>
+                <strong>${t.title}</strong>
+                <small>${t.id}</small>
             `;
+            // คลิกแล้วเติมข้อมูล
+            div.onclick = () => fillForm(t);
             listDiv.appendChild(div);
         });
     }
 
-    // Fill Form
-    function fillForm(id) {
-        const data = templates.find(t => t.id === id);
-        if(!data) return;
+    // เติมข้อมูลลงฟอร์ม
+    function fillForm(data) {
+        if(!confirm("ข้อมูลในช่องจะถูกทับด้วย Template ใหม่ ยืนยันไหม?")) return;
         document.getElementById('inp_d').value = data.d || '';
         document.getElementById('inp_m').value = data.m || '';
         document.getElementById('inp_e').value = data.e || '';
@@ -292,80 +411,47 @@
         document.getElementById('inp_d2').value = data.d2 || '';
     }
 
-    // Modal & CRUD Operations
-    function openModal(id = null) {
-        const modal = document.getElementById('templateModal');
-        const titleEl = document.getElementById('modalTitle');
-        document.getElementById('editId').value = '';
-        
-        // Clear inputs
-        ['title','d','m','e','t','h','o','d2'].forEach(k => document.getElementById('t_'+k).value = '');
+    // --- CRUD สำหรับข้อมูลคนไข้ (Save/Load) ---
 
-        if(id) {
-            const t = templates.find(x => x.id === id);
-            if(t) {
-                titleEl.innerText = 'แก้ไข Template';
-                document.getElementById('editId').value = t.id;
-                document.getElementById('t_title').value = t.title;
-                document.getElementById('t_d').value = t.d;
-                document.getElementById('t_m').value = t.m;
-                document.getElementById('t_e').value = t.e;
-                document.getElementById('t_t').value = t.t;
-                document.getElementById('t_h').value = t.h;
-                document.getElementById('t_o').value = t.o;
-                document.getElementById('t_d2').value = t.d2;
-            }
-        } else {
-            titleEl.innerText = 'เพิ่ม Template โรคใหม่';
-        }
-        modal.style.display = 'flex';
-    }
-
-    function closeModal() { document.getElementById('templateModal').style.display = 'none'; }
-
-    function saveTemplate() {
-        const id = document.getElementById('editId').value;
-        const newObj = {
-            id: id ? id : 'CUSTOM_' + Date.now(),
-            title: document.getElementById('t_title').value,
-            d: document.getElementById('t_d').value,
-            m: document.getElementById('t_m').value,
-            e: document.getElementById('t_e').value,
-            t: document.getElementById('t_t').value,
-            h: document.getElementById('t_h').value,
-            o: document.getElementById('t_o').value,
-            d2: document.getElementById('t_d2').value
+    function saveDischargeNote() {
+        if(!patientProfile) return;
+        const noteData = {
+            d: document.getElementById('inp_d').value,
+            m: document.getElementById('inp_m').value,
+            e: document.getElementById('inp_e').value,
+            t: document.getElementById('inp_t').value,
+            h: document.getElementById('inp_h').value,
+            o: document.getElementById('inp_o').value,
+            d2: document.getElementById('inp_d2').value,
+            savedAt: new Date().toLocaleString()
         };
-
-        if(!newObj.title) return alert("กรุณาระบุชื่อโรค");
-
-        if(id) {
-            // Edit
-            const index = templates.findIndex(t => t.id === id);
-            templates[index] = newObj;
-        } else {
-            // Add
-            templates.push(newObj);
-        }
-
-        localStorage.setItem('dmethod_templates', JSON.stringify(templates));
-        renderTemplates();
-        closeModal();
+        
+        // บันทึกลง LocalStorage โดยใช้ Key เป็น HN ของคนไข้
+        const storageKey = `discharge_note_${patientProfile.hn}`;
+        localStorage.setItem(storageKey, JSON.stringify(noteData));
+        
+        alert(`บันทึกข้อมูลของ ${patientProfile.name} เรียบร้อยแล้ว!`);
     }
 
-    function deleteTemplate(id) {
-        if(confirm("ต้องการลบ Template นี้ใช่หรือไม่?")) {
-            templates = templates.filter(t => t.id !== id);
-            localStorage.setItem('dmethod_templates', JSON.stringify(templates));
-            renderTemplates();
+    function loadDischargeNote() {
+        if(!patientProfile) return;
+        const storageKey = `discharge_note_${patientProfile.hn}`;
+        const savedData = JSON.parse(localStorage.getItem(storageKey));
+
+        if(savedData) {
+            document.getElementById('inp_d').value = savedData.d || '';
+            document.getElementById('inp_m').value = savedData.m || '';
+            document.getElementById('inp_e').value = savedData.e || '';
+            document.getElementById('inp_t').value = savedData.t || '';
+            document.getElementById('inp_h').value = savedData.h || '';
+            document.getElementById('inp_o').value = savedData.o || '';
+            document.getElementById('inp_d2').value = savedData.d2 || '';
         }
     }
 
-    function resetDefaults() {
-        if(confirm("ข้อมูลที่คุณสร้างเองจะหายไป และกลับเป็นค่าเริ่มต้น ยืนยันไหม?")) {
-            templates = defaultTemplates;
-            localStorage.setItem('dmethod_templates', JSON.stringify(templates));
-            renderTemplates();
+    function clearForm() {
+        if(confirm("ต้องการล้างข้อมูลในฟอร์มทั้งหมดหรือไม่?")) {
+            document.querySelectorAll('textarea').forEach(el => el.value = '');
         }
     }
 
