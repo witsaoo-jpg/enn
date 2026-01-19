@@ -6,30 +6,162 @@
     <title>Discharge Planning (D-M-E-T-H-O-D)</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css"> 
     
     <style>
-        body { background-color: #f0f2f5; }
+        :root {
+            --primary: #00796b;
+            --primary-dark: #004d40;
+            --primary-light: #e0f2f1;
+            --accent: #2e7d32;
+            --danger: #c62828;
+            --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
-        /* ส่วนหัวแสดงข้อมูลผู้ป่วย */
-        .patient-header-card {
-            background: linear-gradient(135deg, var(--primary) 0%, #004d40 100%);
-            color: white;
-            padding: 20px 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        body { 
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%);
+            font-family: 'Sarabun', sans-serif;
+            color: #2c3e50;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 18px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            box-shadow: var(--shadow-hover);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            color: white;
         }
-        .ph-info h2 { margin: 0; font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-        .ph-meta { margin-top: 5px; font-size: 1rem; opacity: 0.9; }
-        .ph-meta span { margin-right: 15px; background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 15px; font-size: 0.9rem; }
+
+        .navbar-title {
+            font-weight: 600;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .container { 
+            max-width: 1600px; 
+            margin: 25px auto; 
+            padding: 0 20px;
+        }
+        
+        /* ส่วนหัวแสดงข้อมูลผู้ป่วย */
+        .patient-header-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 28px 35px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-hover);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .patient-header-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50px;
+            width: 300px;
+            height: 300px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+
+        .ph-info {
+            position: relative;
+            z-index: 1;
+        }
+
+        .ph-info h2 { 
+            margin: 0; 
+            font-size: 1.75rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            font-weight: 600;
+        }
+        
+        .ph-meta { 
+            margin-top: 12px; 
+            font-size: 1rem; 
+            opacity: 0.95;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .ph-meta span { 
+            background: rgba(255,255,255,0.2); 
+            padding: 7px 16px; 
+            border-radius: 20px; 
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn {
+            padding: 11px 22px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary {
+            background: white;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-clear {
+            background: #ffebee;
+            color: var(--danger);
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            backdrop-filter: blur(10px);
+        }
 
         .layout-container {
             display: grid;
-            grid-template-columns: 320px 1fr;
+            grid-template-columns: 360px 1fr;
             gap: 25px;
             align-items: start;
         }
@@ -37,113 +169,274 @@
         /* ส่วนเลือกโรคด้านซ้าย */
         .sidebar-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            padding: 20px;
-            height: calc(100vh - 220px);
+            padding: 28px;
+            height: calc(100vh - 260px);
             display: flex;
             flex-direction: column;
-            border: 1px solid #e0e0e0;
+            border: 1px solid rgba(0,0,0,0.06);
+            position: sticky;
+            top: 100px;
         }
         
         .sidebar-title {
-            font-size: 1.1rem; font-weight: bold; color: var(--primary);
-            margin-bottom: 15px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;
+            font-size: 1.2rem; 
+            font-weight: 600; 
+            color: var(--primary);
+            margin-bottom: 20px; 
+            border-bottom: 3px solid var(--primary-light); 
+            padding-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .search-box {
-            width: 100%; padding: 10px 15px; border: 1px solid #ddd;
-            border-radius: 25px; background: #f9f9f9; outline: none; transition: 0.3s;
-            margin-bottom: 15px;
+            width: 100%; 
+            padding: 13px 20px; 
+            border: 2px solid #e0e0e0;
+            border-radius: 30px; 
+            background: #f8f9fa; 
+            outline: none; 
+            transition: all 0.3s;
+            margin-bottom: 20px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 0.95rem;
         }
 
-        #templateList { flex-grow: 1; overflow-y: auto; }
+        .search-box:focus {
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.1);
+        }
+
+        #templateList { 
+            flex-grow: 1; 
+            overflow-y: auto;
+            padding-right: 8px;
+        }
+
+        #templateList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #templateList::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        #templateList::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
 
         .template-item {
-            padding: 12px 15px;
-            margin-bottom: 8px;
+            padding: 16px 18px;
+            margin-bottom: 12px;
             background: #fff;
-            border: 1px solid #eee;
-            border-radius: 8px;
+            border: 2px solid #f0f0f0;
+            border-radius: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .template-item:hover { border-color: var(--primary); background: #e0f2f1; transform: translateX(3px); }
-        .template-item strong { display: block; color: #333; font-size: 0.95rem; }
+        
+        .template-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary);
+            border-radius: 10px 0 0 10px;
+            transform: scaleY(0);
+            transition: transform 0.3s ease;
+        }
+
+        .template-item:hover { 
+            border-color: var(--primary); 
+            background: var(--primary-light); 
+            transform: translateX(6px);
+            box-shadow: var(--shadow);
+        }
+
+        .template-item:hover::before {
+            transform: scaleY(1);
+        }
+
+        .template-item strong { 
+            display: block; 
+            color: #333; 
+            font-size: 0.98rem;
+            line-height: 1.6;
+        }
 
         /* ส่วนฟอร์ม D-M-E-T-H-O-D ด้านขวา */
         .form-card {
             background: white;
-            border-radius: 12px;
+            border-radius: 16px;
             box-shadow: var(--shadow);
-            padding: 30px;
-            min-height: calc(100vh - 220px);
+            padding: 35px 40px;
+            min-height: calc(100vh - 260px);
+            border: 1px solid rgba(0,0,0,0.06);
         }
 
         .action-toolbar {
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
+            gap: 12px;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f5f5f5;
         }
 
-        .dm-group { margin-bottom: 20px; }
+        .dm-group { 
+            margin-bottom: 28px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .dm-label {
-            display: flex; align-items: center; gap: 8px;
-            font-weight: bold; font-size: 1.05rem; color: #37474f;
-            margin-bottom: 8px;
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            font-weight: 600; 
+            font-size: 1.1rem; 
+            color: #2c3e50;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+
+        .dm-label i {
+            color: var(--primary);
+            font-size: 1.25rem;
+            width: 24px;
+            text-align: center;
         }
         
         .dm-textarea {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #cfd8dc;
-            border-radius: 8px;
+            padding: 15px 18px;
+            border: 2px solid #e3e8ef;
+            border-radius: 12px;
             font-family: 'Sarabun', sans-serif;
             font-size: 1rem;
-            line-height: 1.6;
-            min-height: 85px;
+            line-height: 1.7;
+            min-height: 100px;
             resize: vertical;
-            background: #fafafa;
+            background: #fafbfc;
+            transition: all 0.3s ease;
+        }
+
+        .dm-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0, 121, 107, 0.08);
+        }
+
+        .dm-textarea::placeholder {
+            color: #bbb;
+        }
+
+        @media (max-width: 1200px) {
+            .layout-container {
+                grid-template-columns: 320px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .layout-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar-card {
+                height: auto;
+                max-height: 400px;
+                position: static;
+            }
+
+            .ph-info h2 {
+                font-size: 1.4rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .patient-header-card {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .ph-meta {
+                justify-content: center;
+            }
+
+            .action-toolbar {
+                flex-wrap: wrap;
+            }
+
+            .navbar {
+                flex-direction: column;
+                gap: 10px;
+            }
         }
 
         @media print {
             .navbar, .sidebar-card, .action-toolbar, .no-print { display: none !important; }
             .layout-container { display: block; }
-            .form-card { box-shadow: none; padding: 0; }
-            .dm-textarea { border: none; background: none; min-height: auto; padding: 0; }
+            .form-card { box-shadow: none; padding: 20px; border: none; }
+            .dm-textarea { border: none; background: none; min-height: auto; padding: 5px 0; }
             .dm-label { text-decoration: underline; color: black; }
+            body { background: white; }
+            .patient-header-card { 
+                background: white !important;
+                color: black !important;
+                border: 2px solid #333;
+            }
+            .ph-meta span {
+                background: #eee !important;
+                color: black !important;
+            }
         }
     </style>
 </head>
 <body>
 
     <nav class="navbar no-print">
-        <div style="font-weight:bold; font-size:1.1rem;">
-            <i class="fas fa-home"></i> Discharge Planning
+        <div class="navbar-title">
+            <i class="fas fa-hospital-user"></i> 
+            <span>Discharge Planning System</span>
         </div>
         <div>
-            <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;">
+            <button onclick="window.location.href='index.html'" class="btn btn-back">
                 <i class="fas fa-arrow-left"></i> กลับหน้าบันทึก
             </button>
         </div>
     </nav>
 
-    <div class="container" style="max-width: 98%;">
+    <div class="container">
         
         <div class="patient-header-card">
             <div class="ph-info">
-                <h2><i class="fas fa-user-injured"></i> <span id="ptName">นายมีชัย รักดี</span></h2>
+                <h2>
+                    <i class="fas fa-user-injured"></i> 
+                    <span id="ptName">นายมีชัย รักดี</span>
+                </h2>
                 <div class="ph-meta">
-                    <span><i class="fas fa-id-card"></i> HN: <span id="ptHN">66-00123</span></span>
-                    <span><i class="fas fa-procedures"></i> AN: <span id="ptAN">66-1111</span></span>
-                    <span><i class="fas fa-clinic-medical"></i> Ward: <span id="ptWard">Med1</span></span>
+                    <span><i class="fas fa-id-card"></i> HN: <strong id="ptHN">66-00123</strong></span>
+                    <span><i class="fas fa-procedures"></i> AN: <strong id="ptAN">66-1111</strong></span>
+                    <span><i class="fas fa-clinic-medical"></i> Ward: <strong id="ptWard">Med1</strong></span>
                 </div>
             </div>
             <div class="btn-print-group no-print">
-                <button class="btn btn-primary" onclick="window.print()" style="background:white; color:var(--primary); font-weight:bold;">
+                <button class="btn btn-primary" onclick="window.print()">
                     <i class="fas fa-print"></i> พิมพ์ใบกลับบ้าน
                 </button>
             </div>
@@ -152,8 +445,10 @@
         <div class="layout-container">
             
             <div class="sidebar-card no-print">
-                <div class="sidebar-title"><i class="fas fa-book-medical"></i> เลือกกลุ่มโรค</div>
-                <input type="text" id="searchTemplate" class="search-box" placeholder="🔍 ค้นหาชื่อโรค..." onkeyup="renderTemplates()">
+                <div class="sidebar-title">
+                    <i class="fas fa-book-medical"></i> เลือกกลุ่มโรค
+                </div>
+                <input type="text" id="searchTemplate" class="search-box" placeholder="🔍 ค้นหาชื่อโรค..." onkeyup="filterTemplates()">
                 
                 <div id="templateList">
                     <div class="template-item" onclick="fillForm('SURG01')">
@@ -162,55 +457,246 @@
                     <div class="template-item" onclick="fillForm('MED01')">
                         <strong>ปอดอักเสบ (Pneumonia)</strong>
                     </div>
+                    <div class="template-item" onclick="fillForm('MED02')">
+                        <strong>โรคเบาหวาน (Diabetes Mellitus)</strong>
+                    </div>
+                    <div class="template-item" onclick="fillForm('CARD01')">
+                        <strong>ความดันโลหิตสูง (Hypertension)</strong>
+                    </div>
+                    <div class="template-item" onclick="fillForm('CARD02')">
+                        <strong>หัวใจวาย (Myocardial Infarction)</strong>
+                    </div>
+                    <div class="template-item" onclick="fillForm('NEURO01')">
+                        <strong>โรคหลอดเลือดสมอง (Stroke)</strong>
+                    </div>
                 </div>
             </div>
 
             <div class="form-card">
                 <div class="action-toolbar no-print">
-                    <button class="btn" style="background:#ffebee; color:#c62828;" onclick="clearForm()">
+                    <button class="btn btn-clear" onclick="clearForm()">
                         <i class="fas fa-eraser"></i> ล้างข้อมูล
                     </button>
-                    <button class="btn" style="background:#2e7d32; color:white;" onclick="saveDischarge()">
+                    <button class="btn btn-save" onclick="saveDischarge()">
                         <i class="fas fa-save"></i> บันทึกข้อมูล
                     </button>
                 </div>
 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-stethoscope"></i> D - Diagnosis (การวินิจฉัยโรค)</div>
-                    <textarea id="inp_d" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-stethoscope"></i> 
+                        <span>D - Diagnosis (การวินิจฉัยโรค)</span>
+                    </div>
+                    <textarea id="inp_d" class="dm-textarea" placeholder="ระบุการวินิจฉัยโรค..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-pills"></i> M - Medicine (ยา)</div>
-                    <textarea id="inp_m" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-pills"></i> 
+                        <span>M - Medicine (ยา)</span>
+                    </div>
+                    <textarea id="inp_m" class="dm-textarea" placeholder="ระบุรายการยาและวิธีการใช้..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-home"></i> E - Environment (สิ่งแวดล้อม)</div>
-                    <textarea id="inp_e" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-home"></i> 
+                        <span>E - Environment (สิ่งแวดล้อม)</span>
+                    </div>
+                    <textarea id="inp_e" class="dm-textarea" placeholder="คำแนะนำเกี่ยวกับสิ่งแวดล้อมที่เหมาะสม..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-crutch"></i> T - Treatment (การรักษา/ดูแลตนเอง)</div>
-                    <textarea id="inp_t" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-hand-holding-medical"></i> 
+                        <span>T - Treatment (การรักษา/ดูแลตนเอง)</span>
+                    </div>
+                    <textarea id="inp_t" class="dm-textarea" placeholder="วิธีการดูแลรักษาตนเอง..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-heartbeat"></i> H - Health (สุขภาพ/อาการที่ต้องสังเกต)</div>
-                    <textarea id="inp_h" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-heartbeat"></i> 
+                        <span>H - Health (สุขภาพ/อาการที่ต้องสังเกต)</span>
+                    </div>
+                    <textarea id="inp_h" class="dm-textarea" placeholder="อาการที่ต้องสังเกตและติดตาม..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-calendar-alt"></i> O - Outpatient (การนัดตรวจ)</div>
-                    <textarea id="inp_o" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-calendar-check"></i> 
+                        <span>O - Outpatient (การนัดตรวจ)</span>
+                    </div>
+                    <textarea id="inp_o" class="dm-textarea" placeholder="กำหนดการนัดตรวจครั้งถัดไป..."></textarea>
                 </div>
                 
                 <div class="dm-group">
-                    <div class="dm-label"><i class="fas fa-utensils"></i> D - Diet (อาหาร)</div>
-                    <textarea id="inp_d2" class="dm-textarea"></textarea>
+                    <div class="dm-label">
+                        <i class="fas fa-utensils"></i> 
+                        <span>D - Diet (อาหาร)</span>
+                    </div>
+                    <textarea id="inp_d2" class="dm-textarea" placeholder="คำแนะนำเกี่ยวกับอาหาร..."></textarea>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // ข้อมูล Template
+        const templates = {
+            'SURG01': {
+                d: 'ไส้ติ่งอักเสบ ผ่าตัดไส้ติ่งแบบเปิดหน้าท้อง',
+                m: '- ยาแก้ปวด: Paracetamol 500 mg กินวันละ 3 ครั้ง หลังอาหาร\n- ยาปฏิชีวนะ: Amoxicillin 500 mg กินวันละ 3 ครั้ง นาน 7 วัน',
+                e: '- รักษาแผลผ่าตัดให้สะอาดและแห้ง\n- หลีกเลี่ยงการยกของหนัก\n- พักผ่อนให้เพียงพอ',
+                t: '- เปลี่ยนผ้าปิดแผลทุกวัน\n- ล้างแผลด้วยน้ำเกลือ\n- งดอาบน้ำแช่ตัว ใช้วิธีเช็ดตัวแทน 7-10 วัน',
+                h: '- มีไข้สูง\n- แผลแดง บวม มีหนอง\n- ปวดท้องมาก\n- คลื่นไส้อาเจียนรุนแรง',
+                o: 'นัดตรวจที่คลินิกศัลยกรรม ในวันที่ 7 วันหลังจำหน่าย เพื่อเปิดไหม',
+                d2: '- กินอาหารอ่อน ละเอียด หลีกเลี่ยงอาหารรสจัด\n- หลีกเลี่ยงอาหารที่ทำให้ท้องอืด\n- ดื่มน้ำมากๆ'
+            },
+            'MED01': {
+                d: 'ปอดอักเสบ (Community-acquired Pneumonia)',
+                m: '- ยาปฏิชีวนะตามแพทย์สั่ง กินให้ครบ 7-10 วัน\n- ยาแก้ไข้ แก้ปวด\n- ยาขับเสมหะ',
+                e: '- ควรพักผ่อนในที่อากาศถ่ายเทดี\n- หลีกเลี่ยงควันบุหรี่และมลพิษ\n- ควรสวมหน้ากากเมื่อออกจากบ้าน',
+                t: '- ดื่มน้ำมากๆ อย่างน้อย 8 แก้ว/วัน\n- นอนศีรษะสูง\n- ออกกำลังกายเบาๆ เช่น เดินช้าๆ',
+                h: '- หายใจลำบากมากขึ้น\n- เจ็บหน้าอก\n- ไอมีเสมหะสีเขียว เหลือง หรือมีเลือดปน\n- มีไข้สูงไม่ลดลง',
+                o: 'นัดตรวจที่คลินิกอายุรกรรม ในวันที่ 7-10 วัน เพื่อประเมินอาการและตรวจ X-ray ปอดซ้ำ',
+                d2: '- กินอาหารครบ 5 หมู่\n- เน้นโปรตีน ผัก ผลไม้\n- หลีกเลี่ยงอาหารรสจัด เผ็ดร้อน'
+            },
+            'MED02': {
+                d: 'โรคเบาหวาน (Diabetes Mellitus Type 2)',
+                m: '- ยาลดน้ำตาล ตามที่แพทย์สั่ง กินก่อนอาหาร\n- ควรตรวจน้ำตาลก่อนอาหารเช้า และก่อนนอน',
+                e: '- เก็บยาในที่แห้ง อุณหภูมิห้อง\n- สวมรองเท้าที่พอดี นุ่มสบาย\n- ตรวจเท้าทุกวัน',
+                t: '- ตรวจน้ำตาลเอง บันทึกผล\n- ออกกำลังกายสม่ำเสมอ วันละ 30 นาที\n- ดูแลสุขภาพเท้า',
+                h: '- น้ำตาลในเลือดต่ำกว่า 70 หรือสูงกว่า 300 mg/dL\n- เหงื่อออก ตัวสั่น หิวมาก\n- มึนงง ไม่รู้สึกตัว\n- แผลที่เท้าไม่หาย',
+                o: 'นัดตรวจที่คลินิกเบาหวาน ทุก 1-3 เดือน พร้อมตรวจเลือด HbA1c',
+                d2: '- ควบคุมอาหารคาร์โบไฮเดรต\n- หลีกเลี่ยงน้ำตาล ขนมหวาน\n- กินผักมากๆ ผลไม้หวานน้อย\n- กินอาหารตรงเวลา ไม่งดมื้อ'
+            },
+            'CARD01': {
+                d: 'ความดันโลหิตสูง (Hypertension)',
+                m: '- ยาลดความดัน กินตรงเวลาทุกวัน\n- ห้ามหยุดยาเอง แม้ความดันปกติ',
+                e: '- หลีกเลี่ยงความเครียด\n- พักผ่อนให้เพียงพอ\n- หลีกเลี่ยงเสียงดังและควันบุหรี่',
+                t: '- วัดความดันเองที่บ้าน บันทึกผล\n- ออกกำลังกายสม่ำเสมอ\n- ลดน้ำหนักหากน้ำหนักเกิน',
+                h: '- ปวดศีรษะรุนแรง\n- หน้ามืด เวียนศีรษะ\n- เจ็บหน้าอก หายใจลำบาก\n- ชาแขนขา พูดไม่ชัด',
+                o: 'นัดตรวจทุก 1-2 เดือน หรือเมื่อควบคุมความดันได้แล้วนัดทุก 3 เดือน',
+                d2: '- ลดเกลือ อาหารรสจัด\n- หลีกเลี่ยงอาหารมัน ทอด\n- เพิ่มผัก ผลไม้\n- ดื่มน้ำเปล่าเพียงพอ ไม่เกิน 2 ลิตร/วัน'
+            },
+            'CARD02': {
+                d: 'หัวใจวาย (Acute Myocardial Infarction)',
+                m: '- ยาละลายลิ่มเลือด\n- ยาขยายหลอดเลือด\n- ยาลดไขมัน\n- Aspirin (ห้ามหยุดเอง)',
+                e: '- หลีกเลี่ยงกิจกรรมหนักๆ 4-6 สัปดาห์\n- พักผ่อนเพียงพอ\n- สภาพแวดล้อมปลอดความเครียด',
+                t: '- ฟื้นฟูหัวใจตามกำหนด\n- ออกกำลังกายเบาๆ เพิ่มขึ้นทีละน้อย\n- งดสูบบุหรี่และแอลกอฮอล์',
+                h: '- เจ็บหน้าอกอีก\n- หายใจลำบาก\n- เหนื่อยง่าย ใจสั่น\n- บวมขา',
+                o: 'นัดตรวจที่คลินิกหัวใจ ใน 1-2 สัปดาห์ และทุก 1-3 เดือนต่อเนื่อง',
+                d2: '- อาหารไขมันต่ำ\n- ลดเกลือ น้ำตาล\n- เพิ่มผัก ผลไม้ ธัญพืช\n- หลีกเลี่ยงอาหารทอด มัน'
+            },
+            'NEURO01': {
+                d: 'โรคหลอดเลือดสมอง (Cerebrovascular Accident - Stroke)',
+                m: '- ยาป้องกันลิ่มเลือด\n- ยาควบคุมความดัน\n- ยาลดไขมัน\n- กินยาตรงเวลา ห้ามหยุดเอง',
+                e: '- ปรับบ้านให้ปลอดภัย ไม่ลื่น\n- ติดราวจับในห้องน้ำ\n- จัดของใช้ให้อยู่ในระดับที่หยิบง่าย',
+                t: '- ทำกายภาพบำบัดตามนัด\n- ฝึกพูด ฝึกกลืน\n- ฝึกใช้แขนขาที่อ่อนแรง',
+                h: '- อ่อนแรงครึ่งซีกเพิ่มขึ้น\n- ชาแขนขาฉับพลัน\n- พูดไม่ชัด มองเห็นผิดปกติ\n- ปวดศีรษะรุนแรง',
+                o: 'นัดตรวจที่คลินิกประสาทวิทยา ใน 2 สัปดาห์ และนัดกายภาพบำบัดสัปดาห์ละ 2-3 ครั้ง',
+                d2: '- อาหารเนื้อนุ่ม ง่ายต่อการกลืน\n- หลีกเลี่ยงไขมันสูง\n- ลดเกลือ น้ำตาล\n- เพิ่มผัก ผลไม้'
+            }
+        };
+
+        // ฟังก์ชันกรองรายการโรค
+        function filterTemplates() {
+            const search = document.getElementById('searchTemplate').value.toLowerCase();
+            const items = document.querySelectorAll('.template-item');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(search)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // ฟังก์ชันเติมข้อมูลจาก Template
+        function fillForm(templateId) {
+            const template = templates[templateId];
+            if (!template) {
+                alert('ไม่พบข้อมูล Template');
+                return;
+            }
+
+            document.getElementById('inp_d').value = template.d;
+            document.getElementById('inp_m').value = template.m;
+            document.getElementById('inp_e').value = template.e;
+            document.getElementById('inp_t').value = template.t;
+            document.getElementById('inp_h').value = template.h;
+            document.getElementById('inp_o').value = template.o;
+            document.getElementById('inp_d2').value = template.d2;
+
+            // เพิ่ม effect เมื่อเลือก template
+            const formCard = document.querySelector('.form-card');
+            formCard.style.animation = 'none';
+            setTimeout(() => {
+                formCard.style.animation = 'fadeIn 0.5s ease';
+            }, 10);
+        }
+
+        // ฟังก์ชันล้างข้อมูล
+        function clearForm() {
+            if (confirm('คุณต้องการล้างข้อมูลทั้งหมดใช่หรือไม่?')) {
+                document.getElementById('inp_d').value = '';
+                document.getElementById('inp_m').value = '';
+                document.getElementById('inp_e').value = '';
+                document.getElementById('inp_t').value = '';
+                document.getElementById('inp_h').value = '';
+                document.getElementById('inp_o').value = '';
+                document.getElementById('inp_d2').value = '';
+            }
+        }
+
+        // ฟังก์ชันบันทึกข้อมูล
+        function saveDischarge() {
+            const data = {
+                patient: {
+                    name: document.getElementById('ptName').textContent,
+                    hn: document.getElementById('ptHN').textContent,
+                    an: document.getElementById('ptAN').textContent,
+                    ward: document.getElementById('ptWard').textContent
+                },
+                discharge: {
+                    diagnosis: document.getElementById('inp_d').value,
+                    medicine: document.getElementById('inp_m').value,
+                    environment: document.getElementById('inp_e').value,
+                    treatment: document.getElementById('inp_t').value,
+                    health: document.getElementById('inp_h').value,
+                    outpatient: document.getElementById('inp_o').value,
+                    diet: document.getElementById('inp_d2').value
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            // บันทึกลง localStorage (ในการใช้งานจริงควรส่งไป backend)
+            localStorage.setItem('discharge_' + data.patient.an, JSON.stringify(data));
+            
+            alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+        }
+
+        // โหลดข้อมูลเมื่อเปิดหน้า (ถ้ามี)
+        window.addEventListener('load', function() {
+            const an = document.getElementById('ptAN').textContent;
+            const saved = localStorage.getItem('discharge_' + an);
+            
+            if (saved) {
+                const data = JSON.parse(saved);
+                if (confirm('พบข้อมูลที่บันทึกไว้ ต้องการโหลดข้อมูลหรือไม่?')) {
+                    document.getElementById('inp_d').value = data.discharge.diagnosis;
+                    document.getElementById('inp_m').value = data.discharge.medicine;
+                    document.getElementById('inp_e').value = data.discharge.environment;
+                    document.getElementById('inp_t').value = data.discharge.treatment;
+                    document.getElementById('inp_h').value = data.discharge.health;
+                    document.getElementById('inp_o').value = data.discharge.outpatient;
+                    document.getElementById('inp_d2').value = data.discharge.diet;
+                }
+            }
+        });
+    </script>
 </body>
 </html>
