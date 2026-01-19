@@ -17,14 +17,27 @@
         }
         .cat-btn:hover { background: #e0f2f1; color: var(--primary); border-color: var(--primary); }
         .cat-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+        
+        /* CSS สำหรับช่อง S และ O */
+        .so-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .so-box label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
     </style>
-    <link rel="stylesheet" href="style.css">
     
     <script src="data.js"></script>
 </head>
 <body>
 
-<nav class="navbar">
+    <nav class="navbar">
         <div style="font-weight:bold; font-size:1.1rem;">
             <i class="fas fa-notes-medical"></i> Nursing Note
         </div>
@@ -33,17 +46,17 @@
             <span id="userDisplay" style="font-size:0.9rem; margin-right:10px;"></span>
 
             <button onclick="window.location.href='ward.html'" 
-                    style="background:#ff9800; border:none; color:white; padding:5px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem;">
-                <i class="fas fa-users"></i> เปลี่ยนผู้ป่วย (Ward)
+                    style="background:#ff9800; border:none; color:white; padding:6px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem; font-weight:bold;">
+                <i class="fas fa-arrow-left"></i> กลับหน้ารายชื่อ (Ward)
             </button>
 
             <button onclick="goToAdmin()" 
-                    style="background:rgba(255,255,255,0.2); border:none; color:white; padding:5px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem;">
+                    style="background:rgba(255,255,255,0.2); border:none; color:white; padding:6px 15px; border-radius:20px; cursor:pointer; font-size:0.9rem;">
                 <i class="fas fa-cog"></i> Admin
             </button>
         </div>
     </nav>
-
+    
     <div class="patient-banner no-print">
         <div class="patient-info">
             <h2><span id="display_name">...</span> <button class="btn-edit-profile" onclick="openProfileModal()"><i class="fas fa-edit"></i> แก้ไขข้อมูล</button></h2>
@@ -92,7 +105,7 @@
                 </div>
                 
                 <div id="categoryContainer" class="category-filter">
-                    </div>
+                </div>
             </div>
 
             <div class="card">
@@ -121,9 +134,20 @@
                         </select>
                     </div>
 
-                    <textarea id="dataInput" placeholder="Data (S, O)"></textarea>
+                    <div class="so-grid">
+                        <div class="so-box">
+                            <label style="color:#2e7d32;">S (Subjective - ผู้ป่วยบอก):</label>
+                            <textarea id="inputS" rows="4" placeholder="เช่น บ่นปวดแผล, บอกว่าเหนื่อย..."></textarea>
+                        </div>
+                        <div class="so-box">
+                            <label style="color:#1565c0;">O (Objective - สังเกตเห็น):</label>
+                            <textarea id="inputO" rows="4" placeholder="เช่น สีหน้าเจ็บปวด, แผลบวมแดง, V/S..."></textarea>
+                        </div>
+                    </div>
+
                     <textarea id="actionInput" placeholder="Action (กิจกรรมการพยาบาล)"></textarea>
                     <textarea id="responseInput" placeholder="Response (ประเมินผล)"></textarea>
+                    
                     <div style="display: flex; gap: 10px;">
                         <button type="button" class="btn btn-primary" onclick="saveNote()" id="saveBtn"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
                         <button type="button" class="btn" onclick="clearForm()" id="cancelBtn" style="display:none; background:#90a4ae; color:white;">ยกเลิก</button>
@@ -189,77 +213,48 @@
     function closeProfileModal() { document.getElementById('profileModal').style.display = 'none'; }
     function saveProfile() { patientProfile.name = document.getElementById('prof_name').value; patientProfile.hn = document.getElementById('prof_hn').value; patientProfile.an = document.getElementById('prof_an').value; patientProfile.ward = document.getElementById('prof_ward').value; patientProfile.admit = document.getElementById('prof_admit').value; patientProfile.dx = document.getElementById('prof_dx').value; patientProfile.dc = document.getElementById('prof_dc').value; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); closeProfileModal(); }
 
-    // 3. Search & Category System (แก้ไขปรับปรุง)
+    // 3. Search & Category System
     let masterDiagnosis = JSON.parse(localStorage.getItem('masterDiagnosis'));
 
-    // ★★★ ตรวจสอบและโหลดข้อมูลจาก data.js ถ้าในเครื่องไม่มี ★★★
     if (!masterDiagnosis || masterDiagnosis.length < 5) { 
         if(typeof initialMasterData !== 'undefined') {
             masterDiagnosis = initialMasterData; 
             localStorage.setItem('masterDiagnosis', JSON.stringify(masterDiagnosis));
             console.log("Loaded data from data.js");
         } else {
-            console.error("ไม่พบไฟล์ data.js หรือตัวแปร initialMasterData");
-            // ใช้ข้อมูลสำรองกัน Error
+            console.error("ไม่พบไฟล์ data.js");
             masterDiagnosis = [];
         }
     }
 
     const searchInput = document.getElementById('focusSearch'); 
     const suggestionsBox = document.getElementById('suggestions');
-    let currentCategory = 'ALL'; // ตัวแปรจำหมวดหมู่ปัจจุบัน
+    let currentCategory = 'ALL';
 
     function renderCategoryButtons() {
         const container = document.getElementById('categoryContainer');
         const categories = [...new Set(masterDiagnosis.map(item => item.category || "Uncategorized"))].sort();
-        
         let html = `<button class="cat-btn active" onclick="setCategory('ALL', this)">ทั้งหมด</button>`;
-        categories.forEach(cat => {
-            html += `<button class="cat-btn" onclick="setCategory('${cat}', this)">${cat}</button>`;
-        });
-        
-        // ปุ่ม Reset Data (เผื่อข้อมูลค้าง)
+        categories.forEach(cat => { html += `<button class="cat-btn" onclick="setCategory('${cat}', this)">${cat}</button>`; });
         html += `<button class="cat-btn" style="background:#ffebee; color:red; border:1px solid red;" onclick="resetData()">↻ รีเซ็ตข้อมูล</button>`;
-        
         container.innerHTML = html;
     }
 
-    // ฟังก์ชันเลือกหมวดหมู่ (แก้ไขให้ทำงานร่วมกับช่องค้นหา)
     window.setCategory = function(category, btnElement) {
         currentCategory = category;
-        
-        // Highlight ปุ่ม
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         if(btnElement) btnElement.classList.add('active');
-
-        // เรียกฟังก์ชันค้นหาใหม่ทันที เพื่อกรองตามหมวดที่เลือก
         performSearch();
     };
 
-    // ฟังก์ชันค้นหาหลัก (รวมทั้ง Text และ Category)
     function performSearch() {
         const val = searchInput.value.toLowerCase().trim();
-        
-        // 1. กรองตามหมวดหมู่ก่อน
         let filtered = masterDiagnosis;
-        if (currentCategory !== 'ALL') {
-            filtered = masterDiagnosis.filter(item => (item.category || "Uncategorized") === currentCategory);
-        }
-
-        // 2. กรองตามคำค้นหา (ถ้ามี)
+        if (currentCategory !== 'ALL') { filtered = masterDiagnosis.filter(item => (item.category || "Uncategorized") === currentCategory); }
         if (val.length > 0) {
-            filtered = filtered.filter(item => 
-                (item.nanda || "").toLowerCase().includes(val) || 
-                (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val)))
-            );
+            filtered = filtered.filter(item => (item.nanda || "").toLowerCase().includes(val) || (Array.isArray(item.keywords) && item.keywords.some(k => (k || "").toLowerCase().includes(val))));
         }
-
-        // 3. แสดงผล (ถ้าไม่มีคำค้น แต่เลือกหมวดหมู่ ก็ให้แสดงรายการในหมวดนั้นเลย)
-        if (val.length > 0 || currentCategory !== 'ALL') {
-            showSuggestions(filtered);
-        } else {
-            suggestionsBox.style.display = 'none';
-        }
+        if (val.length > 0 || currentCategory !== 'ALL') { showSuggestions(filtered); } else { suggestionsBox.style.display = 'none'; }
     }
 
     function showSuggestions(data) {
@@ -279,66 +274,170 @@
         }
     }
 
+    // ★★★ ฟังก์ชันเลือก Focus (ปรับปรุงใหม่ให้แยก S/O) ★★★
     function selectFocus(item) {
         document.getElementById('focusInput').value = item.nanda;
-        document.getElementById('dataInput').value = item.template?.d || ""; 
+        
+        // แยก Template D ลงช่อง S และ O
+        let tempD = item.template?.d || "";
+        let tempS = "";
+        let tempO = "";
+
+        // พยายามแยกด้วยคำว่า "O:" หรือ "S:"
+        if (tempD.includes("O:")) {
+            let parts = tempD.split("O:");
+            tempS = parts[0].replace("S:", "").trim();
+            tempO = parts[1].trim();
+        } else if (tempD.includes("S:")) {
+            tempS = tempD.replace("S:", "").trim();
+        } else {
+            tempO = tempD; // ถ้าไม่มีป้ายบอก ให้ลง O ทั้งหมด
+        }
+
+        document.getElementById('inputS').value = tempS;
+        document.getElementById('inputO').value = tempO;
+        
         document.getElementById('actionInput').value = item.template?.a || ""; 
         document.getElementById('responseInput').value = item.template?.r || "";
         suggestionsBox.style.display = 'none'; 
-        searchInput.value = ''; // ล้างคำค้น
-        
-        // รีเซ็ตหมวดหมู่กลับเป็นทั้งหมด
+        searchInput.value = ''; 
         currentCategory = 'ALL';
         document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
         document.querySelector('.cat-btn').classList.add('active');
     }
     
-    // Event Listeners
     searchInput.addEventListener('input', performSearch);
-    
-    // ปิดกล่องเมื่อคลิกข้างนอก (ยกเว้นคลิกที่กล่องค้นหา หรือ ปุ่มหมวดหมู่)
     document.addEventListener('click', (e) => { 
-        if (!e.target.closest('.search-wrapper') && !e.target.closest('#categoryContainer')) {
-            suggestionsBox.style.display = 'none'; 
-        }
+        if (!e.target.closest('.search-wrapper') && !e.target.closest('#categoryContainer')) { suggestionsBox.style.display = 'none'; }
     });
 
-    // ฟังก์ชันล้างข้อมูล (เผื่อข้อมูลเก่าค้าง)
     window.resetData = function() {
         if(confirm("ต้องการโหลดข้อมูลโรคใหม่ทั้งหมดจากไฟล์ data.js ใช่หรือไม่? (ข้อมูลคนไข้จะไม่หาย)")) {
             if(typeof initialMasterData !== 'undefined') {
                 localStorage.setItem('masterDiagnosis', JSON.stringify(initialMasterData));
-                alert("รีเซ็ตข้อมูลเรียบร้อย!");
-                location.reload();
-            } else {
-                alert("ไม่พบข้อมูลใน data.js กรุณาตรวจสอบไฟล์");
-            }
+                alert("รีเซ็ตข้อมูลเรียบร้อย!"); location.reload();
+            } else { alert("ไม่พบข้อมูลใน data.js กรุณาตรวจสอบไฟล์"); }
         }
     }
 
-    // 4. Note Logic (เหมือนเดิม)
+    // 4. Note Logic
     function formatToList(text) { if (!text) return "-"; let formatted = text.replace(/(\s+)(\d+\.)/g, '\n$2'); const lines = formatted.split('\n').filter(line => line.trim() !== ''); if (lines.length === 0) return "-"; const isOrdered = /^\s*\d+\./.test(lines[0]); let html = isOrdered ? '<ol style="margin:0; padding-left:20px;">' : '<ul style="margin:0; padding-left:20px;">'; lines.forEach(line => { html += `<li style="margin-bottom:2px;">${line.trim().replace(/^(\d+\.|[-•*])\s*/, '')}</li>`; }); return `<div class="dar-content">${html + (isOrdered ? '</ol>' : '</ul>')}</div>`; }
-    const currentHN = localStorage.getItem('currentHN') || 'default'; const storageKey = `notes_${currentHN}`; let patientNotes = JSON.parse(localStorage.getItem(storageKey)) || [];
+    
+    const currentHN = localStorage.getItem('currentHN') || 'default'; 
+    const storageKey = `notes_${currentHN}`; 
+    let patientNotes = JSON.parse(localStorage.getItem(storageKey)) || [];
 
     function renderUI() {
         const timeline = document.getElementById('timelineList'); const printBody = document.getElementById('printTableBody'); timeline.innerHTML = ''; printBody.innerHTML = '';
         if(patientNotes.length === 0) { timeline.innerHTML = '<div style="text-align:center; padding:30px; color:#999;">ยังไม่มีบันทึกสำหรับผู้ป่วยคนนี้</div>'; return; }
         patientNotes.forEach(n => {
-            const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r); const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
+            const d_html = formatToList(n.d); const a_html = formatToList(n.a); const r_html = formatToList(n.r); 
+            const typeBadge = n.patientType ? `<span class="type-badge type-${n.patientType}" style="font-size:0.7rem; margin-left:5px;">Type ${n.patientType}</span>` : '';
             timeline.innerHTML += `<div class="timeline-item"><div class="note-card"><div style="display:flex; justify-content:space-between; margin-bottom:5px;"><div><span class="focus-badge">${n.focus}</span> ${typeBadge} <small style="color:#666;">${n.displayTime}</small></div><div><button class="btn" style="padding:2px 6px; font-size:10px; background:#e0f2f1; color:#00695c;" onclick="editNote(${n.id})"><i class="fas fa-pen"></i></button> <button class="btn" style="padding:2px 6px; font-size:10px; background:#ffebee; color:#c62828;" onclick="deleteNote(${n.id})"><i class="fas fa-trash"></i></button></div></div><div class="dar-grid"><div class="dar-label">D:</div><div>${d_html}</div><div class="dar-label">A:</div><div>${a_html}</div><div class="dar-label">R:</div><div>${r_html}</div></div></div></div>`;
             printBody.innerHTML += `<tr><td>${n.displayTime}</td><td><strong>${n.focus}</strong> <br><small>(${n.patientType ? 'Type '+n.patientType : '-'})</small></td><td><div style="margin-bottom:5px;"><b>D:</b> ${d_html}</div><div style="margin-bottom:5px;"><b>A:</b> ${a_html}</div><div><b>R:</b> ${r_html}</div></td><td>${n.nurse}</td></tr>`;
         });
     }
+
+    // ★★★ ฟังก์ชันบันทึก (ปรับปรุงใหม่ให้รวม S/O) ★★★
     function saveNote() {
-        const id = document.getElementById('noteId').value; const selectedType = document.getElementById('noteType').value;
-        const noteData = { id: id ? parseInt(id) : Date.now(), datetime: document.getElementById('noteDate').value, displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), focus: document.getElementById('focusInput').value, d: document.getElementById('dataInput').value, a: document.getElementById('actionInput').value, r: document.getElementById('responseInput').value, patientType: selectedType, nurse: currentUser };
+        const id = document.getElementById('noteId').value; 
+        const selectedType = document.getElementById('noteType').value;
+        
+        // รวม S และ O เข้าด้วยกัน
+        const valS = document.getElementById('inputS').value.trim();
+        const valO = document.getElementById('inputO').value.trim();
+        let combinedData = "";
+        
+        if (valS) combinedData += "S: " + valS + "\n";
+        if (valO) combinedData += "O: " + valO;
+        if (!valS && !valO) combinedData = "-";
+
+        const noteData = { 
+            id: id ? parseInt(id) : Date.now(), 
+            datetime: document.getElementById('noteDate').value, 
+            displayTime: new Date(document.getElementById('noteDate').value).toLocaleString('th-TH'), 
+            focus: document.getElementById('focusInput').value, 
+            d: combinedData, // ใช้ค่าที่รวมแล้ว
+            a: document.getElementById('actionInput').value, 
+            r: document.getElementById('responseInput').value, 
+            patientType: selectedType, 
+            nurse: currentUser 
+        };
+        
         if(!noteData.focus || !noteData.datetime) return alert("ระบุข้อมูลให้ครบ");
-        if(id) { patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; clearForm(); } else { patientNotes.unshift(noteData); patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); }
-        localStorage.setItem(storageKey, JSON.stringify(patientNotes)); patientProfile.type = selectedType; localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); renderProfile(); renderUI(); if(!id) setDefaultDateTime();
+        
+        if(id) { 
+            patientNotes[patientNotes.findIndex(n => n.id == id)] = noteData; 
+            clearForm(); 
+        } else { 
+            patientNotes.unshift(noteData); 
+            patientNotes.sort((a,b)=>new Date(b.datetime)-new Date(a.datetime)); 
+        }
+        
+        localStorage.setItem(storageKey, JSON.stringify(patientNotes)); 
+        patientProfile.type = selectedType; 
+        localStorage.setItem('patientProfile', JSON.stringify(patientProfile)); 
+        renderProfile(); 
+        renderUI(); 
+        if(!id) setDefaultDateTime();
+        
+        // ล้างช่อง S O
+        document.getElementById('inputS').value = '';
+        document.getElementById('inputO').value = '';
     }
-    function editNote(id) { const n = patientNotes.find(n => n.id === id); if(!n) return; document.getElementById('noteId').value = n.id; document.getElementById('noteDate').value = n.datetime; document.getElementById('focusInput').value = n.focus; document.getElementById('dataInput').value = n.d; document.getElementById('actionInput').value = n.a; document.getElementById('responseInput').value = n.r; if(n.patientType) document.getElementById('noteType').value = n.patientType; document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; document.getElementById('editModeIndicator').style.display='block'; document.getElementById('cancelBtn').style.display='inline-flex'; }
+
+    // ★★★ ฟังก์ชันแก้ไข (ปรับปรุงใหม่ให้แยก S/O กลับมา) ★★★
+    function editNote(id) { 
+        const n = patientNotes.find(n => n.id === id); 
+        if(!n) return; 
+        
+        document.getElementById('noteId').value = n.id; 
+        document.getElementById('noteDate').value = n.datetime; 
+        document.getElementById('focusInput').value = n.focus; 
+        
+        // แยกข้อมูล D กลับมาใส่ช่อง S และ O
+        let textD = n.d || "";
+        let textS = "";
+        let textO = "";
+        if (textD.includes("O:")) {
+            let parts = textD.split("O:");
+            textS = parts[0].replace("S:", "").trim();
+            textO = parts[1].trim();
+        } else if (textD.includes("S:")) {
+            textS = textD.replace("S:", "").trim();
+        } else {
+            textO = textD;
+        }
+
+        document.getElementById('inputS').value = textS;
+        document.getElementById('inputO').value = textO;
+
+        document.getElementById('actionInput').value = n.a; 
+        document.getElementById('responseInput').value = n.r; 
+        if(n.patientType) document.getElementById('noteType').value = n.patientType; 
+        
+        document.getElementById('saveBtn').innerHTML = 'บันทึกแก้ไข'; 
+        document.getElementById('editModeIndicator').style.display='block'; 
+        document.getElementById('cancelBtn').style.display='inline-flex'; 
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function deleteNote(id) { if(confirm('ลบ?')) { patientNotes = patientNotes.filter(n => n.id !== id); localStorage.setItem(storageKey, JSON.stringify(patientNotes)); renderUI(); } }
-    function clearForm() { document.getElementById('noteForm').reset(); document.getElementById('noteId').value=''; document.getElementById('noteType').value = patientProfile.type || "1"; setDefaultDateTime(); document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; document.getElementById('cancelBtn').style.display='none'; document.getElementById('editModeIndicator').style.display='none'; }
+    
+    function clearForm() { 
+        document.getElementById('noteForm').reset(); 
+        document.getElementById('noteId').value=''; 
+        // ล้าง S O
+        document.getElementById('inputS').value = '';
+        document.getElementById('inputO').value = '';
+        
+        document.getElementById('noteType').value = patientProfile.type || "1"; 
+        setDefaultDateTime(); 
+        document.getElementById('saveBtn').innerHTML='บันทึกข้อมูล'; 
+        document.getElementById('cancelBtn').style.display='none'; 
+        document.getElementById('editModeIndicator').style.display='none'; 
+    }
+    
     function setDefaultDateTime() { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById('noteDate').value = now.toISOString().slice(0,16); }
 
     // Init
