@@ -3,137 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Patient Ward - Nursing Station</title>
+    <title>Ward Management - Nursing Note</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <style>
-        :root { --primary: #00897b; --bg-body: #f0f2f5; }
-        body { font-family: 'Sarabun', sans-serif; background: var(--bg-body); margin: 0; }
-        
-        .navbar { background: linear-gradient(135deg, #00897b, #00695c); color: white; padding: 0.8rem 2rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-        .container { max-width: 1200px; margin: 30px auto; padding: 0 20px; }
-        
-        .ward-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .ward-stats { display: flex; gap: 15px; }
-        .stat-box { background: white; padding: 10px 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); font-size: 0.9rem; }
-        
-        /* Grid Layout */
-        .patient-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        
-        /* Patient Card */
-        .patient-card { 
-            background: white; border-radius: 12px; overflow: hidden; 
-            box-shadow: 0 3px 6px rgba(0,0,0,0.05); transition: transform 0.2s, box-shadow 0.2s; 
-            cursor: pointer; border: 1px solid #eee; position: relative;
-        }
-        .patient-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-color: var(--primary); }
-        
-        .card-header { padding: 15px; background: #f9f9f9; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
-        .bed-badge { background: var(--primary); color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 0.9rem; }
-        .type-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        
-        .card-body { padding: 15px; }
-        .p-name { font-size: 1.1rem; font-weight: 600; color: #333; margin-bottom: 5px; }
-        .p-info { font-size: 0.85rem; color: #666; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
-        .p-dx { color: #00695c; font-weight: 500; margin-top: 10px; background: #e0f2f1; padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; display: inline-block; }
+    <link rel="stylesheet" href="style.css"> 
 
-        /* Type Colors */
-        .t-1 { background: #4caf50; } .t-2 { background: #8bc34a; } .t-3 { background: #ff9800; } .t-4 { background: #f44336; } .t-5 { background: #9c27b0; }
+    <style>
+        /* CSS เฉพาะหน้านี้ */
+        .ward-header {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
+        }
         
-        .btn-logout { background: rgba(255,255,255,0.2); border: none; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        .btn-logout:hover { background: rgba(255,255,255,0.3); }
+        .ward-controls {
+            display: flex;
+            gap: 10px;
+            flex-grow: 1;
+        }
+
+        .ward-select {
+            padding: 10px;
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            font-size: 1rem;
+            color: var(--primary-dark);
+            font-weight: bold;
+            min-width: 200px;
+            cursor: pointer;
+        }
+
+        .search-box {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .patient-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .patient-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-left: 5px solid #ddd;
+            cursor: pointer;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .patient-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-left-color: var(--primary);
+        }
+
+        .patient-card h3 { margin: 0 0 5px 0; color: #333; }
+        .patient-card .hn { color: #777; font-size: 0.9rem; margin-bottom: 10px; }
+        .patient-card .info { font-size: 0.9rem; color: #555; display: flex; justify-content: space-between; margin-top: 5px;}
+        .patient-card .ward-tag {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.75rem;
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 3px 8px;
+            border-radius: 10px;
+        }
+
+        .btn-del {
+            background: #ffebee; color: #c62828; border: none;
+            padding: 5px 10px; border-radius: 4px; font-size: 0.8rem;
+            margin-top: 10px; cursor: pointer;
+        }
+        .btn-del:hover { background: #ffcdd2; }
+
+        /* Modal Styles */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; width: 90%; max-width: 500px; }
+        .modal-header { font-weight: bold; font-size: 1.2rem; margin-bottom: 15px; color: var(--primary); }
+        .form-row { margin-bottom: 15px; }
+        .form-row label { display: block; margin-bottom: 5px; font-weight: 500; }
+        .form-row input, .form-row select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
     </style>
 </head>
 <body>
 
     <nav class="navbar">
-        <div style="font-weight:bold; font-size:1.1rem;"><i class="fas fa-hospital-user"></i> IPD Ward: อายุรกรรมชาย 1</div>
-        <div style="display:flex; align-items:center; gap:15px;">
-            <span id="userDisplay" style="font-size:0.9rem;"></span>
-            <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        <div style="font-weight:bold; font-size:1.1rem;">
+            <i class="fas fa-hospital-user"></i> ระบบรายชื่อผู้ป่วย (Ward Manager)
+        </div>
+        <div style="font-size:0.9rem;">
+            <i class="fas fa-user-nurse"></i> <span id="userDisplay">พยาบาล</span>
         </div>
     </nav>
 
-    <div class="container">
+    <div class="container" style="max-width: 1200px;">
+        
         <div class="ward-header">
-            <h2 style="margin:0; color:#37474f;">รายชื่อผู้ป่วย (Patient List)</h2>
-            <div class="ward-stats">
-                <div class="stat-box"><i class="fas fa-bed"></i> Total: 10</div>
-                <div class="stat-box" style="color:#f44336;"><i class="fas fa-procedures"></i> Heavy (Type 4): 2</div>
+            <div class="ward-controls">
+                <select id="wardSelector" class="ward-select" onchange="filterPatients()">
+                    <option value="ALL">🏥 ทุกวอร์ด (All Wards)</option>
+                    <option value="Med1">อายุรกรรมชาย 1</option>
+                    <option value="Med2">อายุรกรรมหญิง 2</option>
+                    <option value="Surg1">ศัลยกรรมชาย</option>
+                    <option value="Surg2">ศัลยกรรมหญิง</option>
+                    <option value="Ortho">กระดูกและข้อ</option>
+                    <option value="ICU">ICU</option>
+                    <option value="ER">ห้องฉุกเฉิน</option>
+                </select>
+
+                <input type="text" id="searchInput" class="search-box" placeholder="🔍 ค้นหาชื่อ หรือ HN..." onkeyup="filterPatients()">
             </div>
+            
+            <button class="btn btn-primary" onclick="openModal()">
+                <i class="fas fa-user-plus"></i> รับผู้ป่วยใหม่ (Admit)
+            </button>
         </div>
 
-        <div class="patient-grid" id="gridContainer">
+        <div id="patientGrid" class="patient-grid">
             </div>
+
+    </div>
+
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header"><i class="fas fa-procedures"></i> รับผู้ป่วยใหม่ (New Admit)</div>
+            
+            <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                <div>
+                    <label>HN:</label>
+                    <input type="text" id="newHN" placeholder="เช่น 66-123456">
+                </div>
+                <div>
+                    <label>AN:</label>
+                    <input type="text" id="newAN" placeholder="เช่น 66-9999">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <label>ชื่อ-นามสกุล:</label>
+                <input type="text" id="newName" placeholder="เช่น นายสมชาย ใจดี">
+            </div>
+
+            <div class="form-row">
+                <label>วอร์ด (Ward):</label>
+                <select id="newWard">
+                    <option value="Med1">อายุรกรรมชาย 1</option>
+                    <option value="Med2">อายุรกรรมหญิง 2</option>
+                    <option value="Surg1">ศัลยกรรมชาย</option>
+                    <option value="Surg2">ศัลยกรรมหญิง</option>
+                    <option value="Ortho">กระดูกและข้อ</option>
+                    <option value="ICU">ICU</option>
+                    <option value="ER">ห้องฉุกเฉิน</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <label>การวินิจฉัยโรค (Diagnosis):</label>
+                <input type="text" id="newDx" placeholder="เช่น Pneumonia, CA Lung">
+            </div>
+
+            <div class="form-row" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                 <div>
+                    <label>ประเภท (Type):</label>
+                    <select id="newType">
+                        <option value="1">Type 1 (ช่วยเหลือตัวเองได้)</option>
+                        <option value="2">Type 2 (ช่วยเหลือบ้าง)</option>
+                        <option value="3">Type 3 (ช่วยเกือบทั้งหมด)</option>
+                        <option value="4">Type 4 (วิกฤต/ติดเตียง)</option>
+                        <option value="5">Type 5 (Palliative)</option>
+                    </select>
+                 </div>
+                 <div>
+                    <label>เตียง:</label>
+                    <input type="text" id="newBed" placeholder="เช่น 12">
+                 </div>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn btn-reset" onclick="closeModal()">ยกเลิก</button>
+                <button class="btn btn-primary" onclick="savePatient()">บันทึก</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Security Check
-        if (!sessionStorage.getItem('isLoggedIn')) window.location.href = 'login.html';
-        document.getElementById('userDisplay').innerHTML = `<i class="fas fa-user-nurse"></i> ${sessionStorage.getItem('currentUser')}`;
+        // 1. ตรวจสอบ Login (ถ้ามี)
+        const currentUser = sessionStorage.getItem('currentUser') || "พยาบาล";
+        document.getElementById('userDisplay').innerText = currentUser;
 
-        function logout() { sessionStorage.clear(); window.location.href = 'login.html'; }
-
-        // Mock Data: 10 Patients
-        const patients = [
-            { bed: "01", name: "นายสมชาย ใจดี", age: 56, hn: "6600001", an: "6600101", dx: "Pneumonia", type: 3, ward: "อายุรกรรมชาย 1" },
-            { bed: "02", name: "นายวีระ รักชาติ", age: 45, hn: "6600002", an: "6600102", dx: "DHF (Dengue Hemorrhagic Fever)", type: 2, ward: "อายุรกรรมชาย 1" },
-            { bed: "03", name: "นายปิติ มีทรัพย์", age: 72, hn: "6600003", an: "6600103", dx: "COPD with Acute Exacerbation", type: 4, ward: "อายุรกรรมชาย 1" },
-            { bed: "04", name: "นายมานะ อดทน", age: 38, hn: "6600004", an: "6600104", dx: "Appendicitis Post-op", type: 1, ward: "อายุรกรรมชาย 1" },
-            { bed: "05", name: "นายชูใจ ใฝ่ดี", age: 60, hn: "6600005", an: "6600105", dx: "CA Lung", type: 5, ward: "อายุรกรรมชาย 1" },
-            { bed: "06", name: "นายสมศักดิ์ รักเรียน", age: 50, hn: "6600006", an: "6600106", dx: "UTI (Urinary Tract Infection)", type: 2, ward: "อายุรกรรมชาย 1" },
-            { bed: "07", name: "นายกิตติ เก่งกาจ", age: 80, hn: "6600007", an: "6600107", dx: "CVA (Stroke) Ischemic", type: 4, ward: "อายุรกรรมชาย 1" },
-            { bed: "08", name: "นายอำนวย ช่วยเหลือ", age: 42, hn: "6600008", an: "6600108", dx: "Acute Gastritis", type: 1, ward: "อายุรกรรมชาย 1" },
-            { bed: "09", name: "นายบุญมี ศรีสุข", age: 65, hn: "6600009", an: "6600109", dx: "DM Foot Ulcer", type: 3, ward: "อายุรกรรมชาย 1" },
-            { bed: "10", name: "นายเจริญ รุ่งเรือง", age: 55, hn: "6600010", an: "6600110", dx: "Hypertension Crisis", type: 2, ward: "อายุรกรรมชาย 1" }
+        // 2. ข้อมูลผู้ป่วย (จำลองถ้าไม่มี)
+        let patients = JSON.parse(localStorage.getItem('patients')) || [
+            { hn: '66-00123', an: '66-1111', name: 'นายมีชัย รักดี', ward: 'Med1', dx: 'Pneumonia', type: '3', bed: '01', admit: '2025-01-10' },
+            { hn: '66-00124', an: '66-1112', name: 'นางสมศรี สีสวย', ward: 'Surg1', dx: 'Post-op Appendectomy', type: '2', bed: '05', admit: '2025-01-12' },
+            { hn: '66-00125', an: '66-1113', name: 'ลุงบุญ มีกรรม', ward: 'Ortho', dx: 'Fracture Femur', type: '4', bed: '02', admit: '2025-01-15' }
         ];
 
-        const grid = document.getElementById('gridContainer');
+        // โหลดวอร์ดที่เลือกไว้ล่าสุด
+        const savedWard = localStorage.getItem('selectedWard') || 'ALL';
+        document.getElementById('wardSelector').value = savedWard;
 
-        patients.forEach(p => {
-            // สร้าง Card HTML
-            grid.innerHTML += `
-                <div class="patient-card" onclick="selectPatient('${p.hn}')">
-                    <div class="card-header">
-                        <span class="bed-badge">เตียง ${p.bed}</span>
-                        <div style="display:flex; align-items:center; gap:5px;">
-                            <span class="type-dot t-${p.type}"></span> <small style="color:#888;">Type ${p.type}</small>
-                        </div>
+        // 3. ฟังก์ชันแสดงผล
+        function filterPatients() {
+            const ward = document.getElementById('wardSelector').value;
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            localStorage.setItem('selectedWard', ward); // จำค่าที่เลือก
+
+            const grid = document.getElementById('patientGrid');
+            grid.innerHTML = '';
+
+            const filtered = patients.filter(p => {
+                const matchWard = (ward === 'ALL') || (p.ward === ward);
+                const matchSearch = p.name.toLowerCase().includes(search) || p.hn.includes(search);
+                return matchWard && matchSearch;
+            });
+
+            if(filtered.length === 0) {
+                grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#999; margin-top:50px;">ไม่พบรายชื่อผู้ป่วย</div>';
+                return;
+            }
+
+            filtered.forEach((p, index) => {
+                const card = document.createElement('div');
+                card.className = 'patient-card';
+                // เมื่อคลิกที่การ์ด ให้เลือกผู้ป่วยคนนี้แล้วไปหน้าบันทึก
+                card.onclick = (e) => {
+                    if(!e.target.classList.contains('btn-del')) selectPatient(p);
+                };
+
+                let typeColor = '#ddd';
+                if(p.type === '3') typeColor = '#ff9800';
+                if(p.type === '4') typeColor = '#f44336';
+                if(p.type === '5') typeColor = '#9c27b0';
+
+                card.innerHTML = `
+                    <span class="ward-tag">${p.ward} | เตียง ${p.bed || '-'}</span>
+                    <div style="width:10px; height:10px; background:${typeColor}; border-radius:50%; display:inline-block; margin-right:5px;"></div>
+                    <h3>${p.name}</h3>
+                    <div class="hn">HN: ${p.hn} | AN: ${p.an}</div>
+                    <div style="font-size:0.9rem; color:#00695c; margin-bottom:10px;">Dx: ${p.dx}</div>
+                    <div class="info">
+                        <span>Admit: ${p.admit}</span>
+                        <span>Type: ${p.type}</span>
                     </div>
-                    <div class="card-body">
-                        <div class="p-name">${p.name} (${p.age} ปี)</div>
-                        <div class="p-info"><i class="fas fa-id-card"></i> HN: ${p.hn} | AN: ${p.an}</div>
-                        <div class="p-dx">${p.dx}</div>
-                    </div>
-                </div>
-            `;
-        });
+                    <button class="btn-del" onclick="deletePatient('${p.hn}')"><i class="fas fa-trash"></i> จำหน่าย/ลบ</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
 
-        // เมื่อเลือกคนไข้ -> บันทึกข้อมูลลง LocalStorage แล้วไปหน้า index
-        function selectPatient(hn) {
-            const selected = patients.find(p => p.hn === hn);
-            // เตรียมข้อมูลโปรไฟล์
-            const profile = {
-                name: `${selected.name} (${selected.age} ปี)`,
-                hn: selected.hn,
-                an: selected.an,
-                ward: selected.ward,
-                admit: "16/01/2569 08:00", // Mock date
-                dx: selected.dx,
-                dc: "",
-                type: selected.type
-            };
+        // 4. ฟังก์ชันเลือกผู้ป่วย (หัวใจสำคัญ)
+        function selectPatient(patient) {
+            // บันทึกข้อมูลคนไข้ที่เลือกลง LocalStorage
+            localStorage.setItem('patientProfile', JSON.stringify(patient));
+            localStorage.setItem('currentHN', patient.hn); // ใช้สำหรับแยกบันทึก Note
             
-            // บันทึกโปรไฟล์คนไข้คนนี้ลง Storage เพื่อให้ index.html ดึงไปแสดง
-            localStorage.setItem('patientProfile', JSON.stringify(profile));
-            
-            // *** สำคัญ: บันทึกว่าเรากำลังทำงานกับ HN ไหน เพื่อแยก Note ***
-            localStorage.setItem('currentHN', selected.hn);
-
-            // ไปหน้าบันทึก
+            // กระโดดไปหน้าบันทึก (index.html)
             window.location.href = 'index.html';
         }
+
+        // 5. ระบบ Modal เพิ่มผู้ป่วย
+        function openModal() { 
+            // ตั้งค่า Default วอร์ดตามที่เลือกอยู่
+            const currentWard = document.getElementById('wardSelector').value;
+            if(currentWard !== 'ALL') document.getElementById('newWard').value = currentWard;
+            document.getElementById('addModal').style.display = 'flex'; 
+        }
+        function closeModal() { document.getElementById('addModal').style.display = 'none'; }
+        
+        function savePatient() {
+            const newP = {
+                hn: document.getElementById('newHN').value,
+                an: document.getElementById('newAN').value,
+                name: document.getElementById('newName').value,
+                ward: document.getElementById('newWard').value,
+                dx: document.getElementById('newDx').value,
+                type: document.getElementById('newType').value,
+                bed: document.getElementById('newBed').value,
+                admit: new Date().toISOString().slice(0,10)
+            };
+
+            if(!newP.hn || !newP.name) return alert("กรุณากรอก HN และชื่อ");
+
+            patients.push(newP);
+            localStorage.setItem('patients', JSON.stringify(patients));
+            
+            closeModal();
+            filterPatients(); // รีเฟรชหน้าจอ
+            
+            // เคลียร์ฟอร์ม
+            document.getElementById('newHN').value = '';
+            document.getElementById('newAN').value = '';
+            document.getElementById('newName').value = '';
+        }
+
+        function deletePatient(hn) {
+            if(confirm("ยืนยันการลบ/จำหน่ายผู้ป่วยรายนี้?")) {
+                patients = patients.filter(p => p.hn !== hn);
+                localStorage.setItem('patients', JSON.stringify(patients));
+                filterPatients();
+            }
+        }
+
+        // เริ่มต้นทำงาน
+        filterPatients();
+
     </script>
 </body>
 </html>
