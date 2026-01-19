@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discharge Planning (D-M-E-T-H-O-D)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> <style>
+        /* CSS เฉพาะสำหรับหน้านี้ */
+        .layout-container {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* แถบซ้าย: รายการโรค */
+        .sidebar-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 15px;
+            height: calc(100vh - 150px);
+            overflow-y: auto;
+        }
+
+        .template-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .template-item:hover { background-color: #e3f2fd; color: var(--primary); }
+        .template-item strong { display: block; font-size: 0.95rem; }
+        .template-item small { color: #777; font-size: 0.8rem; }
+
+        /* แถบขวา: แบบฟอร์ม */
+        .form-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            padding: 25px;
+        }
+
+        .dm-box { margin-bottom: 15px; }
+        .dm-box label { 
+            display: block; 
+            font-weight: bold; 
+            margin-bottom: 5px; 
+            color: var(--primary-dark);
+            background: #f5f5f5;
+            padding: 5px 10px;
+            border-left: 4px solid var(--accent);
+            border-radius: 4px;
+        }
+        .dm-box textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-family: 'Sarabun', sans-serif;
+            font-size: 1rem;
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* ส่วนหัวกระดาษตอนพิมพ์ */
+        .print-only-header { display: none; }
+
+        @media print {
+            .navbar, .layout-container, .btn-print-group { display: none; }
+            .print-only-header { display: block; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+            .form-card { box-shadow: none; padding: 0; }
+            .dm-box textarea { border: none; resize: none; min-height: auto; padding: 0; margin-bottom: 5px; }
+            .dm-box label { background: none; border: none; padding: 0; color: #000; text-decoration: underline; margin-bottom: 2px; }
+            .dm-box { break-inside: avoid; margin-bottom: 15px; }
+            body { background: white; }
+            #printContent { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div style="font-weight:bold; font-size:1.1rem;">
+            <i class="fas fa-home"></i> Discharge Planning (D-M-E-T-H-O-D)
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;">
+                <i class="fas fa-arrow-left"></i> กลับหน้าบันทึก
+            </button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="patient-banner">
+            <div class="patient-info">
+                <h2><i class="fas fa-user-injured"></i> <span id="ptName">...</span></h2>
+                <div class="patient-meta">
+                    <span>HN: <span id="ptHN">-</span></span> | 
+                    <span>AN: <span id="ptAN">-</span></span> | 
+                    <span>Ward: <span id="ptWard">-</span></span>
+                </div>
+            </div>
+            <div class="btn-print-group">
+                <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์ใบ D-M-E-T-H-O-D</button>
+            </div>
+        </div>
+
+        <div class="layout-container">
+            
+            <div class="sidebar-card">
+                <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">
+                    <i class="fas fa-search"></i> เลือกกลุ่มโรค
+                </h3>
+                <input type="text" id="searchTemplate" placeholder="ค้นหาโรค..." 
+                       style="width:100%; padding:8px; margin-bottom:10px; border:1px solid #ddd; border-radius:4px;"
+                       onkeyup="renderTemplates()">
+                
+                <div id="templateList">
+                    </div>
+            </div>
+
+            <div id="printContent">
+                
+                <div class="print-only-header">
+                    <h2>ใบบันทึกการวางแผนจำหน่าย (Discharge Planning)</h2>
+                    <p>ชื่อ-สกุล: <span id="pNamePrint"></span> HN: <span id="pHNPrint"></span> Ward: <span id="pWardPrint"></span></p>
+                </div>
+
+                <div class="form-card">
+                    <div class="dm-box">
+                        <label>D - Diagnosis (การวินิจฉัยโรค)</label>
+                        <textarea id="inp_d"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>M - Medicine (ยา)</label>
+                        <textarea id="inp_m"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>E - Environment (สิ่งแวดล้อม)</label>
+                        <textarea id="inp_e"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>T - Treatment (การรักษา/ดูแลตนเอง)</label>
+                        <textarea id="inp_t"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>H - Health (สุขภาพ/อาการที่ต้องสังเกต)</label>
+                        <textarea id="inp_h"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>O - Outpatient (การนัดตรวจ)</label>
+                        <textarea id="inp_o"></textarea>
+                    </div>
+                    <div class="dm-box">
+                        <label>D - Diet (อาหาร)</label>
+                        <textarea id="inp_d2"></textarea>
+                    </div>
+                    
+                    <div class="print-only-header" style="border:none; margin-top:30px; text-align:right;">
+                        <p>ลงชื่อพยาบาลผู้จำหน่าย ...........................................................</p>
+                        <p>(...........................................................)</p>
+                        <p>วันที่ ........................................</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // 1. ดึงข้อมูลผู้ป่วย
+    const patientProfile = JSON.parse(localStorage.getItem('patientProfile'));
+    if(patientProfile) {
+        document.getElementById('ptName').innerText = patientProfile.name;
+        document.getElementById('ptHN').innerText = patientProfile.hn;
+        document.getElementById('ptAN').innerText = patientProfile.an;
+        document.getElementById('ptWard').innerText = patientProfile.ward;
+        
+        // สำหรับ Print
+        document.getElementById('pNamePrint').innerText = patientProfile.name;
+        document.getElementById('pHNPrint').innerText = patientProfile.hn;
+        document.getElementById('pWardPrint').innerText = patientProfile.ward;
+    }
+
+    // 2. ข้อมูล Master Data (D-M-E-T-H-O-D Templates)
+    // คุณสามารถเพิ่มโรคใหม่ๆ ที่นี่ได้เลยครับ
+    const dischargeTemplates = [
+        {
+            id: 'SURG01', title: 'ไส้ติ่งอักเสบ (Post-op Appendectomy)',
+            d: 'โรคไส้ติ่งอักเสบเฉียบพลัน (Acute Appendicitis) และได้รับการรักษาโดยการผ่าตัดเอาไส้ติ่งออกแล้ว',
+            m: '1. ยาแก้ปวด (Paracetamol) ทานเมื่อปวด ทุก 4-6 ชม.\n2. ยาฆ่าเชื้อ (Antibiotics) ทานติดต่อกันจนหมด\n3. ยาระบาย (ถ้ามี) ป้องกันท้องผูก',
+            e: 'จัดห้องนอนให้อากาศถ่ายเท สะอาด อยู่ชั้นล่างในช่วง 3 วันแรกเพื่อลดการเดินขึ้นลงบันได',
+            t: '1. ห้ามแผลโดนน้ำ 7 วัน (หรือจนกว่าจะตัดไหม)\n2. ห้ามยกของหนัก > 5 กก. นาน 1 เดือน\n3. ลุกเดินบ่อยๆ แต่ช้าๆ ป้องกันพังผืด',
+            h: 'สังเกตอาการ: ไข้สูง, แผลบวมแดงร้อน มีหนอง, ปวดท้องรุนแรง, อาเจียนมาก ให้รีบมา รพ. ทันที',
+            o: 'นัดดูแผล/ตัดไหม วันที่ ..................... เวลา ........... ที่ห้องตรวจศัลยกรรม (OPD Surg)',
+            d2: 'อาหารอ่อน ย่อยง่าย (ข้าวต้ม/โจ๊ก) ในช่วงแรก, เน้นผักผลไม้ป้องกันท้องผูก, ดื่มน้ำสะอาดมากๆ'
+        },
+        {
+            id: 'MED01', title: 'ปอดอักเสบ (Pneumonia)',
+            d: 'โรคปอดอักเสบ (Pneumonia) ได้รับการรักษาจนอาการดีขึ้น',
+            m: '1. ยาปฏิชีวนะ (Antibiotics) สำคัญมาก ต้องทานให้ครบตามแพทย์สั่ง ห้ามหยุดยาเอง\n2. ยาละลายเสมหะ/แก้ไอ จิบน้ำอุ่นบ่อยๆ',
+            e: 'หลีกเลี่ยงควันบุหรี่ ฝุ่นละออง และอากาศเย็นจัด จัดห้องให้อากาศถ่ายเท',
+            t: '1. ฝึกการหายใจลึกๆ (Deep breathing) บริหารปอด\n2. พักผ่อนให้เพียงพอ\n3. ใส่หน้ากากอนามัยเมื่อต้องเข้าชุมชน',
+            h: 'หากมีไข้สูงกลับมา หอบเหนื่อย ไอมีเสมหะเปลี่ยนสี (เขียว/เหลืองข้น) เจ็บหน้าอก ให้รีบมาพบแพทย์',
+            o: 'นัดฟังผล X-ray ปอดซ้ำ วันที่ ..................... ที่คลินิกอายุรกรรม',
+            d2: 'อาหารครบ 5 หมู่ ปรุงสุกสะอาด ดื่มน้ำอุ่นมากๆ เพื่อช่วยละลายเสมหะ'
+        },
+        {
+            id: 'MED02', title: 'เบาหวาน (Diabetes Mellitus)',
+            d: 'โรคเบาหวาน (DM) ระดับน้ำตาลในเลือดสูง',
+            m: '1. ยาลดน้ำตาล (Metformin/Glipizide) ทานก่อน/หลังอาหารตามสั่งเคร่งครัด\n2. ยาฉีดอินซูลิน (ถ้ามี) ฉีดตามเวลาและเทคนิคที่สอน',
+            e: 'ระวังของมีคมตามพื้น ป้องกันการเกิดแผลที่เท้า สวมรองเท้าในบ้านเสมอ',
+            t: '1. ออกกำลังกายสม่ำเสมอ อย่างน้อย 30 นาที/วัน\n2. ตรวจเท้าทุกวัน ห้ามแช่เท้าในน้ำร้อน\n3. ตัดเล็บอย่างระมัดระวัง',
+            h: 'อาการน้ำตาลต่ำ: ใจสั่น เหงื่อออก หน้ามืด (ให้ดื่มน้ำหวานทันที)\nอาการน้ำตาลสูง: หิวน้ำบ่อย ปัสสาวะบ่อย ผอมลง',
+            o: 'นัดเจาะเลือด (NPO งดน้ำงดอาหารหลังเที่ยงคืน) วันที่ .....................',
+            d2: 'จำกัดแป้งและน้ำตาล (ข้าว ขนมปัง ผลไม้หวาน) งดของหวาน เครื่องดื่มชูกำลัง น้ำอัดลม'
+        },
+        {
+            id: 'MED03', title: 'ความดันโลหิตสูง (Hypertension)',
+            d: 'โรคความดันโลหิตสูง (Essential Hypertension)',
+            m: 'ยาต้านความดันโลหิต ทานสม่ำเสมอทุกวัน ห้ามหยุดยาเองแม้ไม่มีอาการ',
+            e: 'บรรยากาศสงบ ลดความเครียด หลีกเลี่ยงเสียงดัง',
+            t: '1. ควบคุมน้ำหนักตัว\n2. ออกกำลังกายแบบแอโรบิคเบาๆ\n3. วัดความดันโลหิตสม่ำเสมอที่บ้าน',
+            h: 'หากปวดศีรษะรุนแรง ตาพร่ามัว หน้ามืด หรือวัดความดันได้ > 160/100 mmHg ให้รีบมาพบแพทย์',
+            o: 'นัดติดตามอาการ วันที่ ..................... ที่คลินิก NCD',
+            d2: 'ลดเค็ม (จำกัดโซเดียม) งดผงชูรส อาหารหมักดอง ปลาเค็ม ไข่เค็ม'
+        },
+        {
+            id: 'ORTHO01', title: 'กระดูกหัก/ใส่เฝือก (Fracture)',
+            d: 'กระดูกหัก (Fracture) ที่บริเวณ ..................... ใส่เฝือก/ดามเหล็ก',
+            m: 'ยาแก้ปวด และแคลเซียมบำรุงกระดูก ตามแพทย์สั่ง',
+            e: 'จัดบ้านให้โล่ง ป้องกันการสะดุดหกล้ม พื้นห้องน้ำไม่ลื่น',
+            t: '1. ห้ามลงน้ำหนักขาข้างที่หัก (ใช้ไม้ค้ำยันตามสอน)\n2. บริหารเกร็งกล้ามเนื้อในเฝือก (Isometric exercise)\n3. ห้ามให้เฝือกเปียกน้ำ/ห้ามเอาไม้เข้าไปเกา',
+            h: 'หากปลายมือ/เท้า บวม เขียวคล้ำ ชา หรือปวดมากผิดปกติ ให้รีบมา รพ. ทันที',
+            o: 'นัด X-ray ดูการติดของกระดูก วันที่ .....................',
+            d2: 'อาหารโปรตีนสูง (เนื้อ นม ไข่) และแคลเซียมสูง เพื่อเสริมสร้างกระดูก'
+        },
+        {
+            id: 'PED01', title: 'ไข้เลือดออก (Dengue Fever)',
+            d: 'โรคไข้เลือดออก (Dengue Fever) ระยะพักฟื้น',
+            m: 'ให้ยาพาราเซตามอลเฉพาะเวลามีไข้ (ห้ามใช้ Aspirin/Ibuprofen เด็ดขาด)',
+            e: 'นอนในมุ้ง หรือทายากันยุง ป้องกันยุงกัดคนอื่นในบ้าน',
+            t: '1. เช็ดตัวลดไข้หากตัวร้อน\n2. ระวังการกระทบกระเทือน ป้องกันเลือดออก',
+            h: 'ระวังภาวะช็อค (ไข้ลดแต่มือเท้าเย็น ซึม ปวดท้องมาก อาเจียนเป็นเลือด) ต้องรีบมา รพ. ทันที',
+            o: 'นัดเจาะเลือดดูเกล็ดเลือด วันที่ .....................',
+            d2: 'ดื่มน้ำเกลือแร่ (ORS) หรือน้ำผลไม้ ทานอาหารอ่อน งดอาหารสีแดง/ดำ (เพื่อสังเกตสีอุจจาระ)'
+        }
+    ];
+
+    // 3. ฟังก์ชันสร้างรายการโรค
+    function renderTemplates() {
+        const searchText = document.getElementById('searchTemplate').value.toLowerCase();
+        const listDiv = document.getElementById('templateList');
+        listDiv.innerHTML = '';
+
+        const filtered = dischargeTemplates.filter(t => t.title.toLowerCase().includes(searchText) || t.id.toLowerCase().includes(searchText));
+
+        filtered.forEach(t => {
+            const div = document.createElement('div');
+            div.className = 'template-item';
+            div.innerHTML = `<strong>${t.title}</strong><small>${t.id}</small>`;
+            div.onclick = () => fillForm(t);
+            listDiv.appendChild(div);
+        });
+    }
+
+    // 4. ฟังก์ชันเติมข้อมูลลงฟอร์ม
+    function fillForm(data) {
+        document.getElementById('inp_d').value = data.d;
+        document.getElementById('inp_m').value = data.m;
+        document.getElementById('inp_e').value = data.e;
+        document.getElementById('inp_t').value = data.t;
+        document.getElementById('inp_h').value = data.h;
+        document.getElementById('inp_o').value = data.o;
+        document.getElementById('inp_d2').value = data.d2;
+    }
+
+    // เริ่มทำงาน
+    renderTemplates();
+
+</script>
+</body>
+</html>
