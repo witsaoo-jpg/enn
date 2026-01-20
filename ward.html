@@ -75,12 +75,14 @@
             font-size: 0.85rem;
             font-weight: bold;
         }
-        /* Navbar พื้นฐานถ้า style.css ยังไม่มี */
         .navbar {
             background: var(--primary);
             color: white;
             padding: 1rem 2rem;
             box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
     </style>
 </head>
@@ -89,6 +91,9 @@
     <nav class="navbar">
         <div class="navbar-title">
             <i class="fas fa-hospital"></i> ระบบเลือกหอผู้ป่วย (Ward Selection)
+        </div>
+        <div class="user-info" style="font-size: 0.9rem;">
+            <i class="fas fa-user-circle"></i> <span id="navUserName">...</span>
         </div>
     </nav>
 
@@ -207,12 +212,16 @@
         };
         localStorage.setItem('selectedWard', JSON.stringify(selectedWard));
         
-        // นำทางไปยังหน้า "รายชื่อผู้ป่วยในวอร์ด"
+        // นำทางไปยังหน้า "รายชื่อผู้ป่วยในวอร์ด" ตาม Site Map ใหม่
         window.location.href = 'patient_list.html';
     }
 
     // 5. เริ่มแสดงผลครั้งแรกเมื่อโหลดหน้า
     document.addEventListener('DOMContentLoaded', () => {
+        // แสดงชื่อผู้ใช้ใน Navbar
+        const user = sessionStorage.getItem('currentUser');
+        if(user) document.getElementById('navUserName').innerText = user;
+
         renderWards(wardData);
     });
 </script>
