@@ -139,6 +139,15 @@
                 setTimeout(() => card.style.transform = 'translateX(0)', 100);
             }
         }
+        // ตัวอย่างส่วนการตรวจสอบ Login
+function handleLogin() {
+    // ... โค้ดตรวจสอบ Username/Password ...
+    if (loginSuccess) {
+        sessionStorage.setItem('isLoggedIn', 'true');
+        // เปลี่ยนจาก index.html เป็น paperless.html
+        window.location.href = 'paperless.html'; 
+    }
+}
     </script>
 </body>
 </html>
