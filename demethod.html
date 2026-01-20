@@ -15,267 +15,203 @@
             --accent: #2e7d32;
             --danger: #c62828;
             --shadow: 0 2px 8px rgba(0,0,0,0.08);
+            --shadow-hover: 0 4px 16px rgba(0,0,0,0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #f4f7f6; font-family: 'Sarabun', sans-serif; color: #333; }
-
-        .no-print { display: block; }
+        body { background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%); font-family: 'Sarabun', sans-serif; color: #2c3e50; min-height: 100vh; }
 
         /* Navbar */
-        .navbar {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            padding: 15px 30px; display: flex; justify-content: space-between; align-items: center;
-            color: white; box-shadow: var(--shadow); position: sticky; top: 0; z-index: 100;
-        }
+        .navbar { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-hover); position: sticky; top: 0; z-index: 100; color: white; }
+        .navbar-title { font-weight: 600; font-size: 1.25rem; display: flex; align-items: center; gap: 12px; }
 
+        .container { max-width: 1600px; margin: 25px auto; padding: 0 20px; }
+        
         /* Patient Header */
-        .patient-header {
-            background: white; margin: 20px auto; max-width: 1400px; padding: 20px;
-            border-radius: 12px; box-shadow: var(--shadow); border-left: 6px solid var(--primary);
-            display: flex; justify-content: space-between; align-items: center;
-        }
+        .patient-header-card { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; padding: 28px 35px; border-radius: 16px; box-shadow: var(--shadow-hover); display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .ph-info h2 { margin: 0; font-size: 1.75rem; display: flex; align-items: center; gap: 12px; }
+        .ph-meta { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
+        .ph-meta span { background: rgba(255,255,255,0.2); padding: 7px 16px; border-radius: 20px; font-size: 0.9rem; backdrop-filter: blur(10px); display: inline-flex; align-items: center; gap: 6px; }
 
-        .layout {
-            display: grid; grid-template-columns: 350px 1fr; gap: 20px;
-            max-width: 1400px; margin: 0 auto 40px; padding: 0 20px;
-        }
+        /* Layout */
+        .layout-container { display: grid; grid-template-columns: 360px 1fr; gap: 25px; align-items: start; }
 
-        /* Sidebar */
-        .sidebar {
-            background: white; padding: 20px; border-radius: 12px; box-shadow: var(--shadow);
-            height: fit-content; position: sticky; top: 90px;
-        }
-        .template-list { margin-top: 15px; max-height: 400px; overflow-y: auto; }
-        .template-item { 
-            padding: 12px; border: 1px solid #eee; margin-bottom: 8px; border-radius: 8px;
-            cursor: pointer; transition: 0.2s; font-size: 0.9rem;
-        }
-        .template-item:hover { background: var(--primary-light); border-color: var(--primary); }
+        /* Sidebar Templates */
+        .sidebar-card { background: white; border-radius: 16px; box-shadow: var(--shadow); padding: 28px; height: calc(100vh - 260px); display: flex; flex-direction: column; position: sticky; top: 100px; }
+        .sidebar-title { font-size: 1.2rem; font-weight: 600; color: var(--primary); margin-bottom: 20px; border-bottom: 3px solid var(--primary-light); padding-bottom: 14px; }
+        .search-box { width: 100%; padding: 13px 20px; border: 2px solid #e0e0e0; border-radius: 30px; background: #f8f9fa; outline: none; margin-bottom: 20px; }
+        #templateList { flex-grow: 1; overflow-y: auto; }
+        .template-item { padding: 16px 18px; margin-bottom: 12px; background: #fff; border: 2px solid #f0f0f0; border-radius: 12px; cursor: pointer; transition: 0.3s; }
+        .template-item:hover { border-color: var(--primary); background: var(--primary-light); transform: translateX(6px); }
 
         /* Main Form */
-        .main-content { background: white; padding: 30px; border-radius: 12px; box-shadow: var(--shadow); }
-        .dm-group { margin-bottom: 20px; }
-        .dm-group label { display: block; font-weight: bold; margin-bottom: 8px; color: var(--primary-dark); }
-        .dm-group textarea { 
-            width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px;
-            font-family: 'Sarabun'; font-size: 1rem; line-height: 1.6; min-height: 100px;
-        }
+        .form-card { background: white; border-radius: 16px; box-shadow: var(--shadow); padding: 35px 40px; border: 1px solid rgba(0,0,0,0.06); }
+        .action-toolbar { display: flex; justify-content: flex-end; gap: 12px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #f5f5f5; }
+        .dm-group { margin-bottom: 28px; }
+        .dm-label { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 1.1rem; color: #2c3e50; margin-bottom: 12px; }
+        .dm-textarea { width: 100%; padding: 15px 18px; border: 2px solid #e3e8ef; border-radius: 12px; font-family: 'Sarabun'; font-size: 1rem; line-height: 1.7; min-height: 100px; background: #fafbfc; }
 
-        /* History Log */
-        .history-box {
-            margin-top: 30px; padding-top: 20px; border-top: 2px solid #eee;
-        }
-        .history-item {
-            background: #f9f9f9; padding: 12px; border-radius: 8px; margin-bottom: 10px;
-            border-left: 4px solid #999; font-size: 0.85rem;
-        }
-        .history-item b { color: var(--primary); }
-
-        /* Print Settings */
-        @media print {
-            .no-print, .navbar, .sidebar, .btn-group { display: none !important; }
-            body { background: white; }
-            .layout { display: block; }
-            .patient-header { border: 2px solid #333; box-shadow: none; margin-bottom: 30px; }
-            .main-content { box-shadow: none; padding: 0; }
-            .dm-group textarea { border: none; padding: 0; min-height: auto; overflow: visible; }
-            .dm-group label { text-decoration: underline; font-size: 1.1rem; }
-            .history-box { display: none; } /* ซ่อนประวัติเวลาพิมพ์ให้คนไข้ */
-        }
-
-        .btn {
-            padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer;
-            font-weight: bold; display: inline-flex; align-items: center; gap: 8px;
-        }
+        /* Timeline History CRUD */
+        .history-section { margin-top: 40px; padding-top: 30px; border-top: 3px solid var(--primary-light); }
+        .history-item { background: #f8f9fa; padding: 15px 20px; border-radius: 12px; margin-bottom: 15px; border-left: 5px solid var(--primary); position: relative; }
+        .timeline-actions { position: absolute; right: 20px; top: 15px; display: flex; gap: 10px; }
+        
+        .btn { padding: 11px 22px; border: none; border-radius: 10px; cursor: pointer; font-family: 'Sarabun'; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; transition: 0.3s; }
+        .btn-primary { background: white; color: var(--primary); font-weight: 600; }
         .btn-save { background: var(--accent); color: white; }
-        .btn-print { background: var(--primary); color: white; }
-        .btn-clear { background: #eee; color: #666; }
+        .btn-clear { background: #ffebee; color: var(--danger); }
+        .btn-sm { padding: 6px 12px; font-size: 0.85rem; border: 1px solid #ddd; background: white; }
+        .btn-sm:hover { border-color: var(--primary); color: var(--primary); }
+        .btn-del:hover { border-color: var(--danger); color: var(--danger); }
+
+        @media print {
+            .no-print, .navbar, .sidebar-card, .action-toolbar, .timeline-actions { display: none !important; }
+            .layout-container { display: block; }
+            .form-card { box-shadow: none; border: none; padding: 0; }
+            .dm-textarea { border: none; background: transparent; min-height: auto; }
+            .patient-header-card { background: white !important; color: black !important; border: 2px solid #333; }
+            .ph-meta span { background: #eee !important; color: black !important; }
+        }
     </style>
 </head>
 <body>
 
-<nav class="navbar no-print">
-    <div style="font-size: 1.2rem; font-weight: bold;"><i class="fas fa-file-medical"></i> Discharge Planning Tool</div>
-    <button class="btn" style="background: rgba(255,255,255,0.2); color: white;" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> กลับ</button>
-</nav>
+    <nav class="navbar no-print">
+        <div class="navbar-title"><i class="fas fa-hospital-user"></i> <span>Discharge Planning System</span></div>
+        <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;"><i class="fas fa-arrow-left"></i> กลับ</button>
+    </nav>
 
-<div class="patient-header">
-    <div>
-        <h2 id="disp_name">ชื่อคนไข้</h2>
-        <p style="color: #666;">HN: <span id="disp_hn">-</span> | AN: <span id="disp_an">-</span> | Ward: <span id="disp_ward">-</span></p>
-    </div>
-    <div class="btn-group no-print">
-        <button class="btn btn-print" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์ใบกลับบ้าน (PDF)</button>
-    </div>
-</div>
-
-<div class="layout">
-    <div class="sidebar no-print">
-        <div style="font-weight: bold; color: var(--primary);">1. เลือกกลุ่มโรค</div>
-        <input type="text" id="searchBox" placeholder="ค้นหาโรค..." onkeyup="filterList()" style="width: 100%; padding: 8px; margin-top: 10px; border-radius: 5px; border: 1px solid #ddd;">
-        <div class="template-list" id="templateList">
+    <div class="container">
+        <div class="patient-header-card">
+            <div class="ph-info">
+                <h2><i class="fas fa-user-injured"></i> <span id="ptName">...</span></h2>
+                <div class="ph-meta">
+                    <span><i class="fas fa-id-card"></i> HN: <strong id="ptHN">-</strong></span>
+                    <span><i class="fas fa-procedures"></i> AN: <strong id="ptAN">-</strong></span>
+                    <span><i class="fas fa-clinic-medical"></i> Ward: <strong id="ptWard">-</strong></span>
+                </div>
             </div>
-        <hr style="margin: 20px 0;">
-        <div style="font-size: 0.8rem; color: #999;">* ข้อมูลจะถูกบันทึกแยกรายบุคคลตาม HN</div>
-    </div>
-
-    <div class="main-content">
-        <div class="action-toolbar no-print" style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 20px;">
-            <button class="btn btn-clear" onclick="clearForm()"><i class="fas fa-eraser"></i> ล้างช่องกรอก</button>
-            <button class="btn btn-save" onclick="saveData()"><i class="fas fa-save"></i> บันทึกข้อมูลและลงประวัติ</button>
+            <div class="btn-print-group no-print">
+                <button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์ใบกลับบ้าน</button>
+            </div>
         </div>
 
-        <div class="dm-group">
-            <label>D - Diagnosis (การวินิจฉัยและแผนการรักษา)</label>
-            <textarea id="inp_d"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>M - Medicine (ยาที่ได้รับกลับบ้านและการใช้ยา)</label>
-            <textarea id="inp_m"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>E - Environment (การจัดสิ่งแวดล้อมที่บ้าน)</label>
-            <textarea id="inp_e"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>T - Treatment (การดูแลแผล/อุปกรณ์/การเฝ้าสังเกต)</label>
-            <textarea id="inp_t"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>H - Health (อาการผิดปกติที่ต้องรีบมาโรงพยาบาล)</label>
-            <textarea id="inp_h"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>O - Outpatient (การนัดหมายติดตามอาการ)</label>
-            <textarea id="inp_o"></textarea>
-        </div>
-        <div class="dm-group">
-            <label>D - Diet (การรับประทานอาหารที่เหมาะสม)</label>
-            <textarea id="inp_d2"></textarea>
-        </div>
+        <div class="layout-container">
+            <div class="sidebar-card no-print">
+                <div class="sidebar-title"><i class="fas fa-book-medical"></i> เลือกกลุ่มโรค</div>
+                <input type="text" id="searchTemplate" class="search-box" placeholder="🔍 ค้นหาชื่อโรค..." onkeyup="filterTemplates()">
+                <div id="templateList">
+                    </div>
+            </div>
 
-        <div class="history-box no-print">
-            <h3 style="font-size: 1rem; margin-bottom: 15px; color: #666;"><i class="fas fa-history"></i> ประวัติการลงบันทึก (Timeline)</h3>
-            <div id="historyLog">
-                <div style="color: #ccc; font-style: italic;">ยังไม่มีประวัติการบันทึก</div>
+            <div class="form-card">
+                <div class="action-toolbar no-print">
+                    <button class="btn btn-clear" onclick="clearForm()"><i class="fas fa-eraser"></i> ล้างข้อมูล</button>
+                    <button class="btn btn-save" onclick="saveData()"><i class="fas fa-save"></i> บันทึกข้อมูลและลง Timeline</button>
+                </div>
+
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-stethoscope"></i> D - Diagnosis</div><textarea id="inp_d" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-pills"></i> M - Medicine</div><textarea id="inp_m" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-home"></i> E - Environment</div><textarea id="inp_e" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-hand-holding-medical"></i> T - Treatment</div><textarea id="inp_t" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-heartbeat"></i> H - Health</div><textarea id="inp_h" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-calendar-check"></i> O - Outpatient</div><textarea id="inp_o" class="dm-textarea"></textarea></div>
+                <div class="dm-group"><div class="dm-label"><i class="fas fa-utensils"></i> D - Diet</div><textarea id="inp_d2" class="dm-textarea"></textarea></div>
+
+                <div class="history-section no-print">
+                    <h3 style="margin-bottom:20px; color:#666;"><i class="fas fa-history"></i> ประวัติการลงบันทึก (Timeline)</h3>
+                    <div id="historyLog">
+                        <div style="color:#ccc; font-style:italic; text-align:center;">ยังไม่มีประวัติการบันทึก</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
 <script>
-    // 1. คลังข้อมูล Template (เพิ่มได้เองที่นี่)
+    // 1. คลังข้อมูลแม่แบบ
     const masterTemplates = [
-        { id: 'APP', title: 'ผ่าตัดไส้ติ่ง (Appendectomy)', d: 'ไส้ติ่งอักเสบ ได้รับการผ่าตัดเรียบร้อย', m: 'พาราเซตามอล 500มก. ทานทุก 6 ชม. เวลามีอาการปวด', e: 'จัดที่นอนชั้นล่าง ลดการเดินขึ้นลงบันไดใน 7 วันแรก', t: 'รักษาแผลให้แห้ง ห้ามโดนน้ำจนกว่าจะตัดไหม (7 วัน)', h: 'มีไข้สูง แผลบวมแดง มีหนอง ปวดท้องรุนแรง', o: 'นัดตัดไหม 7 วันหลังผ่าตัด ที่ห้องตรวจศัลยกรรม', d2: 'อาหารอ่อนย่อยง่าย งดของหมักดองและแอลกอฮอล์' },
-        { id: 'DM', title: 'เบาหวาน (Diabetes)', d: 'โรคเบาหวาน ควบคุมระดับน้ำตาล', m: 'ยาลดน้ำตาลทานก่อนอาหารเช้า-เย็น ห้ามหยุดยาเอง', e: 'วางของใช้ให้เป็นระเบียบ ป้องกันการเดินชน/หกล้ม', t: 'ตรวจเท้าทุกวัน สวมรองเท้าเดินในบ้านเสมอ', h: 'หน้ามืด ใจสั่น เหงื่อออก (น้ำตาลต่ำ) หรือซึมลง หายใจหอบ', o: 'นัดตรวจเลือดติดตามผล ทุก 1-3 เดือน', d2: 'เน้นผักใบเขียว ลดข้าว แป้ง และผลไม้รสหวานจัด' }
+        { id: 'APP', title: 'ไส้ติ่งอักเสบ (Appendectomy)', d: 'ไส้ติ่งอักเสบเฉียบพลัน ผ่าตัดเรียบร้อย', m: 'Paracetamol 500mg ทานเมื่อมีอาการปวด ทุก 6 ชม.', e: 'พักผ่อนชั้นล่าง งดขึ้นลงบันได 7 วัน', t: 'รักษาแผลให้แห้ง ห้ามโดนน้ำจนกว่าจะตัดไหม', h: 'ไข้สูง แผลบวมแดงหนองซึม ปวดท้องรุนแรง', o: 'นัดตัดไหม 7 วัน ที่แผนกศัลยกรรม', d2: 'อาหารอ่อนย่อยง่าย งดของหมักดอง' },
+        { id: 'DM', title: 'เบาหวาน (Diabetes)', d: 'โรคเบาหวานประเภทที่ 2', m: 'ยาลดน้ำตาลทานก่อนอาหารเช้า-เย็น ห้ามหยุดยาเอง', e: 'จัดบ้านให้มีแสงสว่างเพียงพอ ป้องกันหกล้ม', t: 'ตรวจเท้าทุกวัน สวมรองเท้าเดินในบ้าน', h: 'หน้ามืด ใจสั่น เหงื่อออก ซึมลง', o: 'นัดติดตามผลน้ำตาลทุก 1 เดือน', d2: 'ลดข้าว แป้ง น้ำตาล เน้นผักใบเขียว' }
     ];
 
-    // 2. จัดการข้อมูลคนไข้
-    let profile = JSON.parse(localStorage.getItem('patientProfile')) || { name: 'ไม่ได้เลือกคนไข้', hn: '0000', an: '0000', ward: '-' };
+    // 2. ข้อมูลคนไข้ (ดึงจาก LocalStorage)
+    const profile = JSON.parse(localStorage.getItem('patientProfile')) || { name: 'ไม่ได้เลือกคนไข้', hn: '0000', an: '0000', ward: 'General' };
     const hn = profile.hn;
 
     window.onload = function() {
-        document.getElementById('disp_name').innerText = profile.name;
-        document.getElementById('disp_hn').innerText = profile.hn;
-        document.getElementById('disp_an').innerText = profile.an;
-        document.getElementById('disp_ward').innerText = profile.ward;
-        
-        renderTemplateList();
-        loadPatientData();
+        document.getElementById('ptName').innerText = profile.name;
+        document.getElementById('ptHN').innerText = profile.hn;
+        document.getElementById('ptAN').innerText = profile.an;
+        document.getElementById('ptWard').innerText = profile.ward;
+        renderTemplates();
+        loadTimeline();
     };
 
-    function renderTemplateList() {
+    function renderTemplates() {
         const list = document.getElementById('templateList');
-        list.innerHTML = masterTemplates.map(t => `
-            <div class="template-item" onclick="applyTemplate('${t.id}')">
-                <strong>${t.title}</strong>
-            </div>
-        `).join('');
+        list.innerHTML = masterTemplates.map(t => `<div class="template-item" onclick="applyTemplate('${t.id}')"><strong>${t.title}</strong></div>`).join('');
     }
 
     function applyTemplate(id) {
         const t = masterTemplates.find(x => x.id === id);
-        if(!t) return;
-        if(confirm(`ต้องการใช้ข้อความจากกลุ่มโรค "${t.title}" ใช่หรือไม่?`)) {
-            document.getElementById('inp_d').value = t.d;
-            document.getElementById('inp_m').value = t.m;
-            document.getElementById('inp_e').value = t.e;
-            document.getElementById('inp_t').value = t.t;
-            document.getElementById('inp_h').value = t.h;
-            document.getElementById('inp_o').value = t.o;
-            document.getElementById('inp_d2').value = t.d2;
-        }
+        if(!t || !confirm(`ต้องการใช้ข้อความจากแม่แบบ "${t.title}" หรือไม่?`)) return;
+        ['d','m','e','t','h','o','d2'].forEach(key => document.getElementById('inp_'+key).value = t[key]);
     }
 
-    function filterList() {
-        const val = document.getElementById('searchBox').value.toLowerCase();
-        const items = document.getElementsByClassName('template-item');
-        Array.from(items).forEach(item => {
-            item.style.display = item.innerText.toLowerCase().includes(val) ? 'block' : 'none';
-        });
-    }
-
-    // 3. ระบบบันทึกและประวัติ (History CRUD)
+    // 3. ระบบ Timeline CRUD
     function saveData() {
-        const data = {
-            d: document.getElementById('inp_d').value,
-            m: document.getElementById('inp_m').value,
-            e: document.getElementById('inp_e').value,
-            t: document.getElementById('inp_t').value,
-            h: document.getElementById('inp_h').value,
-            o: document.getElementById('inp_o').value,
-            d2: document.getElementById('inp_d2').value
-        };
+        const data = { d: document.getElementById('inp_d').value, m: document.getElementById('inp_m').value, e: document.getElementById('inp_e').value, t: document.getElementById('inp_t').value, h: document.getElementById('inp_h').value, o: document.getElementById('inp_o').value, d2: document.getElementById('inp_d2').value };
+        
+        // Save current snapshot
+        localStorage.setItem(`discharge_current_${hn}`, JSON.stringify(data));
 
-        // บันทึกข้อมูลปัจจุบัน
-        localStorage.setItem(`discharge_data_${hn}`, JSON.stringify(data));
-
-        // บันทึกลงประวัติ (History Log)
+        // Add to History (Create)
         let history = JSON.parse(localStorage.getItem(`discharge_history_${hn}`)) || [];
-        const newLog = {
-            time: new Date().toLocaleString('th-TH'),
-            user: "พยาบาลประจำตึก", // ในอนาคตดึงจากระบบ Login ได้
-            action: "บันทึก/แก้ไขข้อมูล D-M-E-T-H-O-D"
-        };
-        history.unshift(newLog); // เอาอันใหม่ไว้บน
-        localStorage.setItem(`discharge_history_${hn}`, JSON.stringify(history.slice(0, 5))); // เก็บแค่ 5 รายการล่าสุดพอ
-
-        loadPatientData();
-        alert("บันทึกข้อมูลและลงประวัติเรียบร้อยแล้ว");
+        history.unshift({ id: Date.now(), time: new Date().toLocaleString('th-TH'), user: "พยาบาลประจำตึก", content: data });
+        localStorage.setItem(`discharge_history_${hn}`, JSON.stringify(history.slice(0, 5)));
+        
+        loadTimeline();
+        alert("บันทึกข้อมูลและลงประวัติเรียบร้อย");
     }
 
-    function loadPatientData() {
-        const saved = JSON.parse(localStorage.getItem(`discharge_data_${hn}`));
-        if(saved) {
-            document.getElementById('inp_d').value = saved.d || "";
-            document.getElementById('inp_m').value = saved.m || "";
-            document.getElementById('inp_e').value = saved.e || "";
-            document.getElementById('inp_t').value = saved.t || "";
-            document.getElementById('inp_h').value = saved.h || "";
-            document.getElementById('inp_o').value = saved.o || "";
-            document.getElementById('inp_d2').value = saved.d2 || "";
-        }
-
-        const history = JSON.parse(localStorage.getItem(`discharge_history_${hn}`));
+    function loadTimeline() {
+        const history = JSON.parse(localStorage.getItem(`discharge_history_${hn}`)) || [];
         const logDiv = document.getElementById('historyLog');
-        if(history && history.length > 0) {
-            logDiv.innerHTML = history.map(h => `
-                <div class="history-item">
-                    <b><i class="fas fa-clock"></i> ${h.time}</b> โดย <b>${h.user}</b><br>
-                    <span>${h.action}</span>
+        if(history.length === 0) return;
+        
+        logDiv.innerHTML = history.map(h => `
+            <div class="history-item">
+                <div class="timeline-actions">
+                    <button class="btn btn-sm" onclick="editHistory(${h.id})" title="ดึงข้อมูลกลับมาแก้"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-del" onclick="deleteHistory(${h.id})" title="ลบประวัติ"><i class="fas fa-trash"></i></button>
                 </div>
-            `).join('');
-        }
+                <b><i class="fas fa-clock"></i> ${h.time}</b> โดย <b>${h.user}</b><br>
+                <span style="font-size:0.85rem; color:#666;">บันทึก/แก้ไขข้อมูล D-M-E-T-H-O-D</span>
+            </div>
+        `).join('');
     }
 
-    function clearForm() {
-        if(confirm("ล้างข้อความในช่องกรอกทั้งหมด?")) {
-            const ids = ['d','m','e','t','h','o','d2'];
-            ids.forEach(id => document.getElementById('inp_'+id).value = "");
-        }
+    // Read/Update from Timeline
+    function editHistory(id) {
+        const history = JSON.parse(localStorage.getItem(`discharge_history_${hn}`));
+        const log = history.find(item => item.id === id);
+        if(!log || !confirm("ต้องการดึงข้อมูลชุดนี้กลับมาที่ช่องกรอกใช่หรือไม่?")) return;
+        ['d','m','e','t','h','o','d2'].forEach(key => document.getElementById('inp_'+key).value = log.content[key]);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Delete from Timeline
+    function deleteHistory(id) {
+        if(!confirm("ต้องการลบรายการประวัตินี้หรือไม่?")) return;
+        let history = JSON.parse(localStorage.getItem(`discharge_history_${hn}`));
+        history = history.filter(item => item.id !== id);
+        localStorage.setItem(`discharge_history_${hn}`, JSON.stringify(history));
+        loadTimeline();
+    }
+
+    function clearForm() { if(confirm("ต้องการล้างช่องกรอกทั้งหมดหรือไม่?")) ['d','m','e','t','h','o','d2'].forEach(key => document.getElementById('inp_'+key).value = ""); }
+    function filterTemplates() { const val = document.getElementById('searchTemplate').value.toLowerCase(); Array.from(document.getElementsByClassName('template-item')).forEach(item => item.style.display = item.innerText.toLowerCase().includes(val) ? 'block' : 'none'); }
 </script>
-
 </body>
 </html>
