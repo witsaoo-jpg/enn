@@ -3,162 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบ Paperless Nursing - Dashboard</title>
+    <title>เมนูบริการการพยาบาล - Paperless</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #00796b; /* สีเขียวหลัก */
-            --primary-dark: #004d40;
-            --primary-light: #e0f2f1;
-            --accent: #2e7d32; /* สีเขียวเข้มขึ้น */
-            --shadow: 0 4px 12px rgba(0,0,0,0.1);
-            --shadow-hover: 0 8px 20px rgba(0,0,0,0.15);
-        }
-
+        :root { --primary: #00796b; --accent: #2e7d32; --shadow: 0 4px 12px rgba(0,0,0,0.1); }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: linear-gradient(135deg, #f5f7fa 0%, #e8eef3 100%); font-family: 'Sarabun', sans-serif; color: #2c3e50; min-height: 100vh; }
+        body { background: #f4f7f6; font-family: 'Sarabun', sans-serif; }
 
-        /* Navbar */
-        .navbar { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); padding: 18px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow); color: white; }
-        .navbar-title { font-weight: 600; font-size: 1.25rem; display: flex; align-items: center; gap: 12px; }
+        /* ส่วนแสดงชื่อคนไข้ด้านบน (Header) */
+        .patient-status-bar { background: linear-gradient(135deg, var(--primary) 0%, #004d40 100%); color: white; padding: 25px; box-shadow: var(--shadow); text-align: center; }
+        .patient-status-bar h2 { font-size: 1.8rem; margin-bottom: 10px; }
+        .meta-info { font-size: 1rem; opacity: 0.9; }
 
-        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+        .container { max-width: 1200px; margin: 40px auto; padding: 0 20px; }
         
-        /* Dashboard Grid */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
+        /* Grid สำหรับเมนู 4 ส่วน */
+        .menu-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; }
 
-        /* Card Style */
-        .card {
-            background: linear-gradient(145deg, var(--primary-light) 0%, var(--primary) 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 16px;
-            box-shadow: var(--shadow);
-            transition: all 0.3s ease;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            min-height: 180px;
+        .menu-card {
+            background: white; padding: 35px; border-radius: 20px; text-align: center;
+            box-shadow: var(--shadow); cursor: pointer; transition: 0.3s; border-bottom: 8px solid var(--primary);
         }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: var(--shadow-hover);
-            background: linear-gradient(145deg, var(--primary) 0%, var(--primary-dark) 100%);
-        }
-
-        .card-icon {
-            font-size: 3.5rem;
-            margin-bottom: 15px;
-            opacity: 0.8;
-            color: white; /* ไอคอนสีขาว */
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: white;
-        }
-
-        .card-description {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.9);
-            line-height: 1.5;
-        }
-
-        /* Utility */
-        .mb-20 { margin-bottom: 20px; }
+        .menu-card:hover { transform: translateY(-10px); border-bottom-color: var(--accent); }
+        .menu-card i { font-size: 3.5rem; color: var(--primary); margin-bottom: 20px; }
+        .menu-card h3 { font-size: 1.4rem; color: #333; margin-bottom: 10px; }
+        .menu-card p { font-size: 0.95rem; color: #666; }
     </style>
 </head>
 <body>
 
-    <nav class="navbar">
-        <div class="navbar-title">
-            <i class="fas fa-desktop"></i> ระบบ Paperless Nursing Dashboard
+    <div class="patient-status-bar">
+        <h2 id="headName">...</h2>
+        <div class="meta-info">
+            HN: <span id="headHN">-</span> | AN: <span id="headAN">-</span> | 
+            หอผู้ป่วย: <span id="headWard">-</span>
         </div>
-        <button onclick="window.location.href='index.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer;"><i class="fas fa-home"></i> กลับหน้าหลัก</button>
-    </nav>
+    </div>
 
     <div class="container">
-        <h2 style="text-align: center; margin-bottom: 40px; color: var(--primary-dark); font-size: 2rem;">
-            <i class="fas fa-laptop-medical"></i> เครื่องมือพยาบาลไร้กระดาษ
-        </h2>
-
-        <div class="dashboard-grid">
-            
-            <div class="card" onclick="window.location.href='ward.html'">
-                <i class="card-icon fas fa-hospital-alt"></i>
-                <div class="card-title">รายชื่อหอผู้ป่วย</div>
-                <div class="card-description">เลือกหอผู้ป่วยที่ต้องการเข้าใช้งาน</div>
+        <div class="menu-grid">
+            <div class="menu-card" onclick="window.location.href='adl.html'">
+                <i class="fas fa-clipboard-check"></i>
+                <h3>แบบประเมินแรกรับ (ADL)</h3>
+                <p>ประเมินสมรรถนะผู้ป่วยแรกรับ</p>
             </div>
 
-            <div class="card" onclick="window.location.href='patient_list.html'">
-                <i class="card-icon fas fa-users"></i>
-                <div class="card-title">รายชื่อผู้ป่วย</div>
-                <div class="card-description">ดูและจัดการข้อมูลผู้ป่วยรายบุคคล</div>
+            <div class="menu-card" onclick="window.location.href='pfe.html'">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>PFE</h3>
+                <p>การให้ความรู้ผู้ป่วยและญาติ</p>
             </div>
 
-            <div class="card" onclick="alert('ไปยังหน้าบันทึก Vital Signs')">
-                <i class="card-icon fas fa-heartbeat"></i>
-                <div class="card-title">บันทึกค่าพารามิเตอร์</div>
-                <div class="card-description">บันทึกและติดตามสัญญาณชีพผู้ป่วย</div>
+            <div class="menu-card" onclick="window.location.href='index.html'">
+                <i class="fas fa-edit"></i>
+                <h3>บันทึกทางการพยาบาล</h3>
+                <p>บันทึก Focus Charting (DAR)</p>
             </div>
 
-            <div class="card" onclick="alert('ไปยังหน้าฟอร์มปรอท')">
-                <i class="card-icon fas fa-thermometer-half"></i>
-                <div class="card-title">บันทึกฟอร์มปรอท</div>
-                <div class="card-description">บันทึกอุณหภูมิและกราฟประจำวัน</div>
+            <div class="menu-card" onclick="window.location.href='demethod.html'">
+                <i class="fas fa-file-export"></i>
+                <h3>Discharge Summary</h3>
+                <p>สรุปการจำหน่าย (D-M-E-T-H-O-D)</p>
             </div>
-
-            <div class="card" onclick="alert('ไปยังหน้าซักประวัติผู้ป่วย')">
-                <i class="card-icon fas fa-history"></i>
-                <div class="card-title">ใบซักประวัติผู้ป่วย</div>
-                <div class="card-description">ซักประวัติและข้อมูลสุขภาพเบื้องต้น</div>
-            </div>
-
-            <div class="card" onclick="window.location.href='demethod.html'"> <i class="card-icon fas fa-chalkboard-teacher"></i>
-                <div class="card-title">PFE (Patient & Family Education)</div>
-                <div class="card-description">ให้ความรู้ผู้ป่วยและครอบครัวก่อนจำหน่าย</div>
-            </div>
-
+        </div>
+        
+        <div style="text-align: center; margin-top: 40px;">
+            <button onclick="window.location.href='patient_list.html'" style="padding: 10px 20px; border-radius: 8px; border:1px solid #ccc; cursor:pointer;">
+                <i class="fas fa-arrow-left"></i> กลับไปหน้ารายชื่อผู้ป่วย
+            </button>
         </div>
     </div>
 
-</body>
-  <nav class="navbar">
-    <div class="navbar-title">
-        <i class="fas fa-laptop-medical"></i> 
-        <span>ระบบการพยาบาลไร้กระดาษ (Paperless Nursing)</span>
-    </div>
-    <div style="display: flex; gap: 15px;">
-        <span id="userNameDisplay" style="color: white; align-self: center;">พว.วิษณุกรณ์ (ที)</span>
-        <button onclick="handleLogout()" class="btn" style="background:var(--danger); color:white; border:none; padding: 8px 15px; border-radius: 8px; cursor: pointer;">
-            <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-        </button>
-    </div>
-</nav>
-
 <script>
-    function handleLogout() {
-        if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-            sessionStorage.clear();
-            window.location.href = 'login.html';
-        }
-    }
-
-    // ตรวจสอบว่าได้ Login หรือยังก่อนเข้าหน้า Dashboard
     window.onload = function() {
-        if (!sessionStorage.getItem('isLoggedIn')) {
-            window.location.href = 'login.html';
+        // ดึงข้อมูลวอร์ด
+        const ward = JSON.parse(localStorage.getItem('selectedWard'));
+        if(ward) document.getElementById('headWard').innerText = ward.name;
+
+        // ดึงข้อมูลคนไข้ที่เลือก
+        const profile = JSON.parse(localStorage.getItem('patientProfile'));
+        if(profile) {
+            document.getElementById('headName').innerText = profile.name;
+            document.getElementById('headHN').innerText = profile.hn;
+            document.getElementById('headAN').innerText = profile.an;
+        } else {
+            alert("กรุณาเลือกคนไข้ก่อนใช้งาน");
+            window.location.href = 'patient_list.html';
         }
-    }
+    };
 </script>
+</body>
 </html>
