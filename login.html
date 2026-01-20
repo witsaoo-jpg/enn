@@ -75,6 +75,14 @@
             display: none;
         }
         .footer { margin-top: 20px; font-size: 0.8rem; color: #aaa; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
     </style>
 </head>
 <body>
@@ -121,18 +129,17 @@
             const errorBox = document.getElementById('errorBox');
 
             // ตรวจสอบ Username/Password
-            // คุณทีสามารถเพิ่มเงื่อนไขผู้ใช้คนอื่นได้ที่นี่
             if ((user === 'admin' && pass === '1234') || (user === 'nurse' && pass === '1111')) {
                 
                 // 1. บันทึกสถานะล็อกอินลงใน Session
                 sessionStorage.setItem('isLoggedIn', 'true');
                 
-                // 2. บันทึกชื่อผู้ใช้เพื่อนำไปโชว์ในหน้า Dashboard
+                // 2. บันทึกชื่อผู้ใช้
                 let displayName = user === 'admin' ? 'พว.วิษณุกรณ์ (ที)' : 'พว.ใจดี มีสุข (Staff)';
                 sessionStorage.setItem('currentUser', displayName);
                 
-                // 3. ★★★ จุดสำคัญ: เมื่อผ่านแล้วให้ไปที่หน้า paperless.html ★★★
-                window.location.href = 'paperless.html';
+                // 3. ★★★ เปลี่ยนเส้นทางไปที่หน้าเลือกวอร์ดตาม Site Map ★★★
+                window.location.href = 'ward.html'; 
 
             } else {
                 // กรณีรหัสผ่านผิด
@@ -145,16 +152,5 @@
             }
         }
     </script>
-
-    <style>
-        /* เพิ่ม Animation สั่นเวลาใส่รหัสผิด */
-        @keyframes shake {
-            0% { transform: translateX(0); }
-            25% { transform: translateX(5px); }
-            50% { transform: translateX(-5px); }
-            75% { transform: translateX(5px); }
-            100% { transform: translateX(0); }
-        }
-    </style>
 </body>
 </html>
