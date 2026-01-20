@@ -166,7 +166,13 @@
                 </div>
             `).join('');
         }
-
+function selectWard(name, code) {
+    // เก็บข้อมูลวอร์ดที่เลือกลงเครื่อง
+    localStorage.setItem('selectedWard', JSON.stringify({ name, code }));
+    
+    // เมื่อกดแล้ว ให้ไปหน้า "รายชื่อผู้ป่วยในวอร์ด"
+    window.location.href = 'patient_list.html';
+}
         function filterWards() {
             const val = document.getElementById('wardSearch').value.toLowerCase();
             const filtered = wardData.filter(w => 
