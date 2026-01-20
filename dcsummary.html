@@ -799,6 +799,60 @@
                 modal.style.display = 'none';
             }
         }
+        // --- PDF Export Function (ฉบับแก้ไข: ดึงค่า input มาแสดง) ---
+        function exportToPDF() {
+            // 1. เตรียมข้อมูลก่อนพิมพ์: ยัดค่า Value ลงใน HTML Attribute
+            // จัดการ Input ทั่วไป
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    if (input.checked) {
+                        input.setAttribute('checked', 'checked');
+                    } else {
+                        input.removeAttribute('checked');
+                    }
+                } else {
+                    input.setAttribute('value', input.value);
+                }
+            });
+
+            // จัดการ Textarea (สำคัญมาก เพราะ html2pdf ไม่อ่าน value ของ textarea)
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.innerHTML = textarea.value;
+            });
+
+            // จัดการ Select (ถ้ามี)
+            document.querySelectorAll('select').forEach(select => {
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption) {
+                    selectedOption.setAttribute('selected', 'selected');
+                }
+            });
+
+            // 2. เริ่มกระบวนการ Export
+            const element = document.getElementById('printableArea');
+            
+            // ซ่อนปุ่มต่างๆ ชั่วคราว
+            const noPrintElements = document.querySelectorAll('.no-print-section');
+            noPrintElements.forEach(el => el.style.display = 'none');
+
+            // ตั้งค่า PDF
+            const opt = {
+                margin:       [10, 10, 10, 10], // ขอบ: บน ขวา ล่าง ซ้าย (มม.)
+                filename:     `Discharge_Summary_${currentPatient ? currentPatient.hn : 'Report'}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // เพิ่ม option ให้ชัดขึ้น
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            // สร้าง PDF และแสดงปุ่มกลับมาเมื่อเสร็จ
+            html2pdf().set(opt).from(element).save().then(() => {
+                noPrintElements.forEach(el => el.style.display = '');
+                // คืนค่า display เดิมของปุ่มต่างๆ เพื่อป้องกัน layout เพี้ยน
+                document.querySelector('.view-toggle').style.display = 'block';
+                document.querySelector('.btn-group').style.display = 'flex';
+                document.querySelector('.patient-header-bar').style.display = 'flex';
+            });
+        }
     </script>
 </body>
 </html>
