@@ -11,7 +11,7 @@
         :root { --primary: #00897b; --primary-dark: #00695c; }
         body {
             font-family: 'Sarabun', sans-serif;
-            background: #f0f2f5;
+            background: linear-gradient(135deg, #e0f2f1 0%, #b2dfdb 100%);
             margin: 0;
             height: 100vh;
             display: flex;
@@ -48,7 +48,7 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
-        input:focus { outline: none; border-color: var(--primary); }
+        input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,137,123,0.1); }
 
         .btn-login {
             background: var(--primary);
@@ -84,7 +84,9 @@
         <h2>Nursing Note System</h2>
         <p>ระบบบันทึกทางการพยาบาลอิเล็กทรอนิกส์</p>
 
-        <div id="errorBox" class="error-msg"><i class="fas fa-exclamation-circle"></i> ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง</div>
+        <div id="errorBox" class="error-msg">
+            <i class="fas fa-exclamation-circle"></i> ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+        </div>
 
         <form onsubmit="handleLogin(event)">
             <div class="input-group">
@@ -104,13 +106,12 @@
             <button type="submit" class="btn-login">เข้าสู่ระบบ (Login)</button>
         </form>
 
-        <div class="footer">© 2024 Hospital Focus Charting System</div>
+        <div class="footer">© 2026 Hospital Paperless System</div>
     </div>
 
     <script>
-        // ล้างค่าเก่าก่อนทุกครั้ง
-        sessionStorage.removeItem('isLoggedIn');
-        sessionStorage.removeItem('currentUser');
+        // เคลียร์สถานะเก่าทิ้งก่อนเริ่มใหม่
+        sessionStorage.clear();
 
         function handleLogin(e) {
             e.preventDefault();
@@ -120,34 +121,40 @@
             const errorBox = document.getElementById('errorBox');
 
             // ตรวจสอบ Username/Password
+            // คุณทีสามารถเพิ่มเงื่อนไขผู้ใช้คนอื่นได้ที่นี่
             if ((user === 'admin' && pass === '1234') || (user === 'nurse' && pass === '1111')) {
                 
-                // 1. บันทึกสถานะล็อกอิน
+                // 1. บันทึกสถานะล็อกอินลงใน Session
                 sessionStorage.setItem('isLoggedIn', 'true');
                 
-                // 2. บันทึกชื่อผู้ใช้
-                let displayName = user === 'admin' ? 'พยบ.วิษณุรักษ์ (Admin)' : 'พยบ.ใจดี มีสุข (Staff)';
+                // 2. บันทึกชื่อผู้ใช้เพื่อนำไปโชว์ในหน้า Dashboard
+                let displayName = user === 'admin' ? 'พว.วิษณุกรณ์ (ที)' : 'พว.ใจดี มีสุข (Staff)';
                 sessionStorage.setItem('currentUser', displayName);
                 
-                // 3. ★★★ จุดสำคัญ: เปลี่ยนหน้าไปที่ ward.html ★★★
-                window.location.href = 'ward.html';
+                // 3. ★★★ จุดสำคัญ: เมื่อผ่านแล้วให้ไปที่หน้า paperless.html ★★★
+                window.location.href = 'paperless.html';
 
             } else {
+                // กรณีรหัสผ่านผิด
                 errorBox.style.display = 'block';
                 const card = document.querySelector('.login-card');
-                card.style.transform = 'translateX(5px)';
-                setTimeout(() => card.style.transform = 'translateX(0)', 100);
+                
+                // เอฟเฟกต์สั่นเวลาใส่รหัสผิด
+                card.style.animation = 'shake 0.2s ease-in-out 0s 2';
+                setTimeout(() => card.style.animation = '', 400);
             }
         }
-        // ตัวอย่างส่วนการตรวจสอบ Login
-function handleLogin() {
-    // ... โค้ดตรวจสอบ Username/Password ...
-    if (loginSuccess) {
-        sessionStorage.setItem('isLoggedIn', 'true');
-        // เปลี่ยนจาก index.html เป็น paperless.html
-        window.location.href = 'paperless.html'; 
-    }
-}
     </script>
+
+    <style>
+        /* เพิ่ม Animation สั่นเวลาใส่รหัสผิด */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(5px); }
+            50% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+    </style>
 </body>
 </html>
