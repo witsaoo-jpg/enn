@@ -23,12 +23,64 @@
         body {
             font-family: 'Sarabun', sans-serif;
             background: #f0f2f5;
-            padding: 20px;
+            padding-top: 80px; /* เว้นที่ให้ Fixed Header */
+            padding-bottom: 40px;
             font-size: 14px;
             color: var(--text-dark);
             line-height: 1.5;
         }
 
+        /* --- New: Patient Header Bar --- */
+        .patient-header-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 10px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .patient-info-display {
+            font-size: 1.1rem;
+            font-weight: 500;
+            display: flex;
+            gap: 20px;
+        }
+        
+        .patient-info-display span {
+            background: rgba(255,255,255,0.15);
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            text-decoration: none;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        .back-btn:hover { background: #f1f1f1; transform: translateX(-3px); }
+
+        /* --- Container --- */
         .container {
             max-width: 1000px;
             margin: 0 auto;
@@ -143,9 +195,29 @@
         .history-badge {
             font-size: 11px; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; color: #555; display: inline-block; margin-top: 4px;
         }
+        
+        /* Mobile Responsive adjustment for header */
+        @media (max-width: 768px) {
+            .patient-header-bar { flex-direction: column; gap: 10px; padding: 10px; }
+            .patient-info-display { font-size: 0.9rem; width: 100%; justify-content: space-between; gap: 5px; }
+            .back-btn { width: 100%; justify-content: center; }
+            body { padding-top: 130px; }
+        }
     </style>
 </head>
 <body>
+    
+    <nav class="patient-header-bar">
+        <button class="back-btn" onclick="window.location.href='paperless.html'">
+            <i class="fas fa-arrow-left"></i> ย้อนกลับ
+        </button>
+        <div class="patient-info-display">
+            <span id="headerName"><i class="fas fa-user-injured"></i> ชื่อ: -</span>
+            <span id="headerHN">HN: -</span>
+            <span id="headerAN">AN: -</span>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="header">
             <h1><i class="fas fa-hospital-symbol"></i> โรงพยาบาลชลบุรี (Chonburi Hospital)</h1>
@@ -160,7 +232,9 @@
         <div id="formView">
             <form id="dischargeForm">
                 <input type="hidden" id="recordId">
-                <input type="hidden" id="createdDate"> <div class="form-section">
+                <input type="hidden" id="createdDate">
+
+                <div class="form-section">
                     <div class="section-title"><i class="fas fa-calendar-alt"></i> ข้อมูลการรับเข้าและจำหน่าย</div>
                     <div class="form-row">
                         <div class="form-group" style="flex: 1;">
@@ -498,6 +572,30 @@
         // CRUD: โหลดข้อมูลจาก LocalStorage
         let records = JSON.parse(localStorage.getItem('dischargeRecords')) || [];
         let editingId = null;
+        
+        // ข้อมูลผู้ป่วยปัจจุบัน (Context)
+        let currentPatient = null;
+
+        window.onload = function() {
+            // 1. ดึงข้อมูลผู้ป่วยจาก LocalStorage (ที่ส่งมาจากหน้า patient_list.html)
+            const profile = JSON.parse(localStorage.getItem('patientProfile'));
+            if (profile) {
+                currentPatient = profile;
+                document.getElementById('headerName').innerHTML = `<i class="fas fa-user-injured"></i> ชื่อ: ${profile.name}`;
+                document.getElementById('headerHN').innerText = `HN: ${profile.hn}`;
+                document.getElementById('headerAN').innerText = `AN: ${profile.an}`;
+            } else {
+                document.getElementById('headerName').innerHTML = `<i class="fas fa-user-slash"></i> ไม่ได้เลือกผู้ป่วย`;
+            }
+
+            // 2. ตั้งค่าวันที่ปัจจุบัน
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('admitDate').value = today;
+            document.getElementById('dischargeDate').value = today;
+            
+            // 3. แสดงรายการบันทึกเก่า
+            displayRecords();
+        };
 
         function showForm() {
             document.getElementById('formView').style.display = 'block';
@@ -527,6 +625,11 @@
                 // History Fields
                 createdAt: document.getElementById('createdDate').value || now,
                 updatedAt: now,
+
+                // ใช้ข้อมูลผู้ป่วยจริงจาก Context ถ้ามี
+                hn: currentPatient ? currentPatient.hn : '-',
+                an: currentPatient ? currentPatient.an : '-',
+                patientName: currentPatient ? currentPatient.name : '-',
 
                 admitDate: document.getElementById('admitDate').value,
                 admitTime: document.getElementById('admitTime').value,
@@ -593,15 +696,16 @@
                 autopsy: document.querySelector('input[name="autopsy"]:checked')?.value || '',
                 organDonate: document.querySelector('input[name="organDonate"]:checked')?.value || '',
                 
-                // Mock Data (จำลอง HN/Name)
-                hn: editingId ? records.find(r => r.id === editingId).hn : `HN${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
-                an: editingId ? records.find(r => r.id === editingId).an : `AN${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
-                patientName: editingId ? records.find(r => r.id === editingId).patientName : `ผู้ป่วยตัวอย่าง ${records.length + 1}`,
                 dischargeTypeSimple: document.querySelector('input[name="dischargeType"]:checked')?.value || 'แพทย์อนุมัติ'
             };
 
             if (editingId) {
                 const index = records.findIndex(r => r.id === editingId);
+                // Preserve HN/AN/Name if editing, unless they were empty
+                if(!formData.hn || formData.hn === '-') formData.hn = records[index].hn;
+                if(!formData.an || formData.an === '-') formData.an = records[index].an;
+                if(!formData.patientName || formData.patientName === '-') formData.patientName = records[index].patientName;
+                
                 records[index] = formData;
                 editingId = null;
             } else {
@@ -619,12 +723,17 @@
             const tbody = document.getElementById('recordsTableBody');
             tbody.innerHTML = '';
 
-            if (records.length === 0) {
+            // ถ้ามี Patient Context ให้กรองแสดงเฉพาะของคนไข้คนนั้น (Optional: หรือแสดงหมดตามความต้องการ)
+            // ในที่นี้แสดงทั้งหมดเพื่อให้เห็นภาพรวม หรือจะกรองก็ได้:
+            // const filteredRecords = currentPatient ? records.filter(r => r.hn === currentPatient.hn) : records;
+            const displayList = records; // แสดงทั้งหมด
+
+            if (displayList.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px; color: #999;">ไม่พบข้อมูล</td></tr>`;
                 return;
             }
 
-            records.forEach(record => {
+            displayList.forEach(record => {
                 const row = tbody.insertRow();
                 row.innerHTML = `
                     <td>${record.hn || '-'}<br><small style="color:#999">${record.an || '-'}</small></td>
@@ -654,7 +763,10 @@
             const modalBody = document.getElementById('modalBody');
             modalBody.innerHTML = `
                 <h2 class="modal-header-text">รายละเอียด Discharge Summary</h2>
-                <p style="font-size:12px; color:#666; text-align:right;">แก้ไขล่าสุด: ${record.updatedAt}</p>
+                <div style="background:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
+                    <strong>ผู้ป่วย:</strong> ${record.patientName} (HN: ${record.hn}, AN: ${record.an})<br>
+                    <strong>แก้ไขล่าสุด:</strong> ${record.updatedAt}
+                </div>
                 
                 <div class="view-row"><div class="view-label">การรับเข้า:</div><div class="view-value">${record.admitDate || '-'} ${record.admitTime || ''}</div></div>
                 <div class="view-row"><div class="view-label">การจำหน่าย:</div><div class="view-value">${record.dischargeDate || '-'} ${record.dischargeTime || ''}</div></div>
@@ -780,8 +892,10 @@
             document.getElementById('dischargeForm').reset();
             editingId = null;
             ['medicationTextarea', 'nursingTextarea', 'dietTextarea', 'painTextarea', 'specialCareTextarea'].forEach(id => {
-                document.getElementById(id).style.display = 'none';
+                const el = document.getElementById(id);
+                if(el) el.style.display = 'none';
             });
+            // Reset context header if needed, but usually we keep patient context
         }
 
         function closeModal() {
@@ -794,13 +908,6 @@
                 modal.style.display = 'none';
             }
         }
-
-        window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('admitDate').value = today;
-            document.getElementById('dischargeDate').value = today;
-            displayRecords();
-        };
     </script>
 </body>
 </html>
