@@ -166,7 +166,24 @@
             <h1><i class="fas fa-hospital-symbol"></i> โรงพยาบาลชลบุรี (Chonburi Hospital)</h1>
             <h2>DISCHARGE SUMMARY (Part II : To be completed by RN.)</h2>
         </div>
+<div class="header">
+            <h1><i class="fas fa-hospital-symbol"></i> โรงพยาบาลชลบุรี (Chonburi Hospital)</h1>
+            <h2>DISCHARGE SUMMARY (Part II : To be completed by RN.)</h2>
+        </div>
 
+        <div id="pdfOnlyHeader" style="display: none; border: 1px solid #ccc; padding: 15px; border-radius: 8px; margin-bottom: 20px; background-color: #fff;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 10px;">
+                <span style="font-size: 16px;"><strong>ชื่อ-สกุล:</strong> <span id="pdfName">-</span></span>
+                <span style="font-size: 16px;"><strong>HN:</strong> <span id="pdfHN">-</span></span>
+                <span style="font-size: 16px;"><strong>AN:</strong> <span id="pdfAN">-</span></span>
+            </div>
+            <div style="display: flex; justify-content: flex-start; gap: 30px;">
+                <span style="font-size: 14px;"><strong>หอผู้ป่วย (Ward):</strong> <span id="pdfWard">-</span></span>
+                <span style="font-size: 14px;"><strong>วันที่จำหน่าย:</strong> <span id="pdfDate">-</span></span>
+            </div>
+        </div>
+        <div class="view-toggle no-print-section" style="text-align: right; margin-bottom: 20px;">
+        ```
         <div class="view-toggle no-print-section" style="text-align: right; margin-bottom: 20px;">
             <button class="btn btn-primary" onclick="showForm()" style="display: inline-flex;"><i class="fas fa-plus-circle"></i> สร้างรายการใหม่</button>
             <button class="btn btn-secondary" onclick="showRecords()" style="display: inline-flex;"><i class="fas fa-list"></i> ดูรายการทั้งหมด</button>
@@ -561,9 +578,26 @@
             exportToPDF(true);
         }
 
-        // --- PDF Export Function (Updated) ---
+```javascript
+        // --- PDF Export Function (ฉบับแก้ไข: เพิ่ม Header ข้อมูลผู้ป่วย) ---
         function exportToPDF(returnToTable = false) {
-            // 1. เตรียมข้อมูลก่อนพิมพ์: ยัดค่า Value ลงใน HTML Attribute
+            // 1. เตรียมข้อมูล Header สำหรับ PDF
+            // ดึงข้อมูลจากตัวแปร currentPatient และ Input ในฟอร์ม
+            document.getElementById('pdfName').innerText = currentPatient ? currentPatient.name : '-';
+            document.getElementById('pdfHN').innerText = currentPatient ? currentPatient.hn : '-';
+            document.getElementById('pdfAN').innerText = currentPatient ? currentPatient.an : '-';
+            
+            // ดึงค่า Ward และ Date จากฟอร์ม (กรณีมีการแก้ไขหน้างาน)
+            const wardVal = document.getElementById('dischargeWard').value;
+            const dateVal = document.getElementById('dischargeDate').value;
+            document.getElementById('pdfWard').innerText = wardVal || '-';
+            document.getElementById('pdfDate').innerText = dateVal || '-';
+
+            // แสดงส่วนหัว PDF
+            const pdfHeader = document.getElementById('pdfOnlyHeader');
+            pdfHeader.style.display = 'block';
+
+            // 2. เตรียมข้อมูล Input ในฟอร์ม (ยัดค่า Value ลง Attribute)
             document.querySelectorAll('input').forEach(input => {
                 if (input.type === 'checkbox' || input.type === 'radio') {
                     if (input.checked) {
@@ -587,7 +621,7 @@
                 }
             });
 
-            // 2. เริ่มกระบวนการ Export
+            // 3. เริ่มกระบวนการ Export
             const element = document.getElementById('printableArea');
             
             // ซ่อนปุ่มต่างๆ
@@ -605,13 +639,14 @@
 
             // สร้าง PDF
             html2pdf().set(opt).from(element).save().then(() => {
-                // คืนค่าการแสดงผลปุ่ม
+                // 4. คืนค่าสถานะเดิม (ซ่อน Header PDF, แสดงปุ่ม)
+                pdfHeader.style.display = 'none'; // ซ่อนหัวกระดาษกลับไปเหมือนเดิม
+                
                 noPrintElements.forEach(el => el.style.display = '');
                 document.querySelector('.view-toggle').style.display = 'block';
                 document.querySelector('.btn-group').style.display = 'flex';
                 document.querySelector('.patient-header-bar').style.display = 'flex';
 
-                // หากสั่งพิมพ์จากตาราง ให้กลับไปหน้าตาราง
                 if (returnToTable) {
                     showRecords();
                 }
