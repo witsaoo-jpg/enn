@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายชื่อผู้ป่วย - Nursing Care</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .list-container { max-width: 900px; margin: 30px auto; padding: 0 20px; }
+        .ward-banner { 
+            background: var(--primary); color: white; padding: 20px; 
+            border-radius: 12px; margin-bottom: 25px; display: flex; 
+            justify-content: space-between; align-items: center;
+        }
+        .patient-card {
+            background: white; padding: 18px; border-radius: 12px;
+            margin-bottom: 12px; display: flex; align-items: center;
+            cursor: pointer; transition: 0.2s; border: 1px solid #eee;
+            box-shadow: var(--shadow);
+        }
+        .patient-card:hover { transform: scale(1.02); border-color: var(--primary); }
+        .patient-avatar {
+            width: 50px; height: 50px; background: var(--primary-light);
+            color: var(--primary); border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; margin-right: 15px; font-size: 1.2rem;
+        }
+        .patient-detail { flex-grow: 1; }
+        .patient-detail b { font-size: 1.1rem; color: #333; }
+        .patient-detail p { font-size: 0.9rem; color: #666; }
+        .bed-number { font-weight: bold; color: var(--accent); margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-title">
+            <i class="fas fa-users"></i> รายชื่อผู้ป่วยในความดูแล
+        </div>
+        <button onclick="window.location.href='ward.html'" class="btn" style="background:rgba(255,255,255,0.2); color:white;">
+            <i class="fas fa-exchange-alt"></i> เปลี่ยนวอร์ด
+        </button>
+    </nav>
+
+    <div class="list-container">
+        <div class="ward-banner">
+            <div>
+                <h3 id="wardTitle">หอผู้ป่วย...</h3>
+                <small id="wardCode">รหัส: --</small>
+            </div>
+            <i class="fas fa-hospital-user fa-2x"></i>
+        </div>
+
+        <div id="patientList">
+            </div>
+    </div>
+
+    <script>
+        // ข้อมูลคนไข้จำลอง (ในอนาคตคุณทีสามารถเพิ่มระบบดึงข้อมูลจริงได้)
+        const dummyPatients = [
+            { name: "นายสมชาย รักสงบ", hn: "64-12345", an: "67-001", bed: "01", dx: "Acute Appendicitis" },
+            { name: "นางสาวสมหญิง ยิ้มแย้ม", hn: "65-98765", an: "67-002", bed: "02", dx: "Pneumonia" },
+            { name: "นายวิชัย ใจดี", hn: "66-55443", an: "67-003", bed: "03", dx: "Diabetes Mellitus" }
+        ];
+
+        window.onload = function() {
+            const ward = JSON.parse(localStorage.getItem('selectedWard'));
+            if(ward) {
+                document.getElementById('wardTitle').innerText = ward.name;
+                document.getElementById('wardCode').innerText = `รหัสวอร์ด: ${ward.code}`;
+            }
+            renderPatients();
+        };
+
+        function renderPatients() {
+            const listDiv = document.getElementById('patientList');
+            listDiv.innerHTML = dummyPatients.map(p => `
+                <div class="patient-card" onclick="selectPatient('${p.name}', '${p.hn}', '${p.an}', '${p.dx}')">
+                    <div class="patient-avatar"><i class="fas fa-user"></i></div>
+                    <div class="patient-detail">
+                        <b>${p.name} <span class="bed-number">เตียง ${p.bed}</span></b>
+                        <p>HN: ${p.hn} | AN: ${p.an}</p>
+                        <p style="color:var(--primary)">DX: ${p.dx}</p>
+                    </div>
+                    <i class="fas fa-chevron-right" style="color:#ccc"></i>
+                </div>
+            `).join('');
+        }
+
+        function selectPatient(name, hn, an, dx) {
+            // บันทึกข้อมูลคนไข้ที่เลือก
+            const ward = JSON.parse(localStorage.getItem('selectedWard'));
+            localStorage.setItem('patientProfile', JSON.stringify({ 
+                name, hn, an, dx, ward: ward.name 
+            }));
+            
+            // เข้าสู่หน้า Index (Dashboard ส่วนตัวของคนไข้)
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
