@@ -157,41 +157,51 @@
             { name: "หอผู้ป่วย ให้เลือด", code: "999" }
         ];
 
-        function renderWards(data) {
-            const grid = document.getElementById('wardGrid');
-            grid.innerHTML = data.map(ward => `
-                <div class="ward-card" onclick="selectWard('${ward.name}', '${ward.code}')">
-                    <span class="ward-name">${ward.name}</span>
-                    <span class="ward-code">${ward.code}</span>
-                </div>
-            `).join('');
-        }
-function selectWard(name, code) {
-    // เก็บข้อมูลวอร์ดที่เลือกลงเครื่อง
-    localStorage.setItem('selectedWard', JSON.stringify({ name, code }));
-    
-    // เมื่อกดแล้ว ให้ไปหน้า "รายชื่อผู้ป่วยในวอร์ด"
-    window.location.href = 'patient_list.html';
-}
-        function filterWards() {
-            const val = document.getElementById('wardSearch').value.toLowerCase();
-            const filtered = wardData.filter(w => 
-                w.name.toLowerCase().includes(val) || 
-                w.code.includes(val)
-            );
-            renderWards(filtered);
-        }
+       <script>
+    // 1. ข้อมูลหอผู้ป่วยและรหัส (ดึงมาจากตัวแปร wardData ที่ประกาศไว้ก่อนหน้า)
+    // (คงส่วน wardData = [...] ไว้เหมือนเดิม)
 
-        function selectWard(name, code) {
-            // เก็บข้อมูล Ward ที่เลือกลงใน LocalStorage
-            localStorage.setItem('selectedWard', JSON.stringify({ name, code }));
-            
-            // ไปยังหน้าจัดการรายชื่อผู้ป่วย (สมมติว่าเป็นหน้า patient_list.html)
-            window.location.href = 'index.html';
-        }
+    // 2. ฟังก์ชันแสดงรายการ Card หอผู้ป่วย
+    function renderWards(data) {
+        const grid = document.getElementById('wardGrid');
+        if (!grid) return;
+        
+        grid.innerHTML = data.map(ward => `
+            <div class="ward-card" onclick="selectWard('${ward.name}', '${ward.code}')">
+                <span class="ward-name">${ward.name}</span>
+                <span class="ward-code">${ward.code}</span>
+            </div>
+        `).join('');
+    }
 
-        // เริ่มแสดงผลครั้งแรก
+    // 3. ฟังก์ชันค้นหาหอผู้ป่วย
+    function filterWards() {
+        const val = document.getElementById('wardSearch').value.toLowerCase();
+        const filtered = wardData.filter(w => 
+            w.name.toLowerCase().includes(val) || 
+            w.code.includes(val)
+        );
+        renderWards(filtered);
+    }
+
+    // 4. ฟังก์ชันเมื่อคลิกเลือกวอร์ด (จุดสำคัญ: เปลี่ยนไปหน้า patient_list.html)
+    function selectWard(name, code) {
+        // บันทึกข้อมูลวอร์ดที่เลือกลง LocalStorage
+        const selectedWard = { 
+            name: name, 
+            code: code,
+            timestamp: new Date().getTime() 
+        };
+        localStorage.setItem('selectedWard', JSON.stringify(selectedWard));
+        
+        // นำทางไปยังหน้า "รายชื่อผู้ป่วยในวอร์ด" ตามที่คุณทีต้องการ
+        window.location.href = 'patient_list.html';
+    }
+
+    // 5. เริ่มแสดงผลครั้งแรกเมื่อโหลดหน้า
+    document.addEventListener('DOMContentLoaded', () => {
         renderWards(wardData);
-    </script>
+    });
+</script>
 </body>
 </html>
