@@ -53,6 +53,9 @@
             padding: 5px 8px; border: 1px solid #ccc; border-radius: 4px; font-family: 'Sarabun';
         }
         input[type="text"]:focus { border-color: var(--primary); outline: none; }
+        /* ช่อง BMI ให้อ่านอย่างเดียว */
+        #bmi_val { background-color: #e9ecef; cursor: not-allowed; font-weight: bold; color: var(--primary); }
+        
         textarea { width: 100%; box-sizing: border-box; resize: vertical; }
 
         /* --- Custom Checklist Items --- */
@@ -98,6 +101,7 @@
         .btn-del { background: #e63946; }
         .btn-pdf { background: #023e8a; }
         .btn-search { background: var(--accent); padding: 5px 15px; color: white; border-radius: 4px; }
+        .back-btn { background: #6c757d; }
 
         /* Print Settings */
         @media print {
@@ -105,7 +109,7 @@
             .tab-content { display: block !important; margin-bottom: 30px; page-break-after: always; }
             .container { box-shadow: none; border: none; padding: 0; max-width: 100%; width: 100%; }
             body { background: white; padding: 0; }
-            .check-item { border: none; background: none; padding: 0; } /* Remove bubble style for print */
+            .check-item { border: none; background: none; padding: 0; } 
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -205,8 +209,8 @@
             <div><label>RR (/min)</label><input type="number" id="vs_rr" class="flex-grow"></div>
             <div><label>BP (mmHg)</label><input type="text" id="vs_bp" class="flex-grow"></div>
             <div><label>O2 Sat</label><input type="number" id="vs_o2" class="flex-grow"></div>
-            <div><label>BW (kg)</label><input type="number" id="vs_bw" class="flex-grow"></div>
-            <div><label>HT (cm)</label><input type="number" id="vs_ht" class="flex-grow"></div>
+            <div><label>BW (kg)</label><input type="number" id="vs_bw" class="flex-grow" oninput="calculateBMI()"></div>
+            <div><label>HT (cm)</label><input type="number" id="vs_ht" class="flex-grow" oninput="calculateBMI()"></div>
             <div><label>Pain Score</label><input type="number" id="vs_pain"></div>
         </div>
 
@@ -224,7 +228,6 @@
                 E <input type="number" id="gcs_e" style="width:40px"> 
                 M <input type="number" id="gcs_m" style="width:40px"> 
                 V <input type="number" id="gcs_v" style="width:40px">
-                <span style="color:gray; font-size:12px;">(Total Auto-calc if script added)</span>
             </div>
             <div class="row" style="margin-top:8px;">
                 <label>อื่นๆ/หมายเหตุ:</label>
@@ -439,7 +442,7 @@
         
         <fieldset>
             <legend>Nutritional Risk (NRS 2002)</legend>
-            <div class="row"><label>BMI:</label> <input type="number" id="bmi_val" style="width:80px;"></div>
+            <div class="row"><label>BMI:</label> <input type="text" id="bmi_val" style="width:80px;" readonly placeholder="Auto"></div>
             <div style="margin-top:10px;">
                 <label>คำถามคัดกรอง (ตอบ "ใช่" ข้อใดข้อหนึ่ง = เสี่ยง):</label>
                 <div style="display:flex; flex-direction:column; gap:8px; margin-top:5px;">
@@ -492,6 +495,7 @@
     </div>
 
     <div class="action-bar" data-html2canvas-ignore="true">
+        <button class="btn back-btn" onclick="window.location.href='patient_list.html'">ย้อนกลับ</button>
         <button class="btn btn-del" onclick="deleteData()">ลบข้อมูล</button>
         <button class="btn btn-save" onclick="saveData()">บันทึกข้อมูล</button>
         <button class="btn btn-pdf" onclick="generatePDF()">ออกรายงาน PDF</button>
@@ -500,6 +504,44 @@
 </div>
 
 <script>
+    // --- ON LOAD: Connect to Patient System ---
+    window.onload = function() {
+        // 1. ดึงข้อมูลผู้ป่วยจากหน้าก่อนหน้า (patient_list.html)
+        const patientProfile = JSON.parse(localStorage.getItem('patientProfile'));
+        if (patientProfile) {
+            // แยกชื่อ-นามสกุล (สมมติว่า name เก็บเป็น "ชื่อ นามสกุล")
+            const nameParts = patientProfile.name.split(' ');
+            document.getElementById('pt_name').value = nameParts[0] || '';
+            document.getElementById('pt_surname').value = nameParts.slice(1).join(' ') || '';
+            document.getElementById('pt_hn').value = patientProfile.hn || '';
+            document.getElementById('pt_an').value = patientProfile.an || '';
+            
+            // ลองค้นหาข้อมูลเก่าของ AN นี้ (ถ้ามี)
+            searchData(true); // true = silent mode (ไม่แจ้งเตือนถ้าไม่เจอ)
+        }
+
+        // 2. ตั้งค่าวันที่ปัจจุบันในช่องบันทึก
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        document.getElementById('rec_time').value = now.toISOString().slice(0,16);
+    }
+
+    // --- AUTO CALCULATE BMI ---
+    function calculateBMI() {
+        const weight = parseFloat(document.getElementById('vs_bw').value);
+        const height = parseFloat(document.getElementById('vs_ht').value);
+        const bmiField = document.getElementById('bmi_val');
+
+        if (weight > 0 && height > 0) {
+            // สูตร: น้ำหนัก (kg) / ส่วนสูง (m)^2
+            const heightInMeters = height / 100;
+            const bmi = weight / (heightInMeters * heightInMeters);
+            bmiField.value = bmi.toFixed(2); // ทศนิยม 2 ตำแหน่ง
+        } else {
+            bmiField.value = '';
+        }
+    }
+
     // --- TABS LOGIC ---
     function openTab(tabName) {
         let tabs = document.getElementsByClassName("tab-content");
@@ -536,12 +578,16 @@
         Swal.fire('บันทึกสำเร็จ', 'ข้อมูลถูกบันทึกเรียบร้อยแล้ว', 'success');
     }
 
-    function searchData() {
+    function searchData(silent = false) {
         const an = document.getElementById('pt_an').value.trim();
-        if(!an) return Swal.fire('แจ้งเตือน', 'ระบุเลข AN ที่ต้องการค้นหา', 'warning');
+        if(!an && !silent) return Swal.fire('แจ้งเตือน', 'ระบุเลข AN ที่ต้องการค้นหา', 'warning');
+        if(!an && silent) return;
 
         const raw = localStorage.getItem('RN_Form_' + an);
-        if(!raw) return Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลของ AN นี้', 'info');
+        if(!raw) {
+            if(!silent) Swal.fire('ไม่พบข้อมูล', 'ไม่พบข้อมูลการประเมินของ AN นี้', 'info');
+            return;
+        }
 
         const data = JSON.parse(raw);
         getAllInputs().forEach(el => {
@@ -553,7 +599,11 @@
                 if(data[el.id] !== undefined) el.value = data[el.id];
             }
         });
-        Swal.fire('ค้นหาสำเร็จ', 'โหลดข้อมูลเรียบร้อย', 'success');
+        
+        // คำนวณ BMI ใหม่อีกครั้งหลังจากโหลดข้อมูลเสร็จ
+        calculateBMI();
+
+        if(!silent) Swal.fire('ค้นหาสำเร็จ', 'โหลดข้อมูลเรียบร้อย', 'success');
     }
 
     function deleteData() {
