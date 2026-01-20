@@ -66,7 +66,7 @@
         .form-section {
             background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius);
             padding: 20px; margin-bottom: 20px; position: relative; transition: 0.3s;
-            page-break-inside: avoid; /* ป้องกันการตัดหน้าใน PDF */
+            page-break-inside: avoid;
         }
         .form-section:hover { box-shadow: var(--shadow); border-color: var(--primary); }
 
@@ -112,12 +112,18 @@
         .btn-success { background: #2e7d32; color: white; }
         .btn-danger { background: #c62828; color: white; }
         .btn-secondary { background: #546e7a; color: white; }
-        .btn-warning { background: #ff9800; color: white; } /* ปุ่ม PDF */
 
         .records-table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow); }
         .records-table th { background: var(--primary); color: white; padding: 12px; text-align: left; }
         .records-table td { padding: 12px; border-bottom: 1px solid #eee; }
-        .action-btn { padding: 5px 10px; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px; }
+        
+        /* ปรับปุ่ม Action ให้สวยงาม */
+        .action-btn { 
+            width: 32px; height: 32px; border: none; border-radius: 4px; cursor: pointer; 
+            font-size: 14px; margin-right: 4px; display: inline-flex; align-items: center; justify-content: center;
+            transition: 0.2s;
+        }
+        .action-btn:hover { opacity: 0.8; transform: translateY(-1px); }
 
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 1000; }
         .modal-content { background: white; margin: 30px auto; padding: 30px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
@@ -473,7 +479,6 @@
 
                 <div class="btn-group no-print-section">
                     <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> บันทึกข้อมูล</button>
-                    <button type="button" class="btn btn-warning" onclick="exportToPDF()"><i class="fas fa-file-pdf"></i> Export PDF</button>
                     <button type="button" class="btn btn-danger" onclick="resetForm()"><i class="fas fa-undo"></i> ล้างข้อมูล</button>
                 </div>
                 <div style="text-align: right; margin-top: 10px; font-size: 12px; color: #999;">FM-AOP-CBH-002</div>
@@ -548,28 +553,68 @@
             if (!show) textarea.value = '';
         }
 
-        // --- PDF Export Function ---
-        function exportToPDF() {
+        // --- NEW: Print PDF from Table Row ---
+        function printRecord(id) {
+            // 1. โหลดข้อมูลลงฟอร์ม (เหมือน editRecord)
+            editRecord(id);
+            // 2. สั่งพิมพ์ โดยบอกให้กลับมาหน้ารายการเมื่อเสร็จ (true)
+            exportToPDF(true);
+        }
+
+        // --- PDF Export Function (Updated) ---
+        function exportToPDF(returnToTable = false) {
+            // 1. เตรียมข้อมูลก่อนพิมพ์: ยัดค่า Value ลงใน HTML Attribute
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type === 'checkbox' || input.type === 'radio') {
+                    if (input.checked) {
+                        input.setAttribute('checked', 'checked');
+                    } else {
+                        input.removeAttribute('checked');
+                    }
+                } else {
+                    input.setAttribute('value', input.value);
+                }
+            });
+
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.innerHTML = textarea.value;
+            });
+
+            document.querySelectorAll('select').forEach(select => {
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption) {
+                    selectedOption.setAttribute('selected', 'selected');
+                }
+            });
+
+            // 2. เริ่มกระบวนการ Export
             const element = document.getElementById('printableArea');
             
-            // ซ่อนปุ่มต่างๆ ชั่วคราวด้วย class no-print-section
+            // ซ่อนปุ่มต่างๆ
             const noPrintElements = document.querySelectorAll('.no-print-section');
             noPrintElements.forEach(el => el.style.display = 'none');
 
+            // ตั้งค่า PDF
             const opt = {
-                margin:       10,
+                margin:       [10, 10, 10, 10], 
                 filename:     `Discharge_Summary_${currentPatient ? currentPatient.hn : 'Report'}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            // สั่งสร้าง PDF แล้วค่อยแสดงปุ่มกลับมา
+            // สร้าง PDF
             html2pdf().set(opt).from(element).save().then(() => {
-                noPrintElements.forEach(el => el.style.display = ''); // แสดงกลับคืนถ้าเป็น flex อาจต้องแก้ตรงนี้
-                document.querySelector('.view-toggle').style.display = 'block'; // Fix specific element display
-                document.querySelector('.btn-group').style.display = 'flex'; // Fix flex display
-                document.querySelector('.patient-header-bar').style.display = 'flex'; // Fix header display
+                // คืนค่าการแสดงผลปุ่ม
+                noPrintElements.forEach(el => el.style.display = '');
+                document.querySelector('.view-toggle').style.display = 'block';
+                document.querySelector('.btn-group').style.display = 'flex';
+                document.querySelector('.patient-header-bar').style.display = 'flex';
+
+                // หากสั่งพิมพ์จากตาราง ให้กลับไปหน้าตาราง
+                if (returnToTable) {
+                    showRecords();
+                }
             });
         }
 
@@ -679,7 +724,6 @@
             const tbody = document.getElementById('recordsTableBody');
             tbody.innerHTML = '';
             
-            // แสดงข้อมูลทั้งหมด (หรือจะกรองตาม HN ก็ได้ถ้าต้องการ)
             const displayList = records; 
 
             if (displayList.length === 0) {
@@ -701,9 +745,10 @@
                         ${record.o2Sat ? record.o2Sat + '%' : '-'}
                     </td>
                     <td>
-                        <button class="action-btn" onclick="viewRecord(${record.id})" style="background: var(--primary-dark); color: white;"><i class="fas fa-eye"></i></button>
-                        <button class="action-btn" onclick="editRecord(${record.id})" style="background: #ffa000; color: white;"><i class="fas fa-edit"></i></button>
-                        <button class="action-btn" onclick="deleteRecord(${record.id})" style="background: #d32f2f; color: white;"><i class="fas fa-trash"></i></button>
+                        <button class="action-btn" onclick="viewRecord(${record.id})" style="background: var(--primary-dark); color: white;" title="ดูข้อมูล"><i class="fas fa-eye"></i></button>
+                        <button class="action-btn" onclick="editRecord(${record.id})" style="background: #ffa000; color: white;" title="แก้ไข"><i class="fas fa-edit"></i></button>
+                        <button class="action-btn" onclick="printRecord(${record.id})" style="background: #ff9800; color: white;" title="Export PDF"><i class="fas fa-file-pdf"></i></button>
+                        <button class="action-btn" onclick="deleteRecord(${record.id})" style="background: #d32f2f; color: white;" title="ลบ"><i class="fas fa-trash"></i></button>
                     </td>
                 `;
             });
@@ -715,14 +760,14 @@
             if (!record) return;
 
             const modalBody = document.getElementById('modalBody');
-            // สร้างเนื้อหา Modal (ตัดมาบางส่วนเพื่อความกระชับ)
             modalBody.innerHTML = `
                 <h2 class="modal-header-text">รายละเอียด Discharge Summary</h2>
                 <div style="background:#f9f9f9; padding:10px; border-radius:6px; margin-bottom:15px; font-size:0.9rem;">
                     <strong>ผู้ป่วย:</strong> ${record.patientName} (HN: ${record.hn}, AN: ${record.an})<br>
                     <strong>แก้ไขล่าสุด:</strong> ${record.updatedAt}
                 </div>
-                <div class="view-row"><div class="view-label">การรับเข้า:</div><div class="view-value">${record.admitDate || '-'} ${record.admitTime || ''}</div></div>
+                
+                 <div class="view-row"><div class="view-label">การรับเข้า:</div><div class="view-value">${record.admitDate || '-'} ${record.admitTime || ''}</div></div>
                  <div class="view-row"><div class="view-label">การจำหน่าย:</div><div class="view-value">${record.dischargeDate || '-'} ${record.dischargeTime || ''}</div></div>
                  <div class="view-row"><div class="view-label">วินิจฉัย:</div><div class="view-value">${record.dischargeDiagnosis || '-'}</div></div>
             `;
@@ -745,14 +790,16 @@
                 });
             }
 
-            // Load data to form (ตัดมาบางส่วน)
+            // Load data to form
             setVal('admitDate', record.admitDate);
             setVal('admitTime', record.admitTime);
             setVal('dischargeWard', record.dischargeWard);
             setVal('dischargeDate', record.dischargeDate);
             setVal('dischargeTime', record.dischargeTime);
             setCheck('dischargeType', record.dischargeType);
-            // ... Load all other fields ...
+            setVal('transferLocation', record.transferLocation);
+            setVal('dischargeReason', record.dischargeReason);
+            setCheck('followUpType', record.followUpType);
             setVal('initialDiagnosis', record.initialDiagnosis);
             setVal('dischargeDiagnosis', record.dischargeDiagnosis);
             setVal('temperature', record.temperature);
@@ -760,13 +807,52 @@
             setVal('respiration', record.respiration);
             setVal('bloodPressure', record.bloodPressure);
             setVal('o2Sat', record.o2Sat);
-
-            // Textareas visibility logic
+            setCheck('consciousness', record.consciousness);
+            setCheck('selfCare', record.selfCare);
+            setCheck('behavior', record.behavior);
+            setVal('behaviorOther', record.behaviorOther);
+            setCheck('transport', record.transport);
+            setCheck('medEquipment', record.medEquipment);
+            setVal('medEquipmentDetail', record.medEquipmentDetail);
             setCheck('medication', record.medication);
             setVal('medicationTextarea', record.medicationDetails);
             toggleTextarea('medicationTextarea', record.medication === 'มี');
+            setCheck('nursing', record.nursing);
+            setVal('nursingTextarea', record.nursingDetails);
+            toggleTextarea('nursingTextarea', record.nursing === 'มี');
+            setCheck('diet', record.diet);
+            setVal('dietTextarea', record.dietDetails);
+            toggleTextarea('dietTextarea', record.diet === 'มี');
+            setCheck('painManage', record.painManage);
+            setVal('painTextarea', record.painDetails);
+            toggleTextarea('painTextarea', record.painManage === 'มี');
+            setCheck('specialCare', record.specialCare);
+            setVal('specialCareTextarea', record.specialCareDetails);
+            toggleTextarea('specialCareTextarea', record.specialCare === 'มี');
             
-            // ... Call similar for nursing, diet, etc.
+            setVal('followUpDate1', record.followUpDate1);
+            setVal('followUpTime1', record.followUpTime1);
+            setVal('followUpDept1', record.followUpDept1);
+            setVal('followUpDate2', record.followUpDate2);
+            setVal('followUpTime2', record.followUpTime2);
+            setVal('followUpDept2', record.followUpDept2);
+            setCheck('homeVisit', record.homeVisit);
+            
+            setVal('urgentSigns', record.urgentSigns);
+            setVal('coordName', record.coordName);
+            setVal('coordTel', record.coordTel);
+            setVal('specialPrep', record.specialPrep);
+            setCheck('interpreter', record.interpreter);
+            setVal('interpLanguage', record.interpLanguage);
+            setVal('patSignDate', record.patSignDate);
+            setVal('rnSignDate', record.rnSignDate);
+            
+            setVal('deathDate', record.deathDate);
+            setVal('deathTime', record.deathTime);
+            setVal('notifyBy', record.notifyBy);
+            setVal('pronounceBy', record.pronounceBy);
+            setCheck('autopsy', record.autopsy);
+            setCheck('organDonate', record.organDonate);
 
             showForm();
             window.scrollTo(0, 0);
@@ -798,60 +884,6 @@
             if (event.target === modal) {
                 modal.style.display = 'none';
             }
-        }
-        // --- PDF Export Function (ฉบับแก้ไข: ดึงค่า input มาแสดง) ---
-        function exportToPDF() {
-            // 1. เตรียมข้อมูลก่อนพิมพ์: ยัดค่า Value ลงใน HTML Attribute
-            // จัดการ Input ทั่วไป
-            document.querySelectorAll('input').forEach(input => {
-                if (input.type === 'checkbox' || input.type === 'radio') {
-                    if (input.checked) {
-                        input.setAttribute('checked', 'checked');
-                    } else {
-                        input.removeAttribute('checked');
-                    }
-                } else {
-                    input.setAttribute('value', input.value);
-                }
-            });
-
-            // จัดการ Textarea (สำคัญมาก เพราะ html2pdf ไม่อ่าน value ของ textarea)
-            document.querySelectorAll('textarea').forEach(textarea => {
-                textarea.innerHTML = textarea.value;
-            });
-
-            // จัดการ Select (ถ้ามี)
-            document.querySelectorAll('select').forEach(select => {
-                const selectedOption = select.options[select.selectedIndex];
-                if (selectedOption) {
-                    selectedOption.setAttribute('selected', 'selected');
-                }
-            });
-
-            // 2. เริ่มกระบวนการ Export
-            const element = document.getElementById('printableArea');
-            
-            // ซ่อนปุ่มต่างๆ ชั่วคราว
-            const noPrintElements = document.querySelectorAll('.no-print-section');
-            noPrintElements.forEach(el => el.style.display = 'none');
-
-            // ตั้งค่า PDF
-            const opt = {
-                margin:       [10, 10, 10, 10], // ขอบ: บน ขวา ล่าง ซ้าย (มม.)
-                filename:     `Discharge_Summary_${currentPatient ? currentPatient.hn : 'Report'}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true }, // เพิ่ม option ให้ชัดขึ้น
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            // สร้าง PDF และแสดงปุ่มกลับมาเมื่อเสร็จ
-            html2pdf().set(opt).from(element).save().then(() => {
-                noPrintElements.forEach(el => el.style.display = '');
-                // คืนค่า display เดิมของปุ่มต่างๆ เพื่อป้องกัน layout เพี้ยน
-                document.querySelector('.view-toggle').style.display = 'block';
-                document.querySelector('.btn-group').style.display = 'flex';
-                document.querySelector('.patient-header-bar').style.display = 'flex';
-            });
         }
     </script>
 </body>
